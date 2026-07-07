@@ -52,7 +52,7 @@ export default async function HomePage() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to bottom, rgb(var(--bg-main-rgb) / 0.6), rgb(var(--bg-main-rgb) / 0.85), rgb(var(--bg-main-rgb)))",
+                "linear-gradient(to bottom, rgb(var(--bg-main-rgb) / 0.15), rgb(var(--bg-main-rgb) / 0.4), rgb(var(--bg-main-rgb) / 0.75))",
             }}
           />
         </div>
@@ -64,8 +64,8 @@ export default async function HomePage() {
         />
 
         {/* שכבה 3 - ליבת הממשק, זכוכית קפואה מעל התנועה */}
-        <div className="relative z-20 max-w-5xl mx-auto px-5 pt-14 pb-12">
-          <div className="corner-frame relative overflow-hidden backdrop-blur-md bg-surfaceHi/75 border border-edge p-6 sm:p-10">
+        <div className="relative z-20 max-w-5xl mx-auto px-5 py-20">
+          <div className="corner-frame relative overflow-hidden backdrop-blur-lg bg-surfaceHi/40 border border-edge p-6 sm:p-10">
             {/* טלמטריית פינות - מדמה מחשב ניווט פיזי */}
             <span className="hidden sm:block absolute top-2 left-2 font-mono text-[10px] text-cyan/70 tracking-wider">
               [SYS.LOC // 31.7683°N 35.2137°E]
