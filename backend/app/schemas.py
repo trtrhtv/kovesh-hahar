@@ -14,11 +14,13 @@ class UserCreate(BaseModel):
 
 
 class BikeCreate(BaseModel):
+    model_config = {"protected_namespaces": ()}
     model_name: str
     vehicle_type: Optional[VehicleType] = None
 
 
 class BikeOut(BaseModel):
+    model_config = {"protected_namespaces": ()}
     id: str
     model_name: str
     vehicle_type: Optional[str] = None

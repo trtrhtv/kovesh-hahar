@@ -1,5 +1,25 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+/**
+ * FastAPI מחזיר שגיאות ולידציה כרשימה של אובייקטים (למשל [{loc, msg, type}]),
+ * לא כטקסט בודד - בלי הפונקציה הזו זה מוצג כ-"[object Object]" למשתמש.
+ */
+function extractErrorMessage(errBody: any, fallback: string): string {
+  const detail = errBody?.detail;
+  if (!detail) return fallback;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((d: any) => {
+        if (typeof d === "string") return d;
+        const field = Array.isArray(d?.loc) ? d.loc[d.loc.length - 1] : "";
+        return d?.msg ? `${field ? field + ": " : ""}${d.msg}` : JSON.stringify(d);
+      })
+      .join(" · ");
+  }
+  return fallback;
+}
+
 export type Author = { id: string; display_name: string; avatar_url?: string; phone_number?: string };
 
 export type StoryListItem = {
@@ -79,7 +99,7 @@ export async function updateProfile(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "עדכון הפרופיל נכשל");
+    throw new Error(extractErrorMessage(err, "עדכון הפרופיל נכשל"));
   }
   return res.json();
 }
@@ -96,7 +116,7 @@ export async function addBike(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "הוספת האופנוע נכשלה");
+    throw new Error(extractErrorMessage(err, "הוספת האופנוע נכשלה"));
   }
   return res.json();
 }
@@ -179,7 +199,7 @@ export async function postComment(storyId: string, body: string, token: string):
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "שליחת התגובה נכשלה");
+    throw new Error(extractErrorMessage(err, "שליחת התגובה נכשלה"));
   }
   return res.json();
 }
@@ -206,7 +226,7 @@ export async function postTrailUpdate(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "שליחת העדכון נכשלה");
+    throw new Error(extractErrorMessage(err, "שליחת העדכון נכשלה"));
   }
   return res.json();
 }
@@ -227,7 +247,7 @@ export async function sendContactMessage(name: string, email: string, message: s
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "שליחת ההודעה נכשלה");
+    throw new Error(extractErrorMessage(err, "שליחת ההודעה נכשלה"));
   }
 }
 
@@ -265,7 +285,7 @@ export async function updateStory(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "עדכון הסיפור נכשל");
+    throw new Error(extractErrorMessage(err, "עדכון הסיפור נכשל"));
   }
   return res.json();
 }
@@ -319,7 +339,7 @@ export async function deleteStory(storyId: string, token: string): Promise<void>
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "מחיקת הסיפור נכשלה");
+    throw new Error(extractErrorMessage(err, "מחיקת הסיפור נכשלה"));
   }
 }
 
@@ -385,7 +405,7 @@ export async function createStory(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "העלאת הסיפור נכשלה");
+    throw new Error(extractErrorMessage(err, "העלאת הסיפור נכשלה"));
   }
   return res.json();
 }
