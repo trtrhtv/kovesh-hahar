@@ -215,6 +215,37 @@ export async function fetchContactMessages(token: string): Promise<ContactMessag
   return res.json();
 }
 
+export async function updateStory(
+  storyId: string,
+  data: Partial<{
+    title: string;
+    body: string;
+    vehicle_type: string;
+    vehicle_type_other: string;
+    ride_style: string;
+    difficulty: string;
+    season: string;
+    country: string;
+    region: string;
+    meeting_point_label: string;
+    meeting_point_lat: number | null;
+    meeting_point_lon: number | null;
+    parking_security: string;
+  }>,
+  token: string
+): Promise<StoryDetail> {
+  const res = await fetch(`${API_BASE}/stories/${storyId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "עדכון הסיפור נכשל");
+  }
+  return res.json();
+}
+
 export async function deleteStory(storyId: string, token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/stories/${storyId}`, {
     method: "DELETE",

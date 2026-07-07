@@ -207,6 +207,51 @@ def delete_story(
     return {"deleted": True}
 
 
+@router.patch("/{story_id}", response_model=schemas.StoryOut)
+def update_story(
+    story_id: str,
+    payload: schemas.StoryUpdate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if not story:
+        raise HTTPException(404, "הסיפור לא נמצא")
+    if story.author_id != current_user.id and not admin.is_admin(current_user):
+        raise HTTPException(403, "אין לך הרשאה לערוך את הסיפור הזה")
+
+    data = payload.dict(exclude_unset=True)
+
+    if "body" in data and data["body"] is not None:
+        word_count = len(data["body"].split())
+        if word_count < MIN_BODY_WORDS:
+            raise HTTPException(
+                400, f"הסיפור קצר מדי - נדרשות לפחות {MIN_BODY_WORDS} מילים (יש כרגע {word_count})"
+            )
+
+    country = data.get("country", story.country)
+    region = data.get("region", story.region)
+    if "country" in data or "region" in data:
+        if not locations.is_valid_country(country):
+            raise HTTPException(400, "מדינה לא תקינה")
+        if country == locations.ISRAEL and not locations.is_valid_israel_region(region):
+            raise HTTPException(400, "אזור לא תקין - יש לבחור מהרשימה")
+        if country != locations.ISRAEL and not region.strip():
+            raise HTTPException(400, "יש לציין שם מקום")
+
+    if data.get("vehicle_type") == models.VehicleType.OTHER and not (
+        data.get("vehicle_type_other") or story.vehicle_type_other or ""
+    ).strip():
+        raise HTTPException(400, "יש לפרט את סוג האופנוע כשבוחרים 'אחר'")
+
+    for field, value in data.items():
+        setattr(story, field, value)
+
+    db.commit()
+    db.refresh(story)
+    return _with_extras(story, db)
+
+
 def _with_extras(story: models.Story, db: Session):
     like_count = db.query(func.count(models.Like.id)).filter(models.Like.story_id == story.id).scalar()
     comment_count = (

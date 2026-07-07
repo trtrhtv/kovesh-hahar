@@ -83,6 +83,22 @@ class ContactMessageOut(BaseModel):
         from_attributes = True
 
 
+class StoryUpdate(BaseModel):
+    title: Optional[str] = None
+    body: Optional[str] = None
+    vehicle_type: Optional[VehicleType] = None
+    vehicle_type_other: Optional[str] = None
+    ride_style: Optional[RideStyle] = None
+    difficulty: Optional[Difficulty] = None
+    season: Optional[Season] = None
+    country: Optional[str] = None
+    region: Optional[str] = None
+    meeting_point_label: Optional[str] = None
+    meeting_point_lat: Optional[float] = None
+    meeting_point_lon: Optional[float] = None
+    parking_security: Optional[ParkingSecurity] = None
+
+
 class TrailUpdateCreate(BaseModel):
     status: TrailStatus
     note: Optional[str] = None

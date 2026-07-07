@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { deleteStory, checkIsAdmin } from "@/lib/api";
 
@@ -39,12 +40,17 @@ export default function DeleteStoryButton({
 
   if (!confirming) {
     return (
-      <button
-        onClick={() => setConfirming(true)}
-        className="text-xs text-textDim hover:text-moto underline"
-      >
-        {isAdmin && user.id !== authorId ? "מחק סיפור (מנהל)" : "מחק את הסיפור שלי"}
-      </button>
+      <div className="flex items-center gap-3 text-xs">
+        <Link href={`/stories/${storyId}/edit`} className="text-textDim hover:text-moto underline">
+          ערוך סיפור
+        </Link>
+        <button
+          onClick={() => setConfirming(true)}
+          className="text-textDim hover:text-moto underline"
+        >
+          {isAdmin && user.id !== authorId ? "מחק סיפור (מנהל)" : "מחק את הסיפור שלי"}
+        </button>
+      </div>
     );
   }
 
