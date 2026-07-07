@@ -42,10 +42,20 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
   - `JWT_SECRET_KEY` - מחרוזת אקראית ארוכה
   - `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL_BASE`
 
-### 2. אחסון קבצים → Cloudflare R2
+### 2. אחסון קבצים - שתי אופציות
+
+**אופציה א׳ (ברירת מחדל, בלי אשראי/הרשמה נוספת): Volume על Railway עצמו**
+- בשירות ה-backend ב-Railway: **Settings** → **Volumes** → **+ New Volume**
+- Mount path: `/data`
+- זהו - אין צורך במשתני סביבה נוספים, `STORAGE_BACKEND` ברירת המחדל שלו הוא `local`
+- חשוב: תוסיף משתנה `PUBLIC_BASE_URL` עם כתובת ה-backend שלך ב-Railway (למשל `https://sipur-shvil-production.up.railway.app`, **בלי** `/` בסוף) - כדי שהקישורים לתמונות ייבנו נכון
+
+**אופציה ב׳ (לעתיד, כשנוח לך עם הרשמה+אשראי): Cloudflare R2**
+- יתרון: CDN מובנה בלי עמלת יציאה, מתאים יותר כשהתנועה גדלה
 - צור bucket חדש, חבר אליו custom domain ציבורי (זה ה-`R2_PUBLIC_URL_BASE`)
 - צור API token עם הרשאות Object Read & Write
-- R2 לא גובה עמלת יציאה (egress) - זה ההבדל המהותי מול S3 מבחינת עלות בגדילה
+- הוסף את משתנה הסביבה `STORAGE_BACKEND=r2` + חמשת משתני ה-R2 (ראה `.env.example` בתיקיית backend)
+- **המעבר בין השניים הוא שינוי משתנה סביבה אחד - שום קוד לא צריך להשתנות**
 
 ### 3. Frontend → Vercel
 - חבר את ה-repo, root directory: `frontend`
