@@ -5,9 +5,13 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Railway מזריק את זה אוטומטית כשמצמידים Postgres לשירות
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./local_dev.db")
 
-# Railway נותן URL בפורמט postgres:// ו-SQLAlchemy 2.0 דורש postgresql://
+# Railway נותן URL בפורמט postgres:// - ממירים לפורמט שמפנה במפורש
+# לדרייבר psycopg v3 (לא psycopg2), כדי להימנע מבעיית libpq.so.5 שקרתה
+# עם psycopg2-binary בסביבת ה-runtime של Railway
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
