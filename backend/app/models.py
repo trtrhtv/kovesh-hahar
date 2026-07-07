@@ -57,7 +57,9 @@ class User(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=True)  # להתחברות קלה, בלי אימייל מלא
-    hashed_password = Column(String, nullable=True)  # ריק אם נכנס עם גוגל
+    hashed_password = Column(String, nullable=True)
+    reset_token = Column(String, nullable=True, index=True)
+    reset_token_expires = Column(DateTime, nullable=True)  # ריק אם נכנס עם גוגל
     display_name = Column(String, nullable=False)
     avatar_url = Column(String, nullable=True)
     bike_model = Column(String, nullable=True)  # legacy - נשמר לתאימות, לא בשימוש בממשק החדש

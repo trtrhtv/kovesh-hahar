@@ -91,6 +91,11 @@ function QuickAuthGate({
           className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
         />
         <PasswordInput value={password} onChange={setPassword} required />
+        {mode === "login" && (
+          <Link href="/forgot-password" className="text-xs text-textDim hover:text-moto self-start">
+            שכחת סיסמה?
+          </Link>
+        )}
         {mode === "register" && (
           <label className="flex items-start gap-2.5 text-xs text-textDim leading-relaxed cursor-pointer">
             <input

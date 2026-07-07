@@ -94,6 +94,11 @@ export default function LoginPage() {
             className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
           />
           <PasswordInput value={password} onChange={setPassword} required minLength={mode === "register" ? 8 : undefined} />
+          {mode === "login" && (
+            <Link href="/forgot-password" className="text-xs text-textDim hover:text-moto self-start">
+              שכחת סיסמה?
+            </Link>
+          )}
           {mode === "register" && (
             <input
               type="tel"

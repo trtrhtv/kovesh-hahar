@@ -146,6 +146,15 @@ class RSVPRequest(BaseModel):
     guest_count: int = 1
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
 class ContactMessageCreate(BaseModel):
     name: str
     email: EmailStr

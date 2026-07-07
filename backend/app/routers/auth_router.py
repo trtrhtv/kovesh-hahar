@@ -1,13 +1,15 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import secrets
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
 
 from .. import models, schemas, auth, admin
 from ..phone import is_valid_phone
+from ..rate_limit import check_rate_limit
+from ..email import send_password_reset_email
 from ..database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -33,7 +35,9 @@ def _generate_unique_username(db: Session, display_name: str) -> str:
 
 
 @router.post("/register", response_model=schemas.Token)
-def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
+def register(payload: schemas.UserCreate, request: Request, db: Session = Depends(get_db)):
+    check_rate_limit(request, "register", max_attempts=10, window_seconds=3600)
+
     if not payload.accepted_disclaimer:
         raise HTTPException(400, "יש לאשר את הצהרת האחריות כדי להירשם")
 
@@ -71,7 +75,9 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=schemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    check_rate_limit(request, "login", max_attempts=8, window_seconds=900)
+
     identifier = form_data.username.strip()
     # מתחברים או עם אימייל מלא או עם שם משתמש - לא צריך להקליד @ וכו' כל פעם.
     # אימייל מושווה בלי תלות ברישיות, למקרה שנרשמו עם אותיות גדולות.
@@ -92,6 +98,46 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         )
     token = auth.create_access_token(user.id)
     return schemas.Token(access_token=token)
+
+
+@router.post("/forgot-password")
+def forgot_password(payload: schemas.ForgotPasswordRequest, request: Request, db: Session = Depends(get_db)):
+    check_rate_limit(request, "forgot-password", max_attempts=5, window_seconds=3600)
+
+    user = db.query(models.User).filter(func.lower(models.User.email) == payload.email.lower()).first()
+    # תמיד אותה תשובה בין אם המייל קיים או לא - כדי לא לחשוף אילו מיילים רשומים במערכת
+    generic_response = {"message": "אם קיים חשבון עם המייל הזה, נשלח אליו קישור לאיפוס סיסמה"}
+
+    if not user:
+        return generic_response
+
+    token = secrets.token_urlsafe(32)
+    user.reset_token = token
+    user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    db.commit()
+
+    send_password_reset_email(user.email, token)
+    return generic_response
+
+
+@router.post("/reset-password")
+def reset_password(payload: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
+    if len(payload.new_password) < 8:
+        raise HTTPException(400, "הסיסמה חייבת להיות באורך 8 תווים לפחות")
+
+    user = (
+        db.query(models.User)
+        .filter(models.User.reset_token == payload.token)
+        .first()
+    )
+    if not user or not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
+        raise HTTPException(400, "הקישור לא תקין או שפג תוקפו - יש לבקש קישור חדש")
+
+    user.hashed_password = auth.hash_password(payload.new_password)
+    user.reset_token = None
+    user.reset_token_expires = None
+    db.commit()
+    return {"message": "הסיסמה עודכנה בהצלחה"}
 
 
 @router.get("/me", response_model=schemas.UserOut)
