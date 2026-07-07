@@ -1,5 +1,4 @@
 import CinematicVideoBackground from "@/components/CinematicVideoBackground";
-import HeroActionBackdrop from "@/components/HeroActionBackdrop";
 import BreakoutRiderImage from "@/components/BreakoutRiderImage";
 import BikeSilhouette from "@/components/BikeSilhouette";
 import Logo from "@/components/Logo";
@@ -7,12 +6,10 @@ import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
 import { fetchStories } from "@/lib/api";
-import { getFeaturedStory } from "@/lib/stories";
 import { RIDE_STYLE_LABELS } from "@/lib/labels";
 
 export default async function HomePage() {
   const stories = await fetchStories();
-  const hasFeaturedPhoto = !!getFeaturedStory(stories)?.cover_photo_url;
 
   return (
     <main>
@@ -38,21 +35,16 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <CinematicVideoBackground />
 
-        {hasFeaturedPhoto ? (
-          <HeroActionBackdrop stories={stories} />
-        ) : (
-          <>
-            {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה (נופלים לזה כל עוד אין תמונת אקשן אמיתית) */}
-            <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
-            <div
-              className="absolute inset-0 z-0 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, rgb(var(--bg-main-rgb)))" }}
-              aria-hidden="true"
-            />
-            {/* שכבה 2 - האופנוע המרחף, זוהר בצבע האקצנט הפעיל */}
-            <BikeSilhouette className="bike-drift absolute inset-y-0 left-0 z-10 w-[70%] h-full text-moto pointer-events-none" />
-          </>
-        )}
+        {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן */}
+        <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, transparent, rgb(var(--bg-main-rgb)))" }}
+          aria-hidden="true"
+        />
+        {/* שכבה 2 - האופנוע המרחף, האלמנט הקבוע והבלתי-מותנה של ה-hero */}
+        <BikeSilhouette className="bike-drift absolute inset-y-0 left-0 z-10 w-[85%] h-full text-moto pointer-events-none" />
+
         <div
           className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none z-0"
           style={{ clipPath: "polygon(30% 0, 100% 0, 100% 100%, 0 100%)" }}
