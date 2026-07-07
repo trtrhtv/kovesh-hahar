@@ -6,6 +6,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
+import PasswordInput from "@/components/PasswordInput";
 import { useAuth } from "@/lib/auth";
 import { createStory } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
@@ -39,13 +40,15 @@ function AuthGate({
     password: string,
     displayName: string,
     acceptedDisclaimer: boolean,
-    phoneNumber?: string
+    phoneNumber?: string,
+    username?: string
   ) => Promise<void>;
 }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +62,7 @@ function AuthGate({
       if (mode === "login") {
         await onLogin(email, password);
       } else {
-        await onRegister(email, password, displayName, acceptedDisclaimer, phoneNumber);
+        await onRegister(email, password, displayName, acceptedDisclaimer, phoneNumber, username);
       }
     } catch (err: any) {
       setError(err.message);
@@ -90,23 +93,29 @@ function AuthGate({
             className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
           />
         )}
+        {mode === "register" && (
+          <div>
+            <input
+              type="text"
+              placeholder="שם משתמש (לא חובה - ליצור לבד אם ריק)"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+            />
+            <p className="text-[11px] text-textDim mt-1">
+              באנגלית בלבד - זה מה שתשתמש בו כדי להתחבר בפעם הבאה, בלי להקליד אימייל מלא
+            </p>
+          </div>
+        )}
         <input
-          type="email"
-          placeholder="אימייל"
+          type="text"
+          placeholder={mode === "login" ? "אימייל או שם משתמש" : "אימייל"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
         />
-        <input
-          type="password"
-          placeholder="סיסמה"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-          className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-        />
+        <PasswordInput value={password} onChange={setPassword} required minLength={mode === "register" ? 8 : undefined} />
 
         {mode === "register" && (
           <div>

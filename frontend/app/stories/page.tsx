@@ -5,6 +5,7 @@ import FilterSidebar from "@/components/FilterSidebar";
 import OverviewMap from "@/components/OverviewMap";
 import Pagination from "@/components/Pagination";
 import NotificationBell from "@/components/NotificationBell";
+import AccountMenu from "@/components/AccountMenu";
 import { fetchStories, countStories } from "@/lib/api";
 
 const LIMIT = 20;
@@ -49,6 +50,7 @@ export default async function StoriesPage({
               העלה סיפור
             </Link>
             <NotificationBell />
+            <AccountMenu />
           </div>
         </div>
       </header>

@@ -3,6 +3,7 @@ export const VEHICLE_TYPE_LABELS: Record<string, string> = {
   four_stroke: "4 פעימות",
   two_stroke: "2 פעימות",
   dual_sport: 'דו"ש (דו-שימושי)',
+  motocross: "מוטוקרוס",
   other: "אחר",
 };
 
@@ -11,6 +12,7 @@ export const RIDE_STYLE_LABELS: Record<string, string> = {
   fast_rally: "רכיבה מהירה / ראלי",
   technical_singles: "רכיבה טכנית / סינגלים",
   hard_enduro_extreme: "הארד אנדורו / אקסטרים",
+  desert_dunes: "רכיבה מדברית / דיונות",
 };
 
 export const DIFFICULTY_LABELS: Record<string, string> = {

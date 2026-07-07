@@ -6,6 +6,7 @@ import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
 import NotificationBell from "@/components/NotificationBell";
+import AccountMenu from "@/components/AccountMenu";
 import { fetchStories } from "@/lib/api";
 import { RIDE_STYLE_LABELS } from "@/lib/labels";
 import { ISRAEL_REGIONS } from "@/lib/locations";
@@ -24,9 +25,7 @@ export default async function HomePage() {
             <Link href="/stories" className="hover:text-moto transition-colors">
               כל הסיפורים
             </Link>
-            <Link href="/settings" className="hover:text-moto transition-colors">
-              הגדרות
-            </Link>
+            <AccountMenu />
             <Link
               href="/stories/new"
               className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
@@ -119,6 +118,13 @@ export default async function HomePage() {
                   🔍
                 </button>
               </form>
+
+              <Link
+                href="/stories/nearby"
+                className="inline-block mt-3 text-sm text-cyan hover:underline"
+              >
+                📍 מסלולים בקרבתי ←
+              </Link>
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link

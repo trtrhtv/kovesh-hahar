@@ -1,4 +1,6 @@
 from datetime import datetime
+import re
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -7,6 +9,25 @@ from .. import models, schemas, auth, admin
 from ..database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _slugify_username(text: str) -> str:
+    """הופך שם תצוגה לבסיס לשם משתמש - אותיות/ספרות לועזיות בלבד, אין תמיכה בעברית ב-username"""
+    base = re.sub(r"[^a-zA-Z0-9_]", "", text.replace(" ", "_")).lower()
+    return base or "rider"
+
+
+def _generate_unique_username(db: Session, display_name: str) -> str:
+    base = _slugify_username(display_name)[:20]
+    candidate = base
+    attempt = 0
+    while db.query(models.User).filter(models.User.username == candidate).first():
+        attempt += 1
+        candidate = f"{base}{secrets.randbelow(9000) + 1000}"
+        if attempt > 5:
+            candidate = f"rider{secrets.token_hex(4)}"
+            break
+    return candidate
 
 
 @router.post("/register", response_model=schemas.Token)
@@ -18,8 +39,19 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="כבר קיים משתמש עם האימייל הזה")
 
+    username = (payload.username or "").strip().lower() or None
+    if username:
+        username = re.sub(r"[^a-z0-9_]", "", username)
+        if not username:
+            username = None
+        elif db.query(models.User).filter(models.User.username == username).first():
+            raise HTTPException(400, "שם המשתמש הזה כבר תפוס")
+    if not username:
+        username = _generate_unique_username(db, payload.display_name)
+
     user = models.User(
         email=payload.email,
+        username=username,
         hashed_password=auth.hash_password(payload.password),
         display_name=payload.display_name,
         phone_number=(payload.phone_number or "").strip() or None,
@@ -35,11 +67,17 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    identifier = form_data.username.strip()
+    # מתחברים או עם אימייל מלא או עם שם משתמש - לא צריך להקליד @ וכו' כל פעם
+    user = (
+        db.query(models.User)
+        .filter((models.User.email == identifier) | (models.User.username == identifier.lower()))
+        .first()
+    )
     if not user or not user.hashed_password or not auth.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="אימייל או סיסמה שגויים",
+            detail="פרטי ההתחברות שגויים",
         )
     token = auth.create_access_token(user.id)
     return schemas.Token(access_token=token)
@@ -61,6 +99,12 @@ def update_me(
         if not name:
             raise HTTPException(400, "שם תצוגה לא יכול להיות ריק")
         current_user.display_name = name
+    if payload.username is not None:
+        new_username = re.sub(r"[^a-z0-9_]", "", payload.username.strip().lower())
+        if new_username and new_username != current_user.username:
+            if db.query(models.User).filter(models.User.username == new_username).first():
+                raise HTTPException(400, "שם המשתמש הזה כבר תפוס")
+            current_user.username = new_username
     if payload.phone_number is not None:
         current_user.phone_number = payload.phone_number.strip() or None
     if payload.home_region is not None:

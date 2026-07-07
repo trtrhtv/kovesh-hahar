@@ -11,6 +11,7 @@ class UserCreate(BaseModel):
     display_name: str
     accepted_disclaimer: bool
     phone_number: Optional[str] = None
+    username: Optional[str] = None
 
 
 class BikeCreate(BaseModel):
@@ -28,6 +29,7 @@ class BikeOut(BaseModel):
 
 class UserUpdate(BaseModel):
     display_name: Optional[str] = None
+    username: Optional[str] = None
     phone_number: Optional[str] = None
     home_region: Optional[str] = None
     notifications_enabled: Optional[bool] = None
@@ -36,6 +38,7 @@ class UserUpdate(BaseModel):
 class UserOut(BaseModel):
     id: str
     display_name: str
+    username: Optional[str] = None
     avatar_url: Optional[str] = None
     home_region: Optional[str] = None
     phone_number: Optional[str] = None

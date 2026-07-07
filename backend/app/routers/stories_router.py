@@ -109,6 +109,53 @@ async def create_story(
     return _with_extras(story, db)
 
 
+@router.get("/nearby", response_model=List[schemas.StoryListItem])
+def nearby_stories(
+    lat: float,
+    lon: float,
+    radius_km: float = 50,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+):
+    import math
+
+    radius_km = min(max(radius_km, 1), 300)
+    limit = min(max(limit, 1), 50)
+
+    candidates = (
+        db.query(models.Story)
+        .options(joinedload(models.Story.author))
+        .filter(
+            models.Story.is_published == True,  # noqa: E712
+            (models.Story.meeting_point_lat.isnot(None)) | (models.Story.start_lat.isnot(None)),
+        )
+        .all()
+    )
+
+    def haversine_km(lat1, lon1, lat2, lon2):
+        r = 6371
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
+        )
+        return r * 2 * math.asin(math.sqrt(a))
+
+    results = []
+    for story in candidates:
+        story_lat = story.meeting_point_lat if story.meeting_point_lat is not None else story.start_lat
+        story_lon = story.meeting_point_lon if story.meeting_point_lon is not None else story.start_lon
+        if story_lat is None or story_lon is None:
+            continue
+        distance = haversine_km(lat, lon, story_lat, story_lon)
+        if distance <= radius_km:
+            results.append((distance, story))
+
+    results.sort(key=lambda pair: pair[0])
+    return [_with_extras(story, db) for _, story in results[:limit]]
+
+
 @router.get("/count")
 def count_stories(
     country: Optional[str] = None,

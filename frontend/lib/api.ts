@@ -176,6 +176,19 @@ export async function countStories(params?: {
   return data.count || 0;
 }
 
+export async function fetchNearbyStories(
+  lat: number,
+  lon: number,
+  radiusKm = 50
+): Promise<StoryListItem[]> {
+  const res = await fetch(
+    `${API_BASE}/stories/nearby?lat=${lat}&lon=${lon}&radius_km=${radiusKm}`,
+    { cache: "no-store" }
+  );
+  if (!res.ok) return [];
+  return res.json();
+}
+
 export async function fetchStory(id: string): Promise<StoryDetail | null> {
   const res = await fetch(`${API_BASE}/stories/${id}`, { next: { revalidate: 30 } });
   if (!res.ok) return null;

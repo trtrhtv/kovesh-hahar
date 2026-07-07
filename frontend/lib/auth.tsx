@@ -25,7 +25,8 @@ type AuthContextType = {
     password: string,
     displayName: string,
     acceptedDisclaimer: boolean,
-    phoneNumber?: string
+    phoneNumber?: string,
+    username?: string
   ) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -85,7 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     displayName: string,
     acceptedDisclaimer: boolean,
-    phoneNumber?: string
+    phoneNumber?: string,
+    username?: string
   ) {
     if (!acceptedDisclaimer) {
       throw new Error("יש לאשר את הצהרת האחריות כדי להירשם");
@@ -99,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         display_name: displayName,
         accepted_disclaimer: acceptedDisclaimer,
         phone_number: phoneNumber || undefined,
+        username: username || undefined,
       }),
     });
     if (!res.ok) {

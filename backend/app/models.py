@@ -19,6 +19,7 @@ class VehicleType(str, enum.Enum):
     FOUR_STROKE = "four_stroke"    # 4 פעימות
     TWO_STROKE = "two_stroke"      # 2 פעימות
     DUAL_SPORT = "dual_sport"      # דו"ש (דו-שימושי)
+    MOTOCROSS = "motocross"        # מוטוקרוס
     OTHER = "other"                # אחר - עם טקסט חופשי
 
 
@@ -27,6 +28,7 @@ class RideStyle(str, enum.Enum):
     FAST_RALLY = "fast_rally"                    # רכיבה מהירה / ראלי
     TECHNICAL_SINGLES = "technical_singles"      # רכיבה טכנית / סינגלים
     HARD_ENDURO_EXTREME = "hard_enduro_extreme"  # הארד אנדורו / אקסטרים
+    DESERT_DUNES = "desert_dunes"                # רכיבה מדברית / דיונות
 
 
 class Season(str, enum.Enum):
@@ -54,6 +56,7 @@ class User(Base):
 
     id = Column(String, primary_key=True, default=gen_uuid)
     email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=True)  # להתחברות קלה, בלי אימייל מלא
     hashed_password = Column(String, nullable=True)  # ריק אם נכנס עם גוגל
     display_name = Column(String, nullable=False)
     avatar_url = Column(String, nullable=True)
