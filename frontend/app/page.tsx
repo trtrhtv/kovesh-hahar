@@ -1,7 +1,7 @@
 import CinematicVideoBackground from "@/components/CinematicVideoBackground";
+import HeroCarousel from "@/components/HeroCarousel";
 import BreakoutRiderImage from "@/components/BreakoutRiderImage";
 import Logo from "@/components/Logo";
-import Image from "next/image";
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
@@ -38,16 +38,9 @@ export default async function HomePage() {
         {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן */}
         <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
 
-        {/* שכבה 2 - תמונת האקשן הקבועה, עם פאן איטי */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <Image
-            src="/hero-action.png"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="slow-pan object-cover"
-          />
+        {/* שכבה 2 - קרוסלת האקשן (4 תמונות, מתחלפות כל 8 שניות), עם פאן איטי על כל תמונה */}
+        <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
+          <HeroCarousel />
           <div
             className="absolute inset-0"
             style={{
