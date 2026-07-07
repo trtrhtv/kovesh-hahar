@@ -39,10 +39,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMe = useCallback(async (t: string) => {
+  const fetchMe = useCallback(async (t?: string | null) => {
     const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: { Authorization: `Bearer ${t}` },
-      credentials: "include",
+      headers: t ? { Authorization: `Bearer ${t}` } : {},
+      credentials: "include", // אם יש עוגיית התחברות תקינה, זה מספיק גם בלי טוקן
     });
     if (res.ok) {
       setUser(await res.json());
@@ -55,12 +55,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem(TOKEN_KEY);
-    if (stored) {
-      setToken(stored);
-      fetchMe(stored).finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    if (stored) setToken(stored);
+    // תמיד מנסים - גם בלי טוקן שמור, כי יכול להיות שיש עוגיית התחברות תקינה
+    // (למשל אחרי שניקו את localStorage, או בטאב/מכשיר אחר)
+    fetchMe(stored).finally(() => setLoading(false));
   }, [fetchMe]);
 
   async function login(email: string, password: string) {
@@ -131,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function refreshUser() {
-    if (token) await fetchMe(token);
+    await fetchMe(token);
   }
 
   return (
