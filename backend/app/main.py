@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .routers import auth_router, stories_router, comments_router, trail_updates_router, contact_router, users_router, notifications_router, events_router
+from .routers import auth_router, stories_router, comments_router, trail_updates_router, contact_router, users_router, notifications_router, events_router, reports_router
 from . import storage
 
 # מבנה מסד הנתונים מנוהל עכשיו על ידי Alembic (ראה alembic/), לא כאן.
@@ -36,6 +36,7 @@ app.include_router(contact_router.router)
 app.include_router(users_router.router)
 app.include_router(notifications_router.router)
 app.include_router(events_router.router)
+app.include_router(reports_router.router)
 
 # כשמשתמשים באחסון מקומי (ברירת מחדל) - מגישים את הקבצים שהועלו ישירות דרך ה-API
 if storage.STORAGE_BACKEND == "local":

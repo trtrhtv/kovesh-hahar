@@ -16,6 +16,7 @@ import {
 import RouteMap from "@/components/RouteMap";
 import LikeButton from "@/components/LikeButton";
 import ShareButton from "@/components/ShareButton";
+import ReportButton from "@/components/ReportButton";
 import CommentsSection from "@/components/CommentsSection";
 import NavigateButton from "@/components/NavigateButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -189,6 +190,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
         <div className="flex items-center gap-3 mb-8">
           <LikeButton storyId={story.id} initialCount={story.like_count} />
           <ShareButton title={story.title} path={`/stories/${story.id}`} />
+          <ReportButton contentType="story" contentId={story.id} />
         </div>
 
         <div className="mb-8">

@@ -219,6 +219,41 @@ class Notification(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
+class ReportContentType(str, enum.Enum):
+    STORY = "story"
+    COMMENT = "comment"
+    EVENT = "event"
+
+
+class ReportReason(str, enum.Enum):
+    SPAM = "spam"                        # ספאם/פרסומת
+    INAPPROPRIATE = "inappropriate"      # תוכן לא ראוי
+    HARASSMENT = "harassment"            # הטרדה/פגיעה באדם
+    MISINFORMATION = "misinformation"    # מידע שגוי/מסוכן
+    OTHER = "other"
+
+
+class ReportStatus(str, enum.Enum):
+    PENDING = "pending"
+    REVIEWED = "reviewed"
+    DISMISSED = "dismissed"
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    reporter_id = Column(String, ForeignKey("users.id"), nullable=False)
+    content_type = Column(Enum(ReportContentType), nullable=False)
+    content_id = Column(String, nullable=False, index=True)
+    reason = Column(Enum(ReportReason), nullable=False)
+    note = Column(String, nullable=True)
+    status = Column(Enum(ReportStatus), default=ReportStatus.PENDING, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    reporter = relationship("User")
+
+
 class ContactMessage(Base):
     __tablename__ = "contact_messages"
 

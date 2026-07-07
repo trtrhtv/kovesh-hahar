@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { fetchComments, postComment, type Comment } from "@/lib/api";
+import ReportButton from "@/components/ReportButton";
 
 export default function CommentsSection({ storyId }: { storyId: string }) {
   const { user, token } = useAuth();
@@ -47,6 +48,9 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
               </span>
             </div>
             <p className="text-ink/80 text-sm">{c.body}</p>
+            <div className="mt-1">
+              <ReportButton contentType="comment" contentId={c.id} small />
+            </div>
           </div>
         ))}
         {comments.length === 0 && (

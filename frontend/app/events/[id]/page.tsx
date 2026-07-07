@@ -5,6 +5,7 @@ import NavigateButton from "@/components/NavigateButton";
 import RSVPButton from "@/components/RSVPButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WeatherWidget from "@/components/WeatherWidget";
+import ReportButton from "@/components/ReportButton";
 import DeleteEventButton from "@/components/DeleteEventButton";
 import { fetchEvent } from "@/lib/api";
 import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS, TIME_PERIOD_LABELS } from "@/lib/labels";
@@ -82,6 +83,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
         <Link href={`/users/${event.organizer.id}`} className="text-sm text-textDim hover:text-moto hover:underline">
           מארגן: {event.organizer.display_name}
         </Link>
+        <ReportButton contentType="event" contentId={event.id} />
       </div>
 
       <div className="mb-6">

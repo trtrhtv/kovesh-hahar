@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr
 
-from .models import VehicleType, RideStyle, Difficulty, Season, TrailStatus, ParkingSecurity
+from .models import VehicleType, RideStyle, Difficulty, Season, TrailStatus, ParkingSecurity, ReportContentType, ReportReason, ReportStatus
 
 
 class UserCreate(BaseModel):
@@ -158,6 +158,31 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+
+class ReportCreate(BaseModel):
+    content_type: ReportContentType
+    content_id: str
+    reason: ReportReason
+    note: Optional[str] = None
+
+
+class ReportOut(BaseModel):
+    id: str
+    content_type: str
+    content_id: str
+    reason: str
+    note: Optional[str] = None
+    status: str
+    created_at: datetime
+    reporter: UserOut
+
+    class Config:
+        from_attributes = True
+
+
+class ReportStatusUpdate(BaseModel):
+    status: ReportStatus
 
 
 class ContactMessageCreate(BaseModel):

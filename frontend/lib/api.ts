@@ -315,6 +315,52 @@ export async function resendVerificationEmail(): Promise<void> {
   }
 }
 
+export type Report = {
+  id: string;
+  content_type: string;
+  content_id: string;
+  reason: string;
+  note?: string;
+  status: string;
+  created_at: string;
+  reporter: Author;
+};
+
+export async function createReport(
+  contentType: "story" | "comment" | "event",
+  contentId: string,
+  reason: string,
+  note: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/reports`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ content_type: contentType, content_id: contentId, reason, note: note || undefined }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "שליחת הדיווח נכשלה"));
+  }
+}
+
+export async function fetchReports(statusFilter?: string): Promise<Report[]> {
+  const qs = statusFilter ? `?status_filter=${statusFilter}` : "";
+  const res = await fetch(`${API_BASE}/reports${qs}`, { credentials: "include", cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function updateReportStatus(reportId: string, status: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/reports/${reportId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error("עדכון הדיווח נכשל");
+}
+
 export async function requestPasswordReset(email: string): Promise<void> {
   const res = await fetch(`${API_BASE}/auth/forgot-password`, {
     method: "POST",
