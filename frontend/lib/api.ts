@@ -50,6 +50,21 @@ export type TrailUpdate = {
   author: Author;
 };
 
+export type UserProfile = {
+  id: string;
+  display_name: string;
+  avatar_url?: string;
+  bike_model?: string;
+  home_region?: string;
+  phone_number?: string;
+};
+
+export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
+  const res = await fetch(`${API_BASE}/users/${userId}`, { next: { revalidate: 60 } });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export async function fetchStories(params?: {
   country?: string;
   region?: string;
@@ -58,6 +73,7 @@ export async function fetchStories(params?: {
   difficulty?: string;
   season?: string;
   search?: string;
+  author_id?: string;
   limit?: number;
   offset?: number;
 }): Promise<StoryListItem[]> {

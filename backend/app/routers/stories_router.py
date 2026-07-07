@@ -117,6 +117,7 @@ def list_stories(
     difficulty: Optional[models.Difficulty] = None,
     season: Optional[models.Season] = None,
     search: Optional[str] = None,
+    author_id: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
     db: Session = Depends(get_db),
@@ -126,6 +127,8 @@ def list_stories(
         models.Story.is_published == True  # noqa: E712
     )
 
+    if author_id:
+        query = query.filter(models.Story.author_id == author_id)
     if country:
         query = query.filter(models.Story.country == country)
     if region:

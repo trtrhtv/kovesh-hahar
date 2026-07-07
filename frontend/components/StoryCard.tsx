@@ -106,7 +106,9 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
         />
 
         <div className="mt-3 flex items-center justify-between text-xs text-textDim">
-          <span>{story.author.display_name}</span>
+          <Link href={`/users/${story.author.id}`} onClick={stop} className="hover:text-moto hover:underline">
+            {story.author.display_name}
+          </Link>
           <span>
             {story.like_count} לייקים · {story.comment_count} תגובות
           </span>

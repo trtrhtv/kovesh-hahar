@@ -82,7 +82,11 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
             <div className="w-8 h-8 rounded-full bg-moto/20 border border-moto/50 flex items-center justify-center text-moto font-black text-sm">
               {story.author.display_name.charAt(0)}
             </div>
-            <span className="text-ink/90 text-sm font-bold">{story.author.display_name}</span>
+            <span className="text-ink/90 text-sm font-bold">
+              <Link href={`/users/${story.author.id}`} className="hover:text-moto hover:underline">
+                {story.author.display_name}
+              </Link>
+            </span>
             <span className="text-textDim text-sm">
               · {new Date(story.created_at).toLocaleDateString("he-IL")}
             </span>
