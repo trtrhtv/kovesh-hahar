@@ -16,6 +16,46 @@ export function ensureRTLTextPlugin(maplibregl: any) {
 }
 
 /**
+ * מוסיף מקור מפת לוויין (Esri World Imagery - חינמי, בלי מפתח API) כשכבה
+ * כבויה כברירת מחדל, ומחזירה פונקציית toggle שמחליפה בינה לבין המפה הרגילה.
+ * baseLayerIds הן כל שכבות המפה הבסיסית (חוץ מהמסלול/נעצים שלנו) - הן מוסתרות
+ * כשהלוויין פעיל ומוצגות חזרה כשמכבים אותו.
+ */
+export function addSatelliteToggle(map: any, baseLayerIds: string[]): () => boolean {
+  map.addSource("satellite", {
+    type: "raster",
+    tiles: [
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    ],
+    tileSize: 256,
+    attribution: "Esri, Maxar, Earthstar Geographics",
+  });
+
+  map.addLayer(
+    {
+      id: "satellite-layer",
+      type: "raster",
+      source: "satellite",
+      layout: { visibility: "none" },
+    },
+    baseLayerIds[0] // מתחת לכל שכבה בסיסית, כדי שה-toggle יעבוד נקי
+  );
+
+  let satelliteOn = false;
+
+  return function toggleSatellite() {
+    satelliteOn = !satelliteOn;
+    map.setLayoutProperty("satellite-layer", "visibility", satelliteOn ? "visible" : "none");
+    baseLayerIds.forEach((id) => {
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(id, "visibility", satelliteOn ? "none" : "visible");
+      }
+    });
+    return satelliteOn;
+  };
+}
+
+/**
  * מסיר משכבות המפה כל תיוג גבולות/שמות מדינה - בכוונה וללא הבחנה בין צד לצד.
  * המפה כאן משמשת להצגת מסלולי רכיבה, לא כהצהרה גיאופוליטית, ואנחנו לא
  * הכתובת הנכונה להכריע במחלוקות ריבונות בין-לאומיות. נשארים: כבישים, שבילים,

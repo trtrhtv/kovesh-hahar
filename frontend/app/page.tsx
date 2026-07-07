@@ -12,9 +12,9 @@ export default async function HomePage() {
     <main>
       {/* ניווט עליון */}
       <header className="border-b border-char/15">
-        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center flex-wrap gap-y-2 justify-between">
           <Logo />
-          <nav className="flex items-center gap-5 text-sm">
+          <nav className="flex items-center flex-wrap gap-3 sm:gap-5 text-sm">
             <Link href="/stories" className="hover:text-oxide transition-colors">
               כל הסיפורים
             </Link>

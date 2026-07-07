@@ -30,7 +30,7 @@ export default async function StoriesPage({
   return (
     <main>
       <header className="border-b border-char/15">
-        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center flex-wrap gap-y-2 justify-between">
           <Link href="/" className="font-black text-lg tracking-tight">
             <Logo />
           </Link>

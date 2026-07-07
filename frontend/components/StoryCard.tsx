@@ -17,9 +17,9 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
       className="group grid grid-cols-[1fr_auto] gap-0 bg-sand border border-char/15 hover:border-char/30 hover:shadow-[0_4px_20px_rgba(35,32,27,0.08)] transition-all"
     >
       {/* תוכן */}
-      <div className="p-5 flex flex-col justify-between">
+      <div className="p-4 sm:p-5 flex flex-col justify-between min-w-0">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-trail mb-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-mono text-trail mb-2">
             <span>
               {story.country !== "ישראל" ? `${story.region}, ${story.country}` : story.region}
             </span>
@@ -28,7 +28,7 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
             <span>·</span>
             <span>{RIDE_STYLE_LABELS[story.ride_style] || story.ride_style}</span>
           </div>
-          <h3 className="text-xl font-bold leading-snug group-hover:text-oxide transition-colors">
+          <h3 className="text-lg sm:text-xl font-bold leading-snug group-hover:text-oxide transition-colors">
             {story.title}
           </h3>
         </div>
@@ -76,8 +76,8 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
       {/* תמונה + פרפורציה בסגנון כרטיס ראלי */}
       {story.cover_photo_url && (
         <div className="flex shrink-0">
-          <div className="w-2 ticket-perforation" />
-          <div className="relative w-40 md:w-56 shrink-0">
+          <div className="w-1.5 sm:w-2 ticket-perforation" />
+          <div className="relative w-24 sm:w-40 md:w-56 shrink-0">
             <Image
               src={story.cover_photo_url}
               alt={story.title}

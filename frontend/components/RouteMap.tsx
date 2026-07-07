@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { stripPoliticalLayers, ensureRTLTextPlugin } from "@/lib/mapUtils";
+import { stripPoliticalLayers, ensureRTLTextPlugin, addSatelliteToggle } from "@/lib/mapUtils";
 
 // OpenFreeMap - שירות מפות חינמי לגמרי, בלי מפתח API, בלי הרשמה, בלי הגבלת שימוש.
 // מבוסס נתוני OpenStreetMap. ראה https://openfreemap.org
@@ -16,6 +16,8 @@ export default function RouteMap({
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<(() => boolean) | null>(null);
+  const [satelliteOn, setSatelliteOn] = useState(false);
 
   useEffect(() => {
     if (!profileJson || !containerRef.current) return;
@@ -46,9 +48,13 @@ export default function RouteMap({
       });
 
       map.addControl(new maplibregl.default.NavigationControl(), "top-left");
+      map.addControl(new maplibregl.default.FullscreenControl(), "top-left");
 
       map.on("load", () => {
         stripPoliticalLayers(map);
+
+        const baseLayerIds = map.getStyle().layers.map((l: any) => l.id);
+        toggleRef.current = addSatelliteToggle(map, baseLayerIds);
 
         map.addSource("route", {
           type: "geojson",
@@ -93,5 +99,15 @@ export default function RouteMap({
     );
   }
 
-  return <div ref={containerRef} className={className} />;
+  return (
+    <div className={`relative ${className}`}>
+      <div ref={containerRef} className="w-full h-full" />
+      <button
+        onClick={() => setSatelliteOn(toggleRef.current ? toggleRef.current() : false)}
+        className="absolute bottom-3 right-3 z-10 bg-sand border border-char/25 px-3 py-1.5 text-xs font-bold hover:border-oxide transition-colors shadow-sm"
+      >
+        {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
+      </button>
+    </div>
+  );
 }

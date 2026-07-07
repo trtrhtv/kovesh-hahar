@@ -223,7 +223,7 @@ function StoryForm({ token }: { token: string }) {
           />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="סוג אופנוע">
             <select
               value={vehicleType}
@@ -253,7 +253,7 @@ function StoryForm({ token }: { token: string }) {
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="רמת קושי">
             <select
               value={difficulty}
@@ -283,7 +283,7 @@ function StoryForm({ token }: { token: string }) {
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="מדינה">
             <select
               value={country}
@@ -339,7 +339,7 @@ function StoryForm({ token }: { token: string }) {
               placeholder="שם המקום - לדוגמה: חניון עין גדי"
               className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
             />
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-2">
               <input
                 type="text"
                 inputMode="decimal"
@@ -359,7 +359,7 @@ function StoryForm({ token }: { token: string }) {
               <button
                 type="button"
                 onClick={useMyLocation}
-                className="border border-char/25 px-3 text-xs font-bold hover:border-oxide whitespace-nowrap"
+                className="col-span-2 sm:col-span-1 border border-char/25 px-3 py-2 sm:py-0 text-xs font-bold hover:border-oxide whitespace-nowrap"
               >
                 המיקום שלי
               </button>

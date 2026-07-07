@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { stripPoliticalLayers, ensureRTLTextPlugin } from "@/lib/mapUtils";
+import { stripPoliticalLayers, ensureRTLTextPlugin, addSatelliteToggle } from "@/lib/mapUtils";
 import type { StoryListItem } from "@/lib/api";
 import { DIFFICULTY_COLORS } from "@/lib/labels";
 
@@ -17,6 +17,8 @@ export default function OverviewMap({
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<(() => boolean) | null>(null);
+  const [satelliteOn, setSatelliteOn] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -39,9 +41,13 @@ export default function OverviewMap({
       });
 
       map.addControl(new maplibregl.default.NavigationControl(), "top-left");
+      map.addControl(new maplibregl.default.FullscreenControl(), "top-left");
 
       map.on("load", () => {
         stripPoliticalLayers(map);
+
+        const baseLayerIds = map.getStyle().layers.map((l: any) => l.id);
+        toggleRef.current = addSatelliteToggle(map, baseLayerIds);
 
         if (!pinned.length) return;
 
@@ -88,5 +94,15 @@ export default function OverviewMap({
     };
   }, [stories]);
 
-  return <div ref={containerRef} className={className} />;
+  return (
+    <div className={`relative ${className}`}>
+      <div ref={containerRef} className="w-full h-full" />
+      <button
+        onClick={() => setSatelliteOn(toggleRef.current ? toggleRef.current() : false)}
+        className="absolute bottom-3 right-3 z-10 bg-sand border border-char/25 px-3 py-1.5 text-xs font-bold hover:border-oxide transition-colors shadow-sm"
+      >
+        {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
+      </button>
+    </div>
+  );
 }
