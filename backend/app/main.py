@@ -3,13 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .database import engine, Base
 from .routers import auth_router, stories_router, comments_router, trail_updates_router, contact_router, users_router, notifications_router
 from . import storage
 
-# יוצר את הטבלאות אם לא קיימות. לפרודקשן אמיתי כדאי לעבור ל-alembic migrations,
-# אבל לשלב ה-MVP זה מספיק פשוט ועובד.
-Base.metadata.create_all(bind=engine)
+# מבנה מסד הנתונים מנוהל עכשיו על ידי Alembic (ראה alembic/), לא כאן.
+# כל שינוי מבנה: `alembic revision --autogenerate -m "..."` ואז `alembic upgrade head`
+# רץ אוטומטית לפני עליית השרת (ראה Start Command ב-Railway).
 
 app = FastAPI(title="כובש ההר - API")
 
