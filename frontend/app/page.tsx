@@ -7,6 +7,7 @@ import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
 import { fetchStories } from "@/lib/api";
 import { RIDE_STYLE_LABELS } from "@/lib/labels";
+import { ISRAEL_REGIONS } from "@/lib/locations";
 
 export default async function HomePage() {
   const stories = await fetchStories();
@@ -97,6 +98,23 @@ export default async function HomePage() {
                 מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
                 ועדכוני שטח בזמן אמת.
               </p>
+
+              <form action="/stories" method="get" className="mt-6 flex gap-2 max-w-md">
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="חיפוש מסלול לפי שם..."
+                  className="flex-1 border border-edge bg-surface px-4 py-3 min-h-[48px] focus:border-moto outline-none"
+                />
+                <button
+                  type="submit"
+                  className="tactical-btn bg-moto text-carbon hover:bg-motoDark !px-5"
+                  aria-label="חפש"
+                >
+                  🔍
+                </button>
+              </form>
+
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/stories/new"
@@ -134,6 +152,22 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ניווט קטגורי לפי אזור בארץ */}
+      <section className="max-w-5xl mx-auto px-5 pb-8">
+        <h2 className="font-bold text-sm tracking-wider text-textDim mb-3">עיון לפי אזור</h2>
+        <div className="flex flex-wrap gap-2">
+          {ISRAEL_REGIONS.map((region) => (
+            <Link
+              key={region}
+              href={`/stories?country=${encodeURIComponent("ישראל")}&region=${encodeURIComponent(region)}`}
+              className="switch-btn text-xs font-bold text-ink px-3.5 py-2.5 min-h-[40px] flex items-center"
+            >
+              {region}
+            </Link>
+          ))}
         </div>
       </section>
 

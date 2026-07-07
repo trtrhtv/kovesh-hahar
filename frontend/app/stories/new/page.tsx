@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import BackNav from "@/components/BackNav";
+import PageBackdrop from "@/components/PageBackdrop";
 import { useAuth } from "@/lib/auth";
 import { createStory } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
@@ -14,15 +16,17 @@ const MAX_PHOTOS = 10;
 export default function NewStoryPage() {
   const { user, token, loading, login, register } = useAuth();
 
-  if (loading) {
-    return <div className="max-w-2xl mx-auto px-5 py-24 text-center text-textDim">טוען...</div>;
-  }
-
-  if (!user || !token) {
-    return <AuthGate onLogin={login} onRegister={register} />;
-  }
-
-  return <StoryForm token={token} />;
+  return (
+    <PageBackdrop>
+      {loading ? (
+        <div className="max-w-2xl mx-auto px-5 py-24 text-center text-textDim">טוען...</div>
+      ) : !user || !token ? (
+        <AuthGate onLogin={login} onRegister={register} />
+      ) : (
+        <StoryForm token={token} />
+      )}
+    </PageBackdrop>
+  );
 }
 
 function AuthGate({
@@ -66,6 +70,7 @@ function AuthGate({
 
   return (
     <main className="max-w-md mx-auto px-5 py-24">
+      <div className="mb-4"><BackNav /></div>
       <Link href="/" className="block mb-8">
         <Logo />
       </Link>
@@ -252,6 +257,7 @@ function StoryForm({ token }: { token: string }) {
 
   return (
     <main className="max-w-2xl mx-auto px-5 py-12">
+      <div className="mb-4"><BackNav /></div>
       <Link href="/" className="block mb-8">
         <Logo />
       </Link>

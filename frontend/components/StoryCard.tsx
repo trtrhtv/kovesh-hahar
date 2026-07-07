@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import ElevationSignature from "./ElevationSignature";
@@ -6,9 +9,11 @@ import type { StoryListItem } from "@/lib/api";
 
 /**
  * כרטיס סיפור - דשבורד כהה בהשראת ממשקי רכבי מרוץ. הכרטיס "מרחף" ב-hover
- * וזוהר בצבע האקצנט, בלי להיות עמוס - הריחוף הוא הרמז היחיד לאינטראקטיביות.
+ * וזוהר בצבע האקצנט. תגיות האזור/סוג-האופנוע/סגנון לחיצות בנפרד ומובילות
+ * לעיון מסונן, בלי לפתוח את הסיפור עצמו (עוצרים את הבועה עם stopPropagation).
  */
 export default function StoryCard({ story }: { story: StoryListItem }) {
+  const router = useRouter();
   const difficultyColor = DIFFICULTY_COLORS[story.difficulty] || "#FF6600";
   const ambientClass = /נגב|ערבה|אילת|מכתש/.test(story.region)
     ? "ambient-desert"
@@ -16,26 +21,50 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
     ? "ambient-galilee"
     : "";
 
+  const vehicleLabel =
+    story.vehicle_type === "other" && story.vehicle_type_other
+      ? story.vehicle_type_other
+      : VEHICLE_TYPE_LABELS[story.vehicle_type] || story.vehicle_type;
+
+  function stop(e: React.MouseEvent) {
+    e.stopPropagation();
+  }
+
   return (
-    <Link
-      href={`/stories/${story.id}`}
-      className={`moto-card group grid grid-cols-[1fr_auto] gap-0 overflow-hidden ${ambientClass}`}
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={() => router.push(`/stories/${story.id}`)}
+      onKeyDown={(e) => e.key === "Enter" && router.push(`/stories/${story.id}`)}
+      className={`moto-card group grid grid-cols-[1fr_auto] gap-0 overflow-hidden cursor-pointer ${ambientClass}`}
     >
       {/* תוכן */}
       <div className="p-4 sm:p-5 flex flex-col justify-between min-w-0">
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-mono text-textDim mb-2 tracking-wide">
-            <span>
+            <Link
+              href={`/stories?country=${encodeURIComponent(story.country)}&region=${encodeURIComponent(story.region)}`}
+              onClick={stop}
+              className="hover:text-moto hover:underline transition-colors"
+            >
               {story.country !== "ישראל" ? `${story.region}, ${story.country}` : story.region}
-            </span>
+            </Link>
             <span>·</span>
-            <span>
-              {story.vehicle_type === "other" && story.vehicle_type_other
-                ? story.vehicle_type_other
-                : VEHICLE_TYPE_LABELS[story.vehicle_type] || story.vehicle_type}
-            </span>
+            <Link
+              href={`/stories?vehicle_type=${story.vehicle_type}`}
+              onClick={stop}
+              className="hover:text-moto hover:underline transition-colors"
+            >
+              {vehicleLabel}
+            </Link>
             <span>·</span>
-            <span>{RIDE_STYLE_LABELS[story.ride_style] || story.ride_style}</span>
+            <Link
+              href={`/stories?ride_style=${story.ride_style}`}
+              onClick={stop}
+              className="hover:text-moto hover:underline transition-colors"
+            >
+              {RIDE_STYLE_LABELS[story.ride_style] || story.ride_style}
+            </Link>
           </div>
           <h3 className="text-lg sm:text-xl font-black leading-snug text-ink group-hover:text-moto transition-colors">
             {story.title}
@@ -97,6 +126,6 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-surface/40" />
         </div>
       )}
-    </Link>
+    </div>
   );
 }

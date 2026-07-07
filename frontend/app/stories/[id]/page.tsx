@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import BackNav from "@/components/BackNav";
+import PageBackdrop from "@/components/PageBackdrop";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { fetchStory } from "@/lib/api";
@@ -35,14 +37,16 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
   const readingMinutes = estimateReadingMinutes(story.body);
 
   return (
-    <main>
-      <header className="border-b border-edge">
-        <div className="max-w-3xl mx-auto px-5 py-4">
-          <Link href="/">
-            <Logo />
-          </Link>
-        </div>
-      </header>
+    <PageBackdrop>
+      <main>
+        <header className="border-b border-edge">
+          <div className="max-w-3xl mx-auto px-5 py-4 flex items-center justify-between flex-wrap gap-2">
+            <Link href="/">
+              <Logo />
+            </Link>
+            <BackNav />
+          </div>
+        </header>
 
       {/* Hero טבול - תמונת רקע עם overlay כהה, כותרת וכרטיס יוצר */}
       <div className="relative h-72 sm:h-96 w-full overflow-hidden">
@@ -181,6 +185,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
         <CommentsSection storyId={story.id} />
       </article>
     </main>
+    </PageBackdrop>
   );
 }
 
