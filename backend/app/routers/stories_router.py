@@ -108,6 +108,40 @@ async def create_story(
     return _with_extras(story, db)
 
 
+@router.get("/count")
+def count_stories(
+    country: Optional[str] = None,
+    region: Optional[str] = None,
+    vehicle_type: Optional[models.VehicleType] = None,
+    ride_style: Optional[models.RideStyle] = None,
+    difficulty: Optional[models.Difficulty] = None,
+    season: Optional[models.Season] = None,
+    search: Optional[str] = None,
+    author_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(func.count(models.Story.id)).filter(models.Story.is_published == True)  # noqa: E712
+
+    if author_id:
+        query = query.filter(models.Story.author_id == author_id)
+    if country:
+        query = query.filter(models.Story.country == country)
+    if region:
+        query = query.filter(models.Story.region == region)
+    if vehicle_type:
+        query = query.filter(models.Story.vehicle_type == vehicle_type)
+    if ride_style:
+        query = query.filter(models.Story.ride_style == ride_style)
+    if difficulty:
+        query = query.filter(models.Story.difficulty == difficulty)
+    if season:
+        query = query.filter(models.Story.season == season)
+    if search:
+        query = query.filter(models.Story.title.ilike(f"%{search}%"))
+
+    return {"count": query.scalar() or 0}
+
+
 @router.get("", response_model=List[schemas.StoryListItem])
 def list_stories(
     country: Optional[str] = None,

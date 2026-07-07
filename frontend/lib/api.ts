@@ -132,6 +132,29 @@ export async function fetchStories(params?: {
   return res.json();
 }
 
+export async function countStories(params?: {
+  country?: string;
+  region?: string;
+  vehicle_type?: string;
+  ride_style?: string;
+  difficulty?: string;
+  season?: string;
+  search?: string;
+  author_id?: string;
+}): Promise<number> {
+  const qs = new URLSearchParams(
+    Object.entries(params || {})
+      .filter(([, v]) => v !== undefined && v !== "")
+      .map(([k, v]) => [k, String(v)])
+  );
+  const res = await fetch(`${API_BASE}/stories/count?${qs.toString()}`, {
+    next: { revalidate: 30 },
+  });
+  if (!res.ok) return 0;
+  const data = await res.json();
+  return data.count || 0;
+}
+
 export async function fetchStory(id: string): Promise<StoryDetail | null> {
   const res = await fetch(`${API_BASE}/stories/${id}`, { next: { revalidate: 30 } });
   if (!res.ok) return null;

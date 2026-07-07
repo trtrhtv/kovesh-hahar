@@ -3,7 +3,10 @@ import Logo from "@/components/Logo";
 import StoryCard from "@/components/StoryCard";
 import FilterSidebar from "@/components/FilterSidebar";
 import OverviewMap from "@/components/OverviewMap";
-import { fetchStories } from "@/lib/api";
+import Pagination from "@/components/Pagination";
+import { fetchStories, countStories } from "@/lib/api";
+
+const LIMIT = 20;
 
 export default async function StoriesPage({
   searchParams,
@@ -16,16 +19,19 @@ export default async function StoriesPage({
     difficulty?: string;
     season?: string;
     search?: string;
-    offset?: string;
+    page?: string;
   };
 }) {
-  const offset = Number(searchParams.offset || 0);
-  const limit = 20;
-  const stories = await fetchStories({ ...searchParams, limit, offset });
+  const currentPage = Math.max(1, Number(searchParams.page || 1));
+  const offset = (currentPage - 1) * LIMIT;
 
-  const activeFilters = Object.entries(searchParams).filter(
-    ([k, v]) => k !== "offset" && !!v
-  );
+  const [stories, total] = await Promise.all([
+    fetchStories({ ...searchParams, limit: LIMIT, offset }),
+    countStories(searchParams),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+
+  const activeFilters = Object.entries(searchParams).filter(([k, v]) => k !== "page" && !!v);
 
   return (
     <main>
@@ -50,7 +56,9 @@ export default async function StoriesPage({
 
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-black">כל הסיפורים</h1>
+            <h1 className="text-2xl font-black">
+              כל הסיפורים <span className="text-textDim text-base font-normal">({total})</span>
+            </h1>
             {activeFilters.length > 0 && (
               <Link href="/stories" className="text-sm text-moto hover:underline">
                 נקה סינון
@@ -70,32 +78,12 @@ export default async function StoriesPage({
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-8 text-sm">
-            {offset > 0 ? (
-              <Link
-                href={`/stories?${new URLSearchParams({
-                  ...searchParams,
-                  offset: String(Math.max(0, offset - limit)),
-                }).toString()}`}
-                className="border border-edge px-4 py-2 hover:border-moto"
-              >
-                ← הקודמים
-              </Link>
-            ) : (
-              <span />
-            )}
-            {stories.length === limit && (
-              <Link
-                href={`/stories?${new URLSearchParams({
-                  ...searchParams,
-                  offset: String(offset + limit),
-                }).toString()}`}
-                className="border border-edge px-4 py-2 hover:border-moto"
-              >
-                הבאים →
-              </Link>
-            )}
-          </div>
+          <Pagination
+            basePath="/stories"
+            params={searchParams}
+            currentPage={currentPage}
+            totalPages={totalPages}
+          />
         </div>
       </div>
     </main>
