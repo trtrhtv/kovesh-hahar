@@ -20,7 +20,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
       <header className="border-b border-char/15">
         <div className="max-w-3xl mx-auto px-5 py-4">
           <Link href="/" className="font-black text-lg tracking-tight">
-            סיפור שביל
+            כובש ההר
           </Link>
         </div>
       </header>

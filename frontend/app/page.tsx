@@ -11,7 +11,7 @@ export default async function HomePage() {
       {/* ניווט עליון */}
       <header className="border-b border-char/15">
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
-          <span className="font-black text-lg tracking-tight">סיפור דרך</span>
+          <span className="font-black text-lg tracking-tight">כובש ההר</span>
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/stories" className="hover:text-oxide transition-colors">
               כל הסיפורים

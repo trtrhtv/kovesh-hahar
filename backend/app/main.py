@@ -11,7 +11,7 @@ from . import storage
 # אבל לשלב ה-MVP זה מספיק פשוט ועובד.
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="סיפור דרך - API")
+app = FastAPI(title="כובש ההר - API")
 
 app.add_middleware(
     CORSMiddleware,

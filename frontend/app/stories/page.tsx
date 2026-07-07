@@ -28,7 +28,7 @@ export default async function StoriesPage({
       <header className="border-b border-char/15">
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
           <Link href="/" className="font-black text-lg tracking-tight">
-            סיפור שביל
+            כובש ההר
           </Link>
           <Link
             href="/stories/new"
