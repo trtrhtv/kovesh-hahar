@@ -158,6 +158,42 @@ class NotificationType(str, enum.Enum):
     COMMENT = "comment"            # מישהו הגיב לסיפור שלך
     TRAIL_UPDATE = "trail_update"  # עדכון שטח על סיפור שאהבת
     LIKE = "like"                  # מישהו אהב את הסיפור שלך
+    EVENT_RSVP = "event_rsvp"      # מישהו נרשם לאירוע שלך
+
+
+class Event(Base):
+    """אירוע רכיבה - "מארגן רכיבה בשבת הבאה" וכו', נפרד מסיפורי הדרך"""
+    __tablename__ = "events"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    organizer_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    event_date = Column(DateTime, nullable=False, index=True)
+
+    vehicle_type = Column(Enum(VehicleType), nullable=True)
+    difficulty = Column(Enum(Difficulty), nullable=True)
+    country = Column(String, nullable=False, default="ישראל")
+    region = Column(String, nullable=False)
+
+    meeting_point_label = Column(String, nullable=True)
+    meeting_point_lat = Column(Float, nullable=True)
+    meeting_point_lon = Column(Float, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    organizer = relationship("User")
+
+
+class EventRSVP(Base):
+    """מי הביע כוונה להגיע לאירוע"""
+    __tablename__ = "event_rsvps"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    event_id = Column(String, ForeignKey("events.id"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class Notification(Base):

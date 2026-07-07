@@ -25,6 +25,9 @@ export default async function HomePage() {
             <Link href="/stories" className="hover:text-moto transition-colors">
               כל הסיפורים
             </Link>
+            <Link href="/events" className="hover:text-moto transition-colors">
+              אירועים
+            </Link>
             <AccountMenu />
             <Link
               href="/stories/new"

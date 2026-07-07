@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.orm import Session
 
 from . import models
@@ -8,7 +9,7 @@ def create_notification(
     user_id: str,
     actor_id: str,
     notif_type: models.NotificationType,
-    story_id: str,
+    story_id: Optional[str],
     message: str,
 ):
     if user_id == actor_id:

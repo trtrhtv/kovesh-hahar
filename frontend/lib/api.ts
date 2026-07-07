@@ -176,6 +176,89 @@ export async function countStories(params?: {
   return data.count || 0;
 }
 
+export type EventItem = {
+  id: string;
+  title: string;
+  description: string;
+  event_date: string;
+  vehicle_type?: string;
+  difficulty?: string;
+  country: string;
+  region: string;
+  meeting_point_label?: string;
+  meeting_point_lat?: number;
+  meeting_point_lon?: number;
+  created_at: string;
+  organizer: Author;
+  attendee_count: number;
+  is_attending: boolean;
+};
+
+export async function fetchEvents(params?: {
+  country?: string;
+  region?: string;
+  include_past?: boolean;
+}): Promise<EventItem[]> {
+  const qs = new URLSearchParams(
+    Object.entries(params || {})
+      .filter(([, v]) => v !== undefined && v !== "")
+      .map(([k, v]) => [k, String(v)])
+  );
+  const res = await fetch(`${API_BASE}/events?${qs.toString()}`, { cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchEvent(id: string): Promise<EventItem | null> {
+  const res = await fetch(`${API_BASE}/events/${id}`, { cache: "no-store" });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function createEvent(
+  data: {
+    title: string;
+    description: string;
+    event_date: string;
+    vehicle_type?: string;
+    difficulty?: string;
+    country: string;
+    region: string;
+    meeting_point_label?: string;
+    meeting_point_lat?: number | null;
+    meeting_point_lon?: number | null;
+  },
+  token: string
+): Promise<EventItem> {
+  const res = await fetch(`${API_BASE}/events`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "יצירת האירוע נכשלה"));
+  }
+  return res.json();
+}
+
+export async function deleteEvent(eventId: string, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/events/${eventId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("מחיקת האירוע נכשלה");
+}
+
+export async function toggleEventRSVP(eventId: string, token: string): Promise<{ attending: boolean }> {
+  const res = await fetch(`${API_BASE}/events/${eventId}/rsvp`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("הפעולה נכשלה");
+  return res.json();
+}
+
 export async function fetchNearbyStories(
   lat: number,
   lon: number,

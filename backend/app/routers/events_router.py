@@ -1,0 +1,181 @@
+from datetime import datetime, timedelta
+from typing import Optional, List
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
+
+from .. import models, schemas, auth, admin, locations
+from ..notifications import create_notification
+from ..database import get_db
+
+router = APIRouter(prefix="/events", tags=["events"])
+
+
+@router.post("", response_model=schemas.EventOut)
+def create_event(
+    payload: schemas.EventCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    title = payload.title.strip()
+    description = payload.description.strip()
+    if not title:
+        raise HTTPException(400, "יש למלא כותרת")
+    if len(description) < 10:
+        raise HTTPException(400, "יש למלא תיאור (לפחות כמה מילים)")
+    if payload.event_date < datetime.utcnow() - timedelta(hours=1):
+        raise HTTPException(400, "תאריך האירוע לא יכול להיות בעבר")
+
+    if not locations.is_valid_country(payload.country):
+        raise HTTPException(400, "מדינה לא תקינה")
+    if payload.country == locations.ISRAEL and not locations.is_valid_israel_region(payload.region):
+        raise HTTPException(400, "אזור לא תקין - יש לבחור מהרשימה")
+    if payload.country != locations.ISRAEL and not payload.region.strip():
+        raise HTTPException(400, "יש לציין שם מקום")
+
+    event = models.Event(
+        organizer_id=current_user.id,
+        title=title,
+        description=description,
+        event_date=payload.event_date,
+        vehicle_type=payload.vehicle_type,
+        difficulty=payload.difficulty,
+        country=payload.country,
+        region=payload.region.strip(),
+        meeting_point_label=(payload.meeting_point_label or "").strip() or None,
+        meeting_point_lat=payload.meeting_point_lat,
+        meeting_point_lon=payload.meeting_point_lon,
+    )
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    return _with_extras(event, db, current_user.id)
+
+
+@router.get("", response_model=List[schemas.EventOut])
+def list_events(
+    country: Optional[str] = None,
+    region: Optional[str] = None,
+    include_past: bool = False,
+    limit: int = 30,
+    offset: int = 0,
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
+    db: Session = Depends(get_db),
+):
+    limit = min(max(limit, 1), 50)
+    query = db.query(models.Event).options(joinedload(models.Event.organizer))
+
+    if not include_past:
+        query = query.filter(models.Event.event_date >= datetime.utcnow())
+    if country:
+        query = query.filter(models.Event.country == country)
+    if region:
+        query = query.filter(models.Event.region == region)
+
+    events = query.order_by(models.Event.event_date.asc()).offset(offset).limit(limit).all()
+    uid = current_user.id if current_user else None
+    return [_with_extras(e, db, uid) for e in events]
+
+
+@router.get("/{event_id}", response_model=schemas.EventOut)
+def get_event(
+    event_id: str,
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
+    db: Session = Depends(get_db),
+):
+    event = (
+        db.query(models.Event)
+        .options(joinedload(models.Event.organizer))
+        .filter(models.Event.id == event_id)
+        .first()
+    )
+    if not event:
+        raise HTTPException(404, "האירוע לא נמצא")
+    return _with_extras(event, db, current_user.id if current_user else None)
+
+
+@router.patch("/{event_id}", response_model=schemas.EventOut)
+def update_event(
+    event_id: str,
+    payload: schemas.EventUpdate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(models.Event).filter(models.Event.id == event_id).first()
+    if not event:
+        raise HTTPException(404, "האירוע לא נמצא")
+    if event.organizer_id != current_user.id and not admin.is_admin(current_user):
+        raise HTTPException(403, "אין לך הרשאה לערוך את האירוע הזה")
+
+    data = payload.dict(exclude_unset=True)
+    for field, value in data.items():
+        setattr(event, field, value)
+
+    db.commit()
+    db.refresh(event)
+    return _with_extras(event, db, current_user.id)
+
+
+@router.delete("/{event_id}")
+def delete_event(
+    event_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(models.Event).filter(models.Event.id == event_id).first()
+    if not event:
+        raise HTTPException(404, "האירוע לא נמצא")
+    if event.organizer_id != current_user.id and not admin.is_admin(current_user):
+        raise HTTPException(403, "אין לך הרשאה למחוק את האירוע הזה")
+    db.delete(event)
+    db.query(models.EventRSVP).filter(models.EventRSVP.event_id == event_id).delete()
+    db.commit()
+    return {"deleted": True}
+
+
+@router.post("/{event_id}/rsvp")
+def toggle_rsvp(
+    event_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(models.Event).filter(models.Event.id == event_id).first()
+    if not event:
+        raise HTTPException(404, "האירוע לא נמצא")
+
+    existing = (
+        db.query(models.EventRSVP)
+        .filter(models.EventRSVP.event_id == event_id, models.EventRSVP.user_id == current_user.id)
+        .first()
+    )
+    if existing:
+        db.delete(existing)
+        db.commit()
+        return {"attending": False}
+
+    db.add(models.EventRSVP(event_id=event_id, user_id=current_user.id))
+    create_notification(
+        db,
+        user_id=event.organizer_id,
+        actor_id=current_user.id,
+        notif_type=models.NotificationType.EVENT_RSVP,
+        story_id=None,
+        message=f'{current_user.display_name} מגיע/ה לאירוע "{event.title}"',
+    )
+    db.commit()
+    return {"attending": True}
+
+
+def _with_extras(event: models.Event, db: Session, current_user_id: Optional[str]):
+    count = db.query(func.count(models.EventRSVP.id)).filter(models.EventRSVP.event_id == event.id).scalar()
+    event.attendee_count = count or 0
+    event.is_attending = False
+    if current_user_id:
+        event.is_attending = (
+            db.query(models.EventRSVP)
+            .filter(models.EventRSVP.event_id == event.id, models.EventRSVP.user_id == current_user_id)
+            .first()
+            is not None
+        )
+    return event

@@ -82,6 +82,53 @@ class NotificationOut(BaseModel):
         from_attributes = True
 
 
+class EventCreate(BaseModel):
+    title: str
+    description: str
+    event_date: datetime
+    vehicle_type: Optional[VehicleType] = None
+    difficulty: Optional[Difficulty] = None
+    country: str
+    region: str
+    meeting_point_label: Optional[str] = None
+    meeting_point_lat: Optional[float] = None
+    meeting_point_lon: Optional[float] = None
+
+
+class EventUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    event_date: Optional[datetime] = None
+    vehicle_type: Optional[VehicleType] = None
+    difficulty: Optional[Difficulty] = None
+    country: Optional[str] = None
+    region: Optional[str] = None
+    meeting_point_label: Optional[str] = None
+    meeting_point_lat: Optional[float] = None
+    meeting_point_lon: Optional[float] = None
+
+
+class EventOut(BaseModel):
+    id: str
+    title: str
+    description: str
+    event_date: datetime
+    vehicle_type: Optional[str] = None
+    difficulty: Optional[str] = None
+    country: str
+    region: str
+    meeting_point_label: Optional[str] = None
+    meeting_point_lat: Optional[float] = None
+    meeting_point_lon: Optional[float] = None
+    created_at: datetime
+    organizer: UserOut
+    attendee_count: int = 0
+    is_attending: bool = False
+
+    class Config:
+        from_attributes = True
+
+
 class ContactMessageCreate(BaseModel):
     name: str
     email: EmailStr
