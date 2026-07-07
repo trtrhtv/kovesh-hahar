@@ -12,9 +12,17 @@ from . import storage
 
 app = FastAPI(title="כובש ההר - API")
 
+# CORS מוגבל לדומיינים ספציפיים - זו לא בחירה, זו דרישה טכנית: דפדפנים חוסמים
+# עוגיות (credentials) לגמרי כשה-CORS מוגדר ל-wildcard ("*"). מגדירים את הדומיין
+# האמיתי של הפרונט דרך CORS_ORIGINS (מחרוזת מופרדת בפסיקים, ב-Railway Variables),
+# ותומכים גם אוטומטית בכל preview deployment של Vercel (project-git-branch.vercel.app).
+_cors_origins_env = os.getenv("CORS_ORIGINS", "")
+_extra_origins = [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # יש לצמצם לדומיין האמיתי של הפרונט לפני production
+    allow_origins=["http://localhost:3000"] + _extra_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

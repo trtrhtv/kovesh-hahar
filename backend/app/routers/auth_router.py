@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import re
 import secrets
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
@@ -13,6 +13,24 @@ from ..email import send_password_reset_email
 from ..database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+COOKIE_MAX_AGE = 60 * 60 * 24 * 30  # 30 יום, תואם לתוקף ה-JWT עצמו
+
+
+def _set_auth_cookie(response: Response, token: str):
+    """קובע את הטוקן כ-httpOnly cookie - JavaScript בצד הלקוח לא יכול לגעת בו בכלל,
+    מה שמגן מפני גניבת טוקן דרך XSS. SameSite=None+Secure כי הפרונט (Vercel) וה-
+    backend (Railway) הם דומיינים שונים (cross-site), וזה דורש HTTPS - שני השירותים
+    כבר רצים על HTTPS כך שזה לא בעיה."""
+    response.set_cookie(
+        key=auth.COOKIE_NAME,
+        value=token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+    )
 
 
 def _slugify_username(text: str) -> str:
@@ -35,7 +53,7 @@ def _generate_unique_username(db: Session, display_name: str) -> str:
 
 
 @router.post("/register", response_model=schemas.Token)
-def register(payload: schemas.UserCreate, request: Request, db: Session = Depends(get_db)):
+def register(payload: schemas.UserCreate, request: Request, response: Response, db: Session = Depends(get_db)):
     check_rate_limit(request, "register", max_attempts=10, window_seconds=3600)
 
     if not payload.accepted_disclaimer:
@@ -71,11 +89,17 @@ def register(payload: schemas.UserCreate, request: Request, db: Session = Depend
     db.refresh(user)
 
     token = auth.create_access_token(user.id)
+    _set_auth_cookie(response, token)
     return schemas.Token(access_token=token)
 
 
 @router.post("/login", response_model=schemas.Token)
-def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(
+    request: Request,
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
     check_rate_limit(request, "login", max_attempts=8, window_seconds=900)
 
     identifier = form_data.username.strip()
@@ -97,7 +121,16 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
             detail="פרטי ההתחברות שגויים",
         )
     token = auth.create_access_token(user.id)
+    _set_auth_cookie(response, token)
     return schemas.Token(access_token=token)
+
+
+@router.post("/logout")
+def logout(response: Response):
+    """מנקה את ה-cookie. קריאה זולה - לא דורשת להיות מחובר, כדי שגם אם ה-token
+    כבר לא תקין (פג תוקף וכו') עדיין אפשר "להתנתק" בלי שגיאה."""
+    response.delete_cookie(key=auth.COOKIE_NAME, path="/")
+    return {"message": "התנתקת בהצלחה"}
 
 
 @router.post("/forgot-password")

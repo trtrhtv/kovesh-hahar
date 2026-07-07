@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -14,17 +14,11 @@ from . import models
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 30
+COOKIE_NAME = "access_token"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-
-def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+# auto_error=False בשניהם - כי אנחנו בודקים קוקי או header, לא רק אחד מהם
+_header_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 
 def create_access_token(user_id: str) -> str:
@@ -32,20 +26,40 @@ def create_access_token(user_id: str) -> str:
     return jwt.encode({"sub": user_id, "exp": expire}, SECRET_KEY, algorithm=ALGORITHM)
 
 
+def _decode_user_id(token: str) -> Optional[str]:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload.get("sub")
+    except JWTError:
+        return None
+
+
+def _resolve_token(
+    cookie_token: Optional[str],
+    header_token: Optional[str],
+) -> Optional[str]:
+    """קוקי (httpOnly, השיטה החדשה והבטוחה יותר) קודם - אם אין, נופלים חזרה
+    ל-Authorization header (השיטה הישנה) כדי לא לשבור קריאות קיימות בפרונט
+    שעדיין לא עברו למנגנון החדש."""
+    return cookie_token or header_token
+
+
 def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    cookie_token: Optional[str] = Cookie(default=None, alias=COOKIE_NAME),
+    header_token: Optional[str] = Depends(_header_scheme),
+    db: Session = Depends(get_db),
 ) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="פרטי ההתחברות לא תקינים",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: Optional[str] = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except JWTError:
+    token = _resolve_token(cookie_token, header_token)
+    if not token:
+        raise credentials_exception
+
+    user_id = _decode_user_id(token)
+    if not user_id:
         raise credentials_exception
 
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -54,21 +68,25 @@ def get_current_user(
     return user
 
 
-optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
-
-
 def get_current_user_optional(
-    token: Optional[str] = Depends(optional_oauth2_scheme), db: Session = Depends(get_db)
+    cookie_token: Optional[str] = Cookie(default=None, alias=COOKIE_NAME),
+    header_token: Optional[str] = Depends(_header_scheme),
+    db: Session = Depends(get_db),
 ) -> Optional[models.User]:
     """כמו get_current_user, אבל מחזיר None במקום לזרוק שגיאה כשאין token - לעמודים ציבוריים
     שרוצים לדעת אם יש משתמש מחובר (למשל: האם אני כבר רשום לאירוע הזה)"""
+    token = _resolve_token(cookie_token, header_token)
     if not token:
         return None
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: Optional[str] = payload.get("sub")
-        if not user_id:
-            return None
-    except JWTError:
+    user_id = _decode_user_id(token)
+    if not user_id:
         return None
     return db.query(models.User).filter(models.User.id == user_id).first()
+
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)

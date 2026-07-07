@@ -28,7 +28,7 @@ type AuthContextType = {
     phoneNumber?: string,
     username?: string
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
 
@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchMe = useCallback(async (t: string) => {
     const res = await fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${t}` },
+      credentials: "include",
     });
     if (res.ok) {
       setUser(await res.json());
@@ -70,12 +71,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form,
+      credentials: "include", // מקבלים את ה-httpOnly cookie מהשרת
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.detail || "ההתחברות נכשלה");
     }
     const data = await res.json();
+    // עדיין שומרים גם ב-localStorage לתאימות לאחור עם קריאות API קיימות שמצרפות
+    // Authorization header ידנית - השרת תומך בשתי השיטות במקביל (ראה auth.py).
     localStorage.setItem(TOKEN_KEY, data.access_token);
     setToken(data.access_token);
     await fetchMe(data.access_token);
@@ -103,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         phone_number: phoneNumber || undefined,
         username: username || undefined,
       }),
+      credentials: "include",
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -114,7 +119,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchMe(data.access_token);
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, { method: "POST", credentials: "include" });
+    } catch {
+      // גם אם קריאת הרשת נכשלת, עדיין מנקים את המצב המקומי למטה
+    }
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
