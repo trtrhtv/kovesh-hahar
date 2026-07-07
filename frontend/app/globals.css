@@ -95,7 +95,7 @@ body {
   .switch-btn {
     background-color: rgb(var(--bg-surface-rgb));
     border: 1px solid rgb(var(--border-rgb));
-    border-radius: 3px;
+    border-radius: 0;
     box-shadow: 0 2px 0 rgb(var(--border-rgb));
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
