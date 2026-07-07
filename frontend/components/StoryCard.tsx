@@ -14,7 +14,7 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
   return (
     <Link
       href={`/stories/${story.id}`}
-      className="group grid grid-cols-[1fr_auto] gap-0 bg-sand border border-char/15 hover:border-char/30 transition-colors"
+      className="group grid grid-cols-[1fr_auto] gap-0 bg-sand border border-char/15 hover:border-char/30 hover:shadow-[0_4px_20px_rgba(35,32,27,0.08)] transition-all"
     >
       {/* תוכן */}
       <div className="p-5 flex flex-col justify-between">
@@ -73,16 +73,19 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
         </div>
       </div>
 
-      {/* תמונה */}
+      {/* תמונה + פרפורציה בסגנון כרטיס ראלי */}
       {story.cover_photo_url && (
-        <div className="relative w-40 md:w-56 shrink-0">
-          <Image
-            src={story.cover_photo_url}
-            alt={story.title}
-            fill
-            sizes="224px"
-            className="object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-300"
-          />
+        <div className="flex shrink-0">
+          <div className="w-2 ticket-perforation" />
+          <div className="relative w-40 md:w-56 shrink-0">
+            <Image
+              src={story.cover_photo_url}
+              alt={story.title}
+              fill
+              sizes="224px"
+              className="object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-300"
+            />
+          </div>
         </div>
       )}
     </Link>

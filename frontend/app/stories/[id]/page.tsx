@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { fetchStory } from "@/lib/api";
@@ -28,7 +29,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
       <header className="border-b border-char/15">
         <div className="max-w-3xl mx-auto px-5 py-4">
           <Link href="/" className="font-black text-lg tracking-tight">
-            כובש ההר
+            <Logo />
           </Link>
         </div>
       </header>

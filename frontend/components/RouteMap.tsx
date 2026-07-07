@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { stripPoliticalLayers } from "@/lib/mapUtils";
 
 // OpenFreeMap - שירות מפות חינמי לגמרי, בלי מפתח API, בלי הרשמה, בלי הגבלת שימוש.
 // מבוסס נתוני OpenStreetMap. ראה https://openfreemap.org
@@ -46,6 +47,8 @@ export default function RouteMap({
       map.addControl(new maplibregl.default.NavigationControl(), "top-left");
 
       map.on("load", () => {
+        stripPoliticalLayers(map);
+
         map.addSource("route", {
           type: "geojson",
           data: {

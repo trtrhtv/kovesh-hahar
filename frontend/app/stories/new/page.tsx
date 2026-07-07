@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/lib/auth";
 import { createStory } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
@@ -57,8 +58,8 @@ function AuthGate({
 
   return (
     <main className="max-w-md mx-auto px-5 py-24">
-      <Link href="/" className="font-black text-lg tracking-tight block mb-8">
-        כובש ההר
+      <Link href="/" className="block mb-8">
+        <Logo />
       </Link>
       <h1 className="text-2xl font-black mb-1">
         {mode === "login" ? "התחברות" : "הרשמה"}
@@ -190,8 +191,8 @@ function StoryForm({ token }: { token: string }) {
 
   return (
     <main className="max-w-2xl mx-auto px-5 py-12">
-      <Link href="/" className="font-black text-lg tracking-tight block mb-8">
-        כובש ההר
+      <Link href="/" className="block mb-8">
+        <Logo />
       </Link>
       <h1 className="text-3xl font-black mb-1">שתף סיפור נסיעה</h1>
       <p className="text-char/60 mb-8 text-sm">

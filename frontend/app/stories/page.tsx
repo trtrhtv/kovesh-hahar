@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { Fragment } from "react";
+import Logo from "@/components/Logo";
 import StoryCard from "@/components/StoryCard";
 import FilterSidebar from "@/components/FilterSidebar";
 import OverviewMap from "@/components/OverviewMap";
-import AdBanner from "@/components/AdBanner";
 import { fetchStories } from "@/lib/api";
 
 export default async function StoriesPage({
@@ -33,7 +32,7 @@ export default async function StoriesPage({
       <header className="border-b border-char/15">
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
           <Link href="/" className="font-black text-lg tracking-tight">
-            כובש ההר
+            <Logo />
           </Link>
           <Link
             href="/stories/new"
@@ -61,20 +60,13 @@ export default async function StoriesPage({
 
           <OverviewMap stories={stories} className="w-full h-72 mb-8 border border-char/15" />
 
-          <AdBanner variant="horizontal" />
-
-          <div className="grid gap-4 mt-6">
+          <div className="grid gap-4">
             {stories.length === 0 ? (
               <div className="border border-dashed border-char/30 p-12 text-center text-char/60">
                 לא נמצאו סיפורים שתואמים לסינון הזה.
               </div>
             ) : (
-              stories.map((story, i) => (
-                <Fragment key={story.id}>
-                  <StoryCard story={story} />
-                  {i === 4 && <AdBanner variant="horizontal" />}
-                </Fragment>
-              ))
+              stories.map((story) => <StoryCard key={story.id} story={story} />)
             )}
           </div>
 

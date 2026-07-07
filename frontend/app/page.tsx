@@ -1,7 +1,7 @@
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
-import AdBanner from "@/components/AdBanner";
 import { fetchStories } from "@/lib/api";
 import { RIDE_STYLE_LABELS } from "@/lib/labels";
 
@@ -13,7 +13,7 @@ export default async function HomePage() {
       {/* ניווט עליון */}
       <header className="border-b border-char/15">
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
-          <span className="font-black text-lg tracking-tight">כובש ההר</span>
+          <Logo />
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/stories" className="hover:text-oxide transition-colors">
               כל הסיפורים
@@ -29,20 +29,40 @@ export default async function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-5 pt-16 pb-12">
-        <div className="font-mono text-xs text-trail tracking-widest mb-4">
+      <section className="relative overflow-hidden max-w-5xl mx-auto px-5 pt-16 pb-12">
+        <svg
+          className="absolute -left-24 -top-16 w-[520px] h-[520px] opacity-[0.12] pointer-events-none"
+          viewBox="0 0 400 400"
+          aria-hidden="true"
+        >
+          {[60, 95, 130, 165, 200, 235].map((r, i) => (
+            <ellipse
+              key={r}
+              cx="200"
+              cy="220"
+              rx={r * 1.3}
+              ry={r}
+              fill="none"
+              stroke={i % 2 === 0 ? "#A8462E" : "#23201B"}
+              strokeWidth="1.5"
+              transform={`rotate(${i * 3} 200 220)`}
+            />
+          ))}
+        </svg>
+
+        <div className="relative font-mono text-xs text-trail tracking-widest mb-4">
           ROADBOOK · אנדורו · סינגלים · מוטוקרוס · אדוונצ'ר
         </div>
-        <h1 className="text-5xl md:text-7xl font-black leading-[0.95] max-w-3xl">
+        <h1 className="relative text-5xl md:text-7xl font-black leading-[0.95] max-w-3xl">
           כל רכיבה משאירה
           <br />
           <span className="text-oxide">קו על המפה.</span>
         </h1>
-        <p className="mt-6 text-lg text-char/80 max-w-xl leading-relaxed">
+        <p className="relative mt-6 text-lg text-char/80 max-w-xl leading-relaxed">
           מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
           ועדכוני שטח בזמן אמת. בלי מנויים.
         </p>
-        <div className="mt-8 flex gap-3">
+        <div className="relative mt-8 flex gap-3">
           <Link
             href="/stories/new"
             className="bg-oxide text-sand px-6 py-3 font-bold hover:bg-oxideDark transition-colors"
@@ -78,10 +98,6 @@ export default async function HomePage() {
             </Link>
           ))}
         </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-5 pb-4">
-        <AdBanner variant="horizontal" />
       </section>
 
       {/* פיד סיפורים */}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { stripPoliticalLayers } from "@/lib/mapUtils";
 import type { StoryListItem } from "@/lib/api";
 import { DIFFICULTY_COLORS } from "@/lib/labels";
 
@@ -39,6 +40,8 @@ export default function OverviewMap({
       map.addControl(new maplibregl.default.NavigationControl(), "top-left");
 
       map.on("load", () => {
+        stripPoliticalLayers(map);
+
         if (!pinned.length) return;
 
         pinned.forEach((story) => {
