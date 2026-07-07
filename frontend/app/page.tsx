@@ -22,6 +22,9 @@ export default async function HomePage() {
             <Link href="/stories" className="hover:text-moto transition-colors">
               כל הסיפורים
             </Link>
+            <Link href="/settings" className="hover:text-moto transition-colors">
+              הגדרות
+            </Link>
             <Link
               href="/stories/new"
               className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"

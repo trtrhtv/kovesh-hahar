@@ -13,13 +13,33 @@ class UserCreate(BaseModel):
     phone_number: Optional[str] = None
 
 
+class BikeCreate(BaseModel):
+    model_name: str
+    vehicle_type: Optional[VehicleType] = None
+
+
+class BikeOut(BaseModel):
+    id: str
+    model_name: str
+    vehicle_type: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserUpdate(BaseModel):
+    display_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    home_region: Optional[str] = None
+
+
 class UserOut(BaseModel):
     id: str
     display_name: str
     avatar_url: Optional[str] = None
-    bike_model: Optional[str] = None
     home_region: Optional[str] = None
     phone_number: Optional[str] = None
+    bikes: List[BikeOut] = []
 
     class Config:
         from_attributes = True

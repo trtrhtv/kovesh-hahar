@@ -50,6 +50,70 @@ def get_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
 
 
+@router.patch("/me", response_model=schemas.UserOut)
+def update_me(
+    payload: schemas.UserUpdate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    if payload.display_name is not None:
+        name = payload.display_name.strip()
+        if not name:
+            raise HTTPException(400, "שם תצוגה לא יכול להיות ריק")
+        current_user.display_name = name
+    if payload.phone_number is not None:
+        current_user.phone_number = payload.phone_number.strip() or None
+    if payload.home_region is not None:
+        current_user.home_region = payload.home_region.strip() or None
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.post("/me/bikes", response_model=schemas.BikeOut)
+def add_bike(
+    payload: schemas.BikeCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    name = payload.model_name.strip()
+    if not name:
+        raise HTTPException(400, "יש למלא דגם אופנוע")
+
+    existing_count = db.query(models.UserBike).filter(models.UserBike.user_id == current_user.id).count()
+    if existing_count >= 10:
+        raise HTTPException(400, "מקסימום 10 אופנועים לפרופיל")
+
+    bike = models.UserBike(
+        user_id=current_user.id,
+        model_name=name,
+        vehicle_type=payload.vehicle_type.value if payload.vehicle_type else None,
+    )
+    db.add(bike)
+    db.commit()
+    db.refresh(bike)
+    return bike
+
+
+@router.delete("/me/bikes/{bike_id}")
+def delete_bike(
+    bike_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    bike = (
+        db.query(models.UserBike)
+        .filter(models.UserBike.id == bike_id, models.UserBike.user_id == current_user.id)
+        .first()
+    )
+    if not bike:
+        raise HTTPException(404, "האופנוע לא נמצא")
+    db.delete(bike)
+    db.commit()
+    return {"deleted": True}
+
+
 @router.get("/is-admin")
 def check_is_admin(current_user: models.User = Depends(auth.get_current_user)):
     return {"is_admin": admin.is_admin(current_user)}

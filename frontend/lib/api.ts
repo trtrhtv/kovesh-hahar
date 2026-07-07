@@ -50,19 +50,62 @@ export type TrailUpdate = {
   author: Author;
 };
 
+export type Bike = { id: string; model_name: string; vehicle_type?: string };
+
 export type UserProfile = {
   id: string;
   display_name: string;
   avatar_url?: string;
-  bike_model?: string;
   home_region?: string;
   phone_number?: string;
+  bikes: Bike[];
 };
 
 export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
   const res = await fetch(`${API_BASE}/users/${userId}`, { next: { revalidate: 60 } });
   if (!res.ok) return null;
   return res.json();
+}
+
+export async function updateProfile(
+  data: { display_name?: string; phone_number?: string; home_region?: string },
+  token: string
+): Promise<UserProfile> {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "עדכון הפרופיל נכשל");
+  }
+  return res.json();
+}
+
+export async function addBike(
+  modelName: string,
+  vehicleType: string | undefined,
+  token: string
+): Promise<Bike> {
+  const res = await fetch(`${API_BASE}/auth/me/bikes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ model_name: modelName, vehicle_type: vehicleType || undefined }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "הוספת האופנוע נכשלה");
+  }
+  return res.json();
+}
+
+export async function deleteBike(bikeId: string, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/auth/me/bikes/${bikeId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("מחיקת האופנוע נכשלה");
 }
 
 export async function fetchStories(params?: {

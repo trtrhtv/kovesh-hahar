@@ -57,13 +57,26 @@ class User(Base):
     hashed_password = Column(String, nullable=True)  # ריק אם נכנס עם גוגל
     display_name = Column(String, nullable=False)
     avatar_url = Column(String, nullable=True)
-    bike_model = Column(String, nullable=True)  # "KTM 500 EXC" וכו'
+    bike_model = Column(String, nullable=True)  # legacy - נשמר לתאימות, לא בשימוש בממשק החדש
     home_region = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)  # לכפתור יצירת קשר ב-WhatsApp, לא חובה
     accepted_disclaimer_at = Column(DateTime, nullable=True)  # מתי אישר את הצהרת האחריות
     created_at = Column(DateTime, default=datetime.utcnow)
 
     stories = relationship("Story", back_populates="author", cascade="all, delete-orphan")
+    bikes = relationship("UserBike", back_populates="owner", cascade="all, delete-orphan")
+
+
+class UserBike(Base):
+    """אופנוע אחד מתוך כמה שרוכב יכול להחזיק - לא כל רוכב מוגבל לכלי אחד"""
+    __tablename__ = "user_bikes"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    model_name = Column(String, nullable=False)  # למשל "KTM 500 EXC-F"
+    vehicle_type = Column(String, nullable=True)  # אחת הקטגוריות הקיימות, לא חובה
+
+    owner = relationship("User", back_populates="bikes")
 
 
 class ParkingSecurity(str, enum.Enum):

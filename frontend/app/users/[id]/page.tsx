@@ -33,10 +33,21 @@ export default async function UserProfilePage({ params }: { params: { id: string
             <div className="min-w-0">
               <h1 className="text-2xl font-black text-ink truncate">{profile.display_name}</h1>
               <div className="text-sm text-textDim mt-1 flex flex-wrap gap-x-3">
-                {profile.bike_model && <span>🏍️ {profile.bike_model}</span>}
                 {profile.home_region && <span>📍 {profile.home_region}</span>}
                 <span>{stories.length} סיפורים</span>
               </div>
+              {profile.bikes && profile.bikes.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {profile.bikes.map((bike) => (
+                    <span
+                      key={bike.id}
+                      className="text-[11px] border border-edge px-2 py-1 text-textDim"
+                    >
+                      🏍️ {bike.model_name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

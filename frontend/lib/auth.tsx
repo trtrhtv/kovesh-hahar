@@ -9,9 +9,9 @@ export type CurrentUser = {
   id: string;
   display_name: string;
   avatar_url?: string;
-  bike_model?: string;
   home_region?: string;
   phone_number?: string;
+  bikes?: { id: string; model_name: string; vehicle_type?: string }[];
 };
 
 type AuthContextType = {
@@ -27,6 +27,7 @@ type AuthContextType = {
     phoneNumber?: string
   ) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -115,8 +116,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }
 
+  async function refreshUser() {
+    if (token) await fetchMe(token);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
