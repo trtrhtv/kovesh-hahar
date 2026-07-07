@@ -4,6 +4,7 @@ import secrets
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, func
 
 from .. import models, schemas, auth, admin
 from ..phone import is_valid_phone
@@ -72,12 +73,28 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     identifier = form_data.username.strip()
-    # מתחברים או עם אימייל מלא או עם שם משתמש - לא צריך להקליד @ וכו' כל פעם
     user = (
         db.query(models.User)
-        .filter((models.User.email == identifier) | (models.User.username == identifier.lower()))
+        .filter(
+            or_(
+                func.lower(models.User.email) == identifier.lower(),
+                models.User.username == identifier.lower(),
+            )
+        )
         .first()
     )
+
+    # לוג זמני לאבחון - יוסר ברגע שנפתור את זה, אבל עכשיו נראה בדיוק מה קורה בלוגים של Railway
+    if not user:
+        print(f"[LOGIN DEBUG] לא נמצא אף משתמש עבור הזיהוי: '{identifier}' (lower: '{identifier.lower()}')")
+    else:
+        print(
+            f"[LOGIN DEBUG] נמצא משתמש: email='{user.email}' username='{user.username}' "
+            f"has_password={bool(user.hashed_password)}"
+        )
+        if user.hashed_password:
+            print(f"[LOGIN DEBUG] בדיקת סיסמה: {auth.verify_password(form_data.password, user.hashed_password)}")
+
     if not user or not user.hashed_password or not auth.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
