@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
-from .. import models, schemas, auth, storage, gpx_utils
+from .. import models, schemas, auth, storage, gpx_utils, locations
 from ..database import get_db
 
 router = APIRouter(prefix="/stories", tags=["stories"])
@@ -16,6 +16,7 @@ async def create_story(
     body: str = Form(...),
     ride_type: models.RideType = Form(...),
     difficulty: models.Difficulty = Form(...),
+    country: str = Form(...),
     region: str = Form(...),
     gpx_file: Optional[UploadFile] = File(None),
     photos: List[UploadFile] = File(default=[]),
@@ -25,13 +26,21 @@ async def create_story(
     if len(photos) > storage.MAX_PHOTOS_PER_STORY:
         raise HTTPException(400, f"מקסימום {storage.MAX_PHOTOS_PER_STORY} תמונות לסיפור")
 
+    if not locations.is_valid_country(country):
+        raise HTTPException(400, "מדינה לא תקינה")
+    if country == locations.ISRAEL and not locations.is_valid_israel_region(region):
+        raise HTTPException(400, "אזור לא תקין - יש לבחור מהרשימה")
+    if country != locations.ISRAEL and not region.strip():
+        raise HTTPException(400, "יש לציין שם מקום")
+
     story = models.Story(
         author_id=current_user.id,
         title=title,
         body=body,
         ride_type=ride_type,
         difficulty=difficulty,
-        region=region,
+        country=country,
+        region=region.strip(),
     )
 
     # פענוח GPX אם צורף - זה מה שמפיק את המרחק, הטיפוס, וקו החתימה
@@ -76,6 +85,7 @@ async def create_story(
 
 @router.get("", response_model=List[schemas.StoryListItem])
 def list_stories(
+    country: Optional[str] = None,
     region: Optional[str] = None,
     ride_type: Optional[models.RideType] = None,
     difficulty: Optional[models.Difficulty] = None,
@@ -84,10 +94,13 @@ def list_stories(
     offset: int = 0,
     db: Session = Depends(get_db),
 ):
+    limit = min(max(limit, 1), 50)  # תקרה כדי שאף אחד לא יבקש 10,000 שורות בבת אחת
     query = db.query(models.Story).options(joinedload(models.Story.author)).filter(
         models.Story.is_published == True  # noqa: E712
     )
 
+    if country:
+        query = query.filter(models.Story.country == country)
     if region:
         query = query.filter(models.Story.region == region)
     if ride_type:
@@ -143,6 +156,10 @@ def toggle_like(
 
 
 def _with_like_count(story: models.Story, db: Session):
-    count = db.query(func.count(models.Like.id)).filter(models.Like.story_id == story.id).scalar()
-    story.like_count = count or 0
+    like_count = db.query(func.count(models.Like.id)).filter(models.Like.story_id == story.id).scalar()
+    comment_count = (
+        db.query(func.count(models.Comment.id)).filter(models.Comment.story_id == story.id).scalar()
+    )
+    story.like_count = like_count or 0
+    story.comment_count = comment_count or 0
     return story

@@ -1,0 +1,99 @@
+import Link from "next/link";
+import StoryCard from "@/components/StoryCard";
+import FilterSidebar from "@/components/FilterSidebar";
+import { fetchStories } from "@/lib/api";
+
+export default async function StoriesPage({
+  searchParams,
+}: {
+  searchParams: {
+    country?: string;
+    region?: string;
+    ride_type?: string;
+    difficulty?: string;
+    search?: string;
+    offset?: string;
+  };
+}) {
+  const offset = Number(searchParams.offset || 0);
+  const limit = 20;
+  const stories = await fetchStories({ ...searchParams, limit, offset });
+
+  const activeFilters = Object.entries(searchParams).filter(
+    ([k, v]) => k !== "offset" && !!v
+  );
+
+  return (
+    <main>
+      <header className="border-b border-char/15">
+        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
+          <Link href="/" className="font-black text-lg tracking-tight">
+            סיפור שביל
+          </Link>
+          <Link
+            href="/stories/new"
+            className="bg-oxide text-sand px-4 py-2 font-bold hover:bg-oxideDark transition-colors text-sm"
+          >
+            העלה סיפור
+          </Link>
+        </div>
+      </header>
+
+      <div className="max-w-5xl mx-auto px-5 py-10 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-10">
+        <aside>
+          <FilterSidebar defaults={searchParams} />
+        </aside>
+
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-black">כל הסיפורים</h1>
+            {activeFilters.length > 0 && (
+              <Link href="/stories" className="text-sm text-oxide hover:underline">
+                נקה סינון
+              </Link>
+            )}
+          </div>
+
+          {stories.length === 0 ? (
+            <div className="border border-dashed border-char/30 p-12 text-center text-char/60">
+              לא נמצאו סיפורים שתואמים לסינון הזה.
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {stories.map((story) => (
+                <StoryCard key={story.id} story={story} />
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between mt-8 text-sm">
+            {offset > 0 ? (
+              <Link
+                href={`/stories?${new URLSearchParams({
+                  ...searchParams,
+                  offset: String(Math.max(0, offset - limit)),
+                }).toString()}`}
+                className="border border-char/25 px-4 py-2 hover:border-oxide"
+              >
+                ← הקודמים
+              </Link>
+            ) : (
+              <span />
+            )}
+            {stories.length === limit && (
+              <Link
+                href={`/stories?${new URLSearchParams({
+                  ...searchParams,
+                  offset: String(offset + limit),
+                }).toString()}`}
+                className="border border-char/25 px-4 py-2 hover:border-oxide"
+              >
+                הבאים →
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

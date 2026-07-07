@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import engine, Base
-from .routers import auth_router, stories_router
+from .routers import auth_router, stories_router, comments_router
 
 # יוצר את הטבלאות אם לא קיימות. לפרודקשן אמיתי כדאי לעבור ל-alembic migrations,
 # אבל לשלב ה-MVP זה מספיק פשוט ועובד.
@@ -20,6 +20,7 @@ app.add_middleware(
 
 app.include_router(auth_router.router)
 app.include_router(stories_router.router)
+app.include_router(comments_router.router)
 
 
 @app.get("/")

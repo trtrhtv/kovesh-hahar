@@ -1,0 +1,315 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth";
+import { createStory } from "@/lib/api";
+import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
+import { RIDE_TYPE_LABELS, DIFFICULTY_LABELS } from "@/lib/labels";
+
+const MAX_PHOTOS = 10;
+
+export default function NewStoryPage() {
+  const { user, token, loading, login, register } = useAuth();
+
+  if (loading) {
+    return <div className="max-w-2xl mx-auto px-5 py-24 text-center text-char/60">טוען...</div>;
+  }
+
+  if (!user || !token) {
+    return <AuthGate onLogin={login} onRegister={register} />;
+  }
+
+  return <StoryForm token={token} />;
+}
+
+function AuthGate({
+  onLogin,
+  onRegister,
+}: {
+  onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: (email: string, password: string, displayName: string) => Promise<void>;
+}) {
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      if (mode === "login") {
+        await onLogin(email, password);
+      } else {
+        await onRegister(email, password, displayName);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="max-w-md mx-auto px-5 py-24">
+      <Link href="/" className="font-black text-lg tracking-tight block mb-8">
+        סיפור שביל
+      </Link>
+      <h1 className="text-2xl font-black mb-1">
+        {mode === "login" ? "התחברות" : "הרשמה"}
+      </h1>
+      <p className="text-char/60 mb-6 text-sm">כדי לשתף סיפור נסיעה, צריך קודם חשבון.</p>
+
+      <form onSubmit={submit} className="flex flex-col gap-4">
+        {mode === "register" && (
+          <input
+            type="text"
+            placeholder="שם תצוגה"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            required
+            className="border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+          />
+        )}
+        <input
+          type="email"
+          placeholder="אימייל"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+        />
+        <input
+          type="password"
+          placeholder="סיסמה"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={8}
+          className="border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+        />
+
+        {error && <p className="text-oxide text-sm">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="bg-oxide text-sand py-3 font-bold hover:bg-oxideDark transition-colors disabled:opacity-50"
+        >
+          {busy ? "רגע..." : mode === "login" ? "התחבר" : "הרשם"}
+        </button>
+      </form>
+
+      <button
+        onClick={() => setMode(mode === "login" ? "register" : "login")}
+        className="text-sm text-oxide hover:underline mt-4"
+      >
+        {mode === "login" ? "אין לך חשבון? הרשם" : "כבר יש לך חשבון? התחבר"}
+      </button>
+    </main>
+  );
+}
+
+function StoryForm({ token }: { token: string }) {
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [rideType, setRideType] = useState("hard_enduro");
+  const [difficulty, setDifficulty] = useState("moderate");
+  const [country, setCountry] = useState(ISRAEL);
+  const [region, setRegion] = useState("");
+  const [gpxFile, setGpxFile] = useState<File | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (files.length > MAX_PHOTOS) {
+      setError(`אפשר להעלות עד ${MAX_PHOTOS} תמונות`);
+      return;
+    }
+    setError(null);
+    setPhotos(files);
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (!region.trim()) {
+      setError(country === ISRAEL ? "יש לבחור אזור" : "יש לציין שם מקום");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const story = await createStory(
+        { title, body, ride_type: rideType, difficulty, country, region, gpxFile, photos },
+        token
+      );
+      router.push(`/stories/${story.id}`);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="max-w-2xl mx-auto px-5 py-12">
+      <Link href="/" className="font-black text-lg tracking-tight block mb-8">
+        סיפור שביל
+      </Link>
+      <h1 className="text-3xl font-black mb-1">שתף סיפור נסיעה</h1>
+      <p className="text-char/60 mb-8 text-sm">
+        קובץ GPX מומלץ מאוד - הוא זה שמפיק את המרחק, הטיפוס, ואת קו החתימה של הסיפור.
+      </p>
+
+      <form onSubmit={submit} className="flex flex-col gap-5">
+        <Field label="כותרת">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            maxLength={120}
+            placeholder="לדוגמה: מכתש רמון בשקיעה"
+            className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+          />
+        </Field>
+
+        <Field label="הסיפור">
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            required
+            rows={8}
+            placeholder="איך הייתה הרכיבה, מה כדאי לדעת לפני שיוצאים, אתגרים בדרך..."
+            className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none resize-y"
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="סוג רכיבה">
+            <select
+              value={rideType}
+              onChange={(e) => setRideType(e.target.value)}
+              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            >
+              {Object.entries(RIDE_TYPE_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="רמת קושי">
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            >
+              {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="מדינה">
+            <select
+              value={country}
+              onChange={(e) => {
+                setCountry(e.target.value);
+                setRegion("");
+              }}
+              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label={country === ISRAEL ? "אזור" : "שם מקום"}>
+            {country === ISRAEL ? (
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              >
+                <option value="">בחר אזור...</option>
+                {ISRAEL_REGIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                placeholder="עיר / אזור"
+                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              />
+            )}
+          </Field>
+        </div>
+
+        <Field label="קובץ GPX (לא חובה, אבל ממש מומלץ)">
+          <input
+            type="file"
+            accept=".gpx"
+            onChange={(e) => setGpxFile(e.target.files?.[0] || null)}
+            className="w-full text-sm"
+          />
+        </Field>
+
+        <Field label={`תמונות (עד ${MAX_PHOTOS})`}>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={handlePhotos}
+            className="w-full text-sm"
+          />
+          {photos.length > 0 && (
+            <p className="text-xs text-char/60 mt-1">{photos.length} תמונות נבחרו</p>
+          )}
+        </Field>
+
+        {error && <p className="text-oxide text-sm">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="bg-oxide text-sand py-3 font-bold hover:bg-oxideDark transition-colors disabled:opacity-50"
+        >
+          {busy ? "מעלה..." : "פרסם סיפור"}
+        </button>
+      </form>
+    </main>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">{label}</span>
+      {children}
+    </label>
+  );
+}

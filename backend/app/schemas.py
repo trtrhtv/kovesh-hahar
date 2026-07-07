@@ -32,7 +32,22 @@ class StoryCreate(BaseModel):
     body: str
     ride_type: RideType
     difficulty: Difficulty
+    country: str
     region: str
+
+
+class CommentCreate(BaseModel):
+    body: str
+
+
+class CommentOut(BaseModel):
+    id: str
+    body: str
+    created_at: datetime
+    author: UserOut
+
+    class Config:
+        from_attributes = True
 
 
 class PhotoOut(BaseModel):
@@ -50,6 +65,7 @@ class StoryOut(BaseModel):
     body: str
     ride_type: RideType
     difficulty: Difficulty
+    country: str
     region: str
     distance_km: Optional[float] = None
     elevation_gain_m: Optional[float] = None
@@ -61,6 +77,7 @@ class StoryOut(BaseModel):
     author: UserOut
     photos: List[PhotoOut] = []
     like_count: int = 0
+    comment_count: int = 0
 
     class Config:
         from_attributes = True
@@ -72,6 +89,7 @@ class StoryListItem(BaseModel):
     title: str
     ride_type: RideType
     difficulty: Difficulty
+    country: str
     region: str
     distance_km: Optional[float] = None
     elevation_gain_m: Optional[float] = None
@@ -80,6 +98,7 @@ class StoryListItem(BaseModel):
     created_at: datetime
     author: UserOut
     like_count: int = 0
+    comment_count: int = 0
 
     class Config:
         from_attributes = True

@@ -20,7 +20,9 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
       <div className="p-5 flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-trail mb-2">
-            <span>{story.region}</span>
+            <span>
+              {story.country !== "ישראל" ? `${story.region}, ${story.country}` : story.region}
+            </span>
             <span>·</span>
             <span>{RIDE_TYPE_LABELS[story.ride_type] || story.ride_type}</span>
           </div>
@@ -63,7 +65,9 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
 
         <div className="mt-3 flex items-center justify-between text-xs text-char/60">
           <span>{story.author.display_name}</span>
-          <span>{story.like_count} לייקים</span>
+          <span>
+            {story.like_count} לייקים · {story.comment_count} תגובות
+          </span>
         </div>
       </div>
 

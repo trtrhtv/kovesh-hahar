@@ -53,9 +53,10 @@ class Story(Base):
 
     title = Column(String, nullable=False)
     body = Column(Text, nullable=False)
-    ride_type = Column(Enum(RideType), nullable=False)
-    difficulty = Column(Enum(Difficulty), nullable=False)
-    region = Column(String, nullable=False)  # למשל "רמת הנגב", "הגליל העליון"
+    ride_type = Column(Enum(RideType), nullable=False, index=True)
+    difficulty = Column(Enum(Difficulty), nullable=False, index=True)
+    country = Column(String, nullable=False, default="ישראל", index=True)
+    region = Column(String, nullable=False, index=True)  # אזור מוגדר (ישראל) או שם מקום חופשי (חו"ל)
 
     # נתונים שנגזרים אוטומטית מקובץ ה-GPX בעת ההעלאה
     gpx_url = Column(String, nullable=True)          # קובץ ה-GPX המקורי ב-R2
@@ -66,9 +67,9 @@ class Story(Base):
     start_lon = Column(Float, nullable=True)
 
     cover_photo_url = Column(String, nullable=True)
-    is_published = Column(Boolean, default=True)
+    is_published = Column(Boolean, default=True, index=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     author = relationship("User", back_populates="stories")
     photos = relationship("StoryPhoto", back_populates="story", cascade="all, delete-orphan")
@@ -91,19 +92,20 @@ class Comment(Base):
     __tablename__ = "comments"
 
     id = Column(String, primary_key=True, default=gen_uuid)
-    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False, index=True)
     author_id = Column(String, ForeignKey("users.id"), nullable=False)
     body = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     story = relationship("Story", back_populates="comments")
+    author = relationship("User")
 
 
 class Like(Base):
     __tablename__ = "likes"
 
     id = Column(String, primary_key=True, default=gen_uuid)
-    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
 
     story = relationship("Story", back_populates="likes")
