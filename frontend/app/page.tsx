@@ -1,7 +1,9 @@
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
+import OverviewMap from "@/components/OverviewMap";
+import AdBanner from "@/components/AdBanner";
 import { fetchStories } from "@/lib/api";
-import { RIDE_TYPE_LABELS } from "@/lib/labels";
+import { RIDE_STYLE_LABELS } from "@/lib/labels";
 
 export default async function HomePage() {
   const stories = await fetchStories();
@@ -29,7 +31,7 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-5 pt-16 pb-12">
         <div className="font-mono text-xs text-trail tracking-widest mb-4">
-          ROADBOOK · אינדורו כביש · סינגלים · הארד אינדורו
+          ROADBOOK · אנדורו · סינגלים · מוטוקרוס · אדוונצ'ר
         </div>
         <h1 className="text-5xl md:text-7xl font-black leading-[0.95] max-w-3xl">
           כל רכיבה משאירה
@@ -38,7 +40,7 @@ export default async function HomePage() {
         </h1>
         <p className="mt-6 text-lg text-char/80 max-w-xl leading-relaxed">
           מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
-          וכל מה שהיה שם בשטח. בלי מנויים, בלי פרסומות פולשניות.
+          ועדכוני שטח בזמן אמת. בלי מנויים.
         </p>
         <div className="mt-8 flex gap-3">
           <Link
@@ -58,19 +60,28 @@ export default async function HomePage() {
 
       <div className="contour-divider max-w-5xl mx-auto" />
 
-      {/* פילטרים מהירים */}
+      {/* תצוגה היברידית - מפה עם כל הנעצים */}
       <section className="max-w-5xl mx-auto px-5 py-8">
+        <OverviewMap stories={stories} className="w-full h-72 border border-char/15" />
+      </section>
+
+      {/* פילטרים מהירים לפי סגנון רכיבה */}
+      <section className="max-w-5xl mx-auto px-5 pb-8">
         <div className="flex flex-wrap gap-2">
-          {Object.entries(RIDE_TYPE_LABELS).map(([key, label]) => (
+          {Object.entries(RIDE_STYLE_LABELS).map(([key, label]) => (
             <Link
               key={key}
-              href={`/stories?ride_type=${key}`}
+              href={`/stories?ride_style=${key}`}
               className="text-sm border border-char/20 px-3 py-1.5 hover:border-oxide hover:text-oxide transition-colors"
             >
               {label}
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-5 pb-4">
+        <AdBanner variant="horizontal" />
       </section>
 
       {/* פיד סיפורים */}

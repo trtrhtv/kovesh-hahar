@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr
 
-from .models import RideType, Difficulty
+from .models import VehicleType, RideStyle, Difficulty, Season, TrailStatus
 
 
 class UserCreate(BaseModel):
@@ -30,10 +30,31 @@ class Token(BaseModel):
 class StoryCreate(BaseModel):
     title: str
     body: str
-    ride_type: RideType
+    vehicle_type: VehicleType
+    ride_style: RideStyle
     difficulty: Difficulty
+    season: Season
     country: str
     region: str
+    meeting_point_label: Optional[str] = None
+    meeting_point_lat: Optional[float] = None
+    meeting_point_lon: Optional[float] = None
+
+
+class TrailUpdateCreate(BaseModel):
+    status: TrailStatus
+    note: Optional[str] = None
+
+
+class TrailUpdateOut(BaseModel):
+    id: str
+    status: TrailStatus
+    note: Optional[str] = None
+    created_at: datetime
+    author: UserOut
+
+    class Config:
+        from_attributes = True
 
 
 class CommentCreate(BaseModel):
@@ -63,10 +84,15 @@ class StoryOut(BaseModel):
     id: str
     title: str
     body: str
-    ride_type: RideType
+    vehicle_type: VehicleType
+    ride_style: RideStyle
     difficulty: Difficulty
+    season: Season
     country: str
     region: str
+    meeting_point_label: Optional[str] = None
+    pin_lat: Optional[float] = None
+    pin_lon: Optional[float] = None
     distance_km: Optional[float] = None
     elevation_gain_m: Optional[float] = None
     elevation_profile_json: Optional[str] = None
@@ -87,10 +113,14 @@ class StoryListItem(BaseModel):
     """גרסה מצומצמת לפיד - בלי body מלא, כדי לא לגרור טקסטים ארוכים"""
     id: str
     title: str
-    ride_type: RideType
+    vehicle_type: VehicleType
+    ride_style: RideStyle
     difficulty: Difficulty
+    season: Season
     country: str
     region: str
+    pin_lat: Optional[float] = None
+    pin_lon: Optional[float] = None
     distance_km: Optional[float] = None
     elevation_gain_m: Optional[float] = None
     elevation_profile_json: Optional[str] = None

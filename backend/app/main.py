@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .database import engine, Base
-from .routers import auth_router, stories_router, comments_router
+from .routers import auth_router, stories_router, comments_router, trail_updates_router
 from . import storage
 
 # יוצר את הטבלאות אם לא קיימות. לפרודקשן אמיתי כדאי לעבור ל-alembic migrations,
@@ -24,6 +24,7 @@ app.add_middleware(
 app.include_router(auth_router.router)
 app.include_router(stories_router.router)
 app.include_router(comments_router.router)
+app.include_router(trail_updates_router.router)
 
 # כשמשתמשים באחסון מקומי (ברירת מחדל) - מגישים את הקבצים שהועלו ישירות דרך ה-API
 if storage.STORAGE_BACKEND == "local":

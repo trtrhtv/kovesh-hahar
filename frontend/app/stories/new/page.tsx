@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { createStory } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
-import { RIDE_TYPE_LABELS, DIFFICULTY_LABELS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, RIDE_STYLE_LABELS, DIFFICULTY_LABELS, SEASON_LABELS } from "@/lib/labels";
 
 const MAX_PHOTOS = 10;
 
@@ -119,10 +119,15 @@ function StoryForm({ token }: { token: string }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [rideType, setRideType] = useState("hard_enduro");
+  const [vehicleType, setVehicleType] = useState("enduro_light");
+  const [rideStyle, setRideStyle] = useState("technical_singles");
   const [difficulty, setDifficulty] = useState("moderate");
+  const [season, setSeason] = useState("all_year");
   const [country, setCountry] = useState(ISRAEL);
   const [region, setRegion] = useState("");
+  const [meetingLabel, setMeetingLabel] = useState("");
+  const [meetingLat, setMeetingLat] = useState("");
+  const [meetingLon, setMeetingLon] = useState("");
   const [gpxFile, setGpxFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -138,6 +143,14 @@ function StoryForm({ token }: { token: string }) {
     setPhotos(files);
   }
 
+  function useMyLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setMeetingLat(String(pos.coords.latitude.toFixed(6)));
+      setMeetingLon(String(pos.coords.longitude.toFixed(6)));
+    });
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -150,7 +163,21 @@ function StoryForm({ token }: { token: string }) {
     setBusy(true);
     try {
       const story = await createStory(
-        { title, body, ride_type: rideType, difficulty, country, region, gpxFile, photos },
+        {
+          title,
+          body,
+          vehicle_type: vehicleType,
+          ride_style: rideStyle,
+          difficulty,
+          season,
+          country,
+          region,
+          meetingPointLabel: meetingLabel || undefined,
+          meetingPointLat: meetingLat ? Number(meetingLat) : null,
+          meetingPointLon: meetingLon ? Number(meetingLon) : null,
+          gpxFile,
+          photos,
+        },
         token
       );
       router.push(`/stories/${story.id}`);
@@ -196,13 +223,13 @@ function StoryForm({ token }: { token: string }) {
         </Field>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="סוג רכיבה">
+          <Field label="סוג אופנוע">
             <select
-              value={rideType}
-              onChange={(e) => setRideType(e.target.value)}
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
               className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
             >
-              {Object.entries(RIDE_TYPE_LABELS).map(([key, label]) => (
+              {Object.entries(VEHICLE_TYPE_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
                 </option>
@@ -210,6 +237,22 @@ function StoryForm({ token }: { token: string }) {
             </select>
           </Field>
 
+          <Field label="סגנון רכיבה">
+            <select
+              value={rideStyle}
+              onChange={(e) => setRideStyle(e.target.value)}
+              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            >
+              {Object.entries(RIDE_STYLE_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <Field label="רמת קושי">
             <select
               value={difficulty}
@@ -217,6 +260,20 @@ function StoryForm({ token }: { token: string }) {
               className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
             >
               {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="עונה מומלצת">
+            <select
+              value={season}
+              onChange={(e) => setSeason(e.target.value)}
+              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            >
+              {Object.entries(SEASON_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
                 </option>
@@ -267,6 +324,46 @@ function StoryForm({ token }: { token: string }) {
               />
             )}
           </Field>
+        </div>
+
+        <div className="border border-char/20 p-4">
+          <p className="text-xs font-bold text-char/60 mb-3 tracking-wide">
+            נקודת כינוס (לא חובה, אבל מייצרת כפתור ניווט ישיר ל-Waze/Google Maps בסיפור)
+          </p>
+          <div className="flex flex-col gap-3">
+            <input
+              type="text"
+              value={meetingLabel}
+              onChange={(e) => setMeetingLabel(e.target.value)}
+              placeholder="שם המקום - לדוגמה: חניון עין גדי"
+              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            />
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+              <input
+                type="text"
+                inputMode="decimal"
+                value={meetingLat}
+                onChange={(e) => setMeetingLat(e.target.value)}
+                placeholder="קו רוחב (lat)"
+                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none text-sm"
+              />
+              <input
+                type="text"
+                inputMode="decimal"
+                value={meetingLon}
+                onChange={(e) => setMeetingLon(e.target.value)}
+                placeholder="קו אורך (lon)"
+                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none text-sm"
+              />
+              <button
+                type="button"
+                onClick={useMyLocation}
+                className="border border-char/25 px-3 text-xs font-bold hover:border-oxide whitespace-nowrap"
+              >
+                המיקום שלי
+              </button>
+            </div>
+          </div>
         </div>
 
         <Field label="קובץ GPX (לא חובה, אבל ממש מומלץ)">

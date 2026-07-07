@@ -14,10 +14,15 @@ router = APIRouter(prefix="/stories", tags=["stories"])
 async def create_story(
     title: str = Form(...),
     body: str = Form(...),
-    ride_type: models.RideType = Form(...),
+    vehicle_type: models.VehicleType = Form(...),
+    ride_style: models.RideStyle = Form(...),
     difficulty: models.Difficulty = Form(...),
+    season: models.Season = Form(...),
     country: str = Form(...),
     region: str = Form(...),
+    meeting_point_label: Optional[str] = Form(None),
+    meeting_point_lat: Optional[float] = Form(None),
+    meeting_point_lon: Optional[float] = Form(None),
     gpx_file: Optional[UploadFile] = File(None),
     photos: List[UploadFile] = File(default=[]),
     current_user: models.User = Depends(auth.get_current_user),
@@ -37,10 +42,15 @@ async def create_story(
         author_id=current_user.id,
         title=title,
         body=body,
-        ride_type=ride_type,
+        vehicle_type=vehicle_type,
+        ride_style=ride_style,
         difficulty=difficulty,
+        season=season,
         country=country,
         region=region.strip(),
+        meeting_point_label=(meeting_point_label or "").strip() or None,
+        meeting_point_lat=meeting_point_lat,
+        meeting_point_lon=meeting_point_lon,
     )
 
     # פענוח GPX אם צורף - זה מה שמפיק את המרחק, הטיפוס, וקו החתימה
@@ -80,15 +90,17 @@ async def create_story(
 
     db.commit()
     db.refresh(story)
-    return _with_like_count(story, db)
+    return _with_extras(story, db)
 
 
 @router.get("", response_model=List[schemas.StoryListItem])
 def list_stories(
     country: Optional[str] = None,
     region: Optional[str] = None,
-    ride_type: Optional[models.RideType] = None,
+    vehicle_type: Optional[models.VehicleType] = None,
+    ride_style: Optional[models.RideStyle] = None,
     difficulty: Optional[models.Difficulty] = None,
+    season: Optional[models.Season] = None,
     search: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
@@ -103,10 +115,14 @@ def list_stories(
         query = query.filter(models.Story.country == country)
     if region:
         query = query.filter(models.Story.region == region)
-    if ride_type:
-        query = query.filter(models.Story.ride_type == ride_type)
+    if vehicle_type:
+        query = query.filter(models.Story.vehicle_type == vehicle_type)
+    if ride_style:
+        query = query.filter(models.Story.ride_style == ride_style)
     if difficulty:
         query = query.filter(models.Story.difficulty == difficulty)
+    if season:
+        query = query.filter(models.Story.season == season)
     if search:
         like = f"%{search}%"
         query = query.filter(models.Story.title.ilike(like))
@@ -117,7 +133,7 @@ def list_stories(
         .limit(limit)
         .all()
     )
-    return [_with_like_count(s, db) for s in stories]
+    return [_with_extras(s, db) for s in stories]
 
 
 @router.get("/{story_id}", response_model=schemas.StoryOut)
@@ -130,7 +146,7 @@ def get_story(story_id: str, db: Session = Depends(get_db)):
     )
     if not story:
         raise HTTPException(404, "הסיפור לא נמצא")
-    return _with_like_count(story, db)
+    return _with_extras(story, db)
 
 
 @router.post("/{story_id}/like")
@@ -155,11 +171,14 @@ def toggle_like(
     return {"liked": True}
 
 
-def _with_like_count(story: models.Story, db: Session):
+def _with_extras(story: models.Story, db: Session):
     like_count = db.query(func.count(models.Like.id)).filter(models.Like.story_id == story.id).scalar()
     comment_count = (
         db.query(func.count(models.Comment.id)).filter(models.Comment.story_id == story.id).scalar()
     )
     story.like_count = like_count or 0
     story.comment_count = comment_count or 0
+    # "נעץ" למפה - עדיפות לנקודת הכינוס הידנית, אחרת נקודת ההתחלה מה-GPX
+    story.pin_lat = story.meeting_point_lat if story.meeting_point_lat is not None else story.start_lat
+    story.pin_lon = story.meeting_point_lon if story.meeting_point_lon is not None else story.start_lon
     return story

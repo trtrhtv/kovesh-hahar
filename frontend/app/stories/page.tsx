@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import StoryCard from "@/components/StoryCard";
 import FilterSidebar from "@/components/FilterSidebar";
+import OverviewMap from "@/components/OverviewMap";
+import AdBanner from "@/components/AdBanner";
 import { fetchStories } from "@/lib/api";
 
 export default async function StoriesPage({
@@ -9,8 +12,10 @@ export default async function StoriesPage({
   searchParams: {
     country?: string;
     region?: string;
-    ride_type?: string;
+    vehicle_type?: string;
+    ride_style?: string;
     difficulty?: string;
+    season?: string;
     search?: string;
     offset?: string;
   };
@@ -54,17 +59,24 @@ export default async function StoriesPage({
             )}
           </div>
 
-          {stories.length === 0 ? (
-            <div className="border border-dashed border-char/30 p-12 text-center text-char/60">
-              לא נמצאו סיפורים שתואמים לסינון הזה.
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {stories.map((story) => (
-                <StoryCard key={story.id} story={story} />
-              ))}
-            </div>
-          )}
+          <OverviewMap stories={stories} className="w-full h-72 mb-8 border border-char/15" />
+
+          <AdBanner variant="horizontal" />
+
+          <div className="grid gap-4 mt-6">
+            {stories.length === 0 ? (
+              <div className="border border-dashed border-char/30 p-12 text-center text-char/60">
+                לא נמצאו סיפורים שתואמים לסינון הזה.
+              </div>
+            ) : (
+              stories.map((story, i) => (
+                <Fragment key={story.id}>
+                  <StoryCard story={story} />
+                  {i === 4 && <AdBanner variant="horizontal" />}
+                </Fragment>
+              ))
+            )}
+          </div>
 
           <div className="flex items-center justify-between mt-8 text-sm">
             {offset > 0 ? (

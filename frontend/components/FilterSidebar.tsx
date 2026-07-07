@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
-import { RIDE_TYPE_LABELS, DIFFICULTY_LABELS } from "@/lib/labels";
+import {
+  VEHICLE_TYPE_LABELS,
+  RIDE_STYLE_LABELS,
+  DIFFICULTY_LABELS,
+  SEASON_LABELS,
+} from "@/lib/labels";
 
 export default function FilterSidebar({
   defaults,
@@ -10,8 +15,10 @@ export default function FilterSidebar({
   defaults: {
     country?: string;
     region?: string;
-    ride_type?: string;
+    vehicle_type?: string;
+    ride_style?: string;
     difficulty?: string;
+    season?: string;
     search?: string;
   };
 }) {
@@ -73,15 +80,33 @@ export default function FilterSidebar({
 
       <div>
         <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
-          סוג רכיבה
+          סוג אופנוע
         </label>
         <select
-          name="ride_type"
-          defaultValue={defaults.ride_type}
+          name="vehicle_type"
+          defaultValue={defaults.vehicle_type}
           className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
         >
           <option value="">הכל</option>
-          {Object.entries(RIDE_TYPE_LABELS).map(([key, label]) => (
+          {Object.entries(VEHICLE_TYPE_LABELS).map(([key, label]) => (
+            <option key={key} value={key}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+          סגנון רכיבה
+        </label>
+        <select
+          name="ride_style"
+          defaultValue={defaults.ride_style}
+          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+        >
+          <option value="">הכל</option>
+          {Object.entries(RIDE_STYLE_LABELS).map(([key, label]) => (
             <option key={key} value={key}>
               {label}
             </option>
@@ -100,6 +125,24 @@ export default function FilterSidebar({
         >
           <option value="">הכל</option>
           {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
+            <option key={key} value={key}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+          עונה מומלצת
+        </label>
+        <select
+          name="season"
+          defaultValue={defaults.season}
+          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+        >
+          <option value="">הכל</option>
+          {Object.entries(SEASON_LABELS).map(([key, label]) => (
             <option key={key} value={key}>
               {label}
             </option>

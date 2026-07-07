@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import ElevationSignature from "./ElevationSignature";
-import { RIDE_TYPE_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, RIDE_STYLE_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from "@/lib/labels";
 import type { StoryListItem } from "@/lib/api";
 
 /**
@@ -24,7 +24,9 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
               {story.country !== "ישראל" ? `${story.region}, ${story.country}` : story.region}
             </span>
             <span>·</span>
-            <span>{RIDE_TYPE_LABELS[story.ride_type] || story.ride_type}</span>
+            <span>{VEHICLE_TYPE_LABELS[story.vehicle_type] || story.vehicle_type}</span>
+            <span>·</span>
+            <span>{RIDE_STYLE_LABELS[story.ride_style] || story.ride_style}</span>
           </div>
           <h3 className="text-xl font-bold leading-snug group-hover:text-oxide transition-colors">
             {story.title}

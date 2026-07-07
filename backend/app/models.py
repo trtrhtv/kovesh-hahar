@@ -14,13 +14,32 @@ def gen_uuid():
     return str(uuid.uuid4())
 
 
-class RideType(str, enum.Enum):
-    ENDURO_ROAD = "enduro_road"          # אינדורו כביש
-    SINGLES = "singles"                   # סינגלים
-    HARD_ENDURO = "hard_enduro"           # הארד אינדורו
-    OFF_ROAD_TOURING = "off_road_touring" # מסע שטח
-    DESERT = "desert"                     # מדבר
-    OTHER = "other"
+class VehicleType(str, enum.Enum):
+    ADV_HEAVY = "adv_heavy"                # אדוונצ'ר כבד / דו-צילינדר
+    DUAL_SPORT_LIGHT = "dual_sport_light"  # דו-שימושי קל
+    ENDURO_PRO = "enduro_pro"              # אנדורו מקצועי
+    ENDURO_LIGHT = "enduro_light"          # אנדורו קל
+    MOTOCROSS = "motocross"                # מוטוקרוס (מסלולים סגורים/דיונות, בלי רישוי צהוב)
+
+
+class RideStyle(str, enum.Enum):
+    SCENIC_TOURING = "scenic_touring"            # טיול נופים ופיקניק
+    FAST_RALLY = "fast_rally"                    # רכיבה מהירה / ראלי
+    TECHNICAL_SINGLES = "technical_singles"      # רכיבה טכנית / סינגלים
+    HARD_ENDURO_EXTREME = "hard_enduro_extreme"  # הארד אנדורו / אקסטרים
+
+
+class Season(str, enum.Enum):
+    WINTER = "winter"
+    SUMMER = "summer"
+    ALL_YEAR = "all_year"
+
+
+class TrailStatus(str, enum.Enum):
+    OPEN = "open"        # פתוח וזורם
+    BLOCKED = "blocked"  # חסום
+    MUDDY = "muddy"      # מלכודת בוץ
+    UNKNOWN = "unknown"  # לא ידוע / ישן מדי
 
 
 class Difficulty(str, enum.Enum):
@@ -53,10 +72,17 @@ class Story(Base):
 
     title = Column(String, nullable=False)
     body = Column(Text, nullable=False)
-    ride_type = Column(Enum(RideType), nullable=False, index=True)
+    vehicle_type = Column(Enum(VehicleType), nullable=False, index=True)
+    ride_style = Column(Enum(RideStyle), nullable=False, index=True)
     difficulty = Column(Enum(Difficulty), nullable=False, index=True)
+    season = Column(Enum(Season), nullable=False, default=Season.ALL_YEAR, index=True)
     country = Column(String, nullable=False, default="ישראל", index=True)
     region = Column(String, nullable=False, index=True)  # אזור מוגדר (ישראל) או שם מקום חופשי (חו"ל)
+
+    # נקודת כינוס/התחלה - מוזן ידנית (חובה כדי לייצר ניווט גם לסיפור בלי GPX)
+    meeting_point_label = Column(String, nullable=True)  # למשל "חניון עין גדי"
+    meeting_point_lat = Column(Float, nullable=True)
+    meeting_point_lon = Column(Float, nullable=True)
 
     # נתונים שנגזרים אוטומטית מקובץ ה-GPX בעת ההעלאה
     gpx_url = Column(String, nullable=True)          # קובץ ה-GPX המקורי ב-R2
@@ -98,6 +124,21 @@ class Comment(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     story = relationship("Story", back_populates="comments")
+    author = relationship("User")
+
+
+class TrailUpdate(Base):
+    """עדכון שטח קצר על מצב המסלול - כל רוכב יכול לפרסם, לא רק מי שהעלה את הסיפור"""
+    __tablename__ = "trail_updates"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False, index=True)
+    author_id = Column(String, ForeignKey("users.id"), nullable=False)
+    status = Column(Enum(TrailStatus), nullable=False)
+    note = Column(Text, nullable=True)  # למשל "קריסה אחרי הגשם - 05/2026"
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    story = relationship("Story")
     author = relationship("User")
 
 
