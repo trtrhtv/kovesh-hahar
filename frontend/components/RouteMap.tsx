@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import "mapbox-gl/dist/mapbox-gl.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+// OpenFreeMap - שירות מפות חינמי לגמרי, בלי מפתח API, בלי הרשמה, בלי הגבלת שימוש.
+// מבוסס נתוני OpenStreetMap. ראה https://openfreemap.org
+const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
 export default function RouteMap({
   profileJson,
@@ -15,7 +17,7 @@ export default function RouteMap({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!MAPBOX_TOKEN || !profileJson || !containerRef.current) return;
+    if (!profileJson || !containerRef.current) return;
 
     let points: [number, number, number][] = [];
     try {
@@ -28,19 +30,20 @@ export default function RouteMap({
     let map: any;
     let cancelled = false;
 
-    // ייבוא דינמי - mapbox-gl תלוי ב-window, אסור לטעון אותו ב-SSR
-    import("mapbox-gl").then((mapboxgl) => {
+    // ייבוא דינמי - maplibre-gl תלוי ב-window, אסור לטעון אותו ב-SSR
+    import("maplibre-gl").then((maplibregl) => {
       if (cancelled || !containerRef.current) return;
-      mapboxgl.default.accessToken = MAPBOX_TOKEN;
 
-      const coordinates = points.map((p) => [p[1], p[0]]); // GPX הוא [lat, lon], Mapbox רוצה [lon, lat]
+      const coordinates = points.map((p) => [p[1], p[0]]); // GPX הוא [lat, lon], המפה רוצה [lon, lat]
 
-      map = new mapboxgl.default.Map({
+      map = new maplibregl.default.Map({
         container: containerRef.current,
-        style: "mapbox://styles/mapbox/outdoors-v12",
+        style: MAP_STYLE,
         center: coordinates[0] as [number, number],
         zoom: 11,
       });
+
+      map.addControl(new maplibregl.default.NavigationControl(), "top-left");
 
       map.on("load", () => {
         map.addSource("route", {
@@ -60,13 +63,13 @@ export default function RouteMap({
           paint: { "line-color": "#A8462E", "line-width": 4 },
         });
 
-        new mapboxgl.default.Marker({ color: "#5C6B47" })
+        new maplibregl.default.Marker({ color: "#5C6B47" })
           .setLngLat(coordinates[0] as [number, number])
           .addTo(map);
 
         const bounds = coordinates.reduce(
           (b: any, coord: any) => b.extend(coord),
-          new mapboxgl.default.LngLatBounds(coordinates[0] as any, coordinates[0] as any)
+          new maplibregl.default.LngLatBounds(coordinates[0] as any, coordinates[0] as any)
         );
         map.fitBounds(bounds, { padding: 40, duration: 0 });
       });
@@ -77,14 +80,6 @@ export default function RouteMap({
       if (map) map.remove();
     };
   }, [profileJson]);
-
-  if (!MAPBOX_TOKEN) {
-    return (
-      <div className={`flex items-center justify-center bg-sandDark text-char/50 text-sm ${className}`}>
-        כדי להציג מפה יש להגדיר NEXT_PUBLIC_MAPBOX_TOKEN
-      </div>
-    );
-  }
 
   if (!profileJson) {
     return (
