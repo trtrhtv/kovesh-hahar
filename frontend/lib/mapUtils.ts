@@ -16,6 +16,51 @@ export function ensureRTLTextPlugin(maplibregl: any) {
 }
 
 /**
+ * יוצר מרקר "אני כאן" עם אפקט ראדאר פועם (טבעת מתרחבת + נקודה מוצקה),
+ * בצבע האקצנט הפעיל כדי שיתאים תמיד למותג שנבחר בבורר ה-theme.
+ */
+export function createUserLocationMarker(maplibregl: any, lngLat: [number, number]) {
+  const el = document.createElement("div");
+  el.style.width = "18px";
+  el.style.height = "18px";
+  el.style.position = "relative";
+  el.innerHTML = `
+    <span class="absolute inset-0 rounded-full animate-ping" style="background-color: rgb(var(--accent-rgb) / 0.6)"></span>
+    <span class="absolute inset-[3px] rounded-full border-2 border-white" style="background-color: rgb(var(--accent-rgb))"></span>
+  `;
+  return new maplibregl.Marker({ element: el });
+}
+
+/**
+ * מאתר את מיקום המשתמש (Geolocation API), טס אליו על המפה, ומציב/מעדכן
+ * את מרקר "אני כאן". markerHolder הוא useRef כדי לשמור מופע יחיד ולא
+ * להערים מרקרים בכל לחיצה.
+ */
+export function locateAndFly(
+  map: any,
+  maplibregl: any,
+  markerHolder: { current: any },
+  onError?: (msg: string) => void
+) {
+  if (!navigator.geolocation) {
+    onError?.("הדפדפן הזה לא תומך באיתור מיקום");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      map.flyTo({ center: [longitude, latitude], zoom: 14, speed: 1.4 });
+      if (markerHolder.current) markerHolder.current.remove();
+      markerHolder.current = createUserLocationMarker(maplibregl, [longitude, latitude])
+        .setLngLat([longitude, latitude])
+        .addTo(map);
+    },
+    () => onError?.("לא הצלחנו לאתר את המיקום - ודא שנתת הרשאת מיקום לדפדפן"),
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+/**
  * מוסיף מקור מפת לוויין (Esri World Imagery - חינמי, בלי מפתח API) כשכבה
  * כבויה כברירת מחדל, ומחזירה פונקציית toggle שמחליפה בינה לבין המפה הרגילה.
  * baseLayerIds הן כל שכבות המפה הבסיסית (חוץ מהמסלול/נעצים שלנו) - הן מוסתרות

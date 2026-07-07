@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { stripPoliticalLayers, ensureRTLTextPlugin, addSatelliteToggle } from "@/lib/mapUtils";
+import { stripPoliticalLayers, ensureRTLTextPlugin, addSatelliteToggle, locateAndFly } from "@/lib/mapUtils";
+import LocateButton from "@/components/LocateButton";
 
 // OpenFreeMap - שירות מפות חינמי לגמרי, בלי מפתח API, בלי הרשמה, בלי הגבלת שימוש.
 // מבוסס נתוני OpenStreetMap. ראה https://openfreemap.org
@@ -17,7 +18,11 @@ export default function RouteMap({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<(() => boolean) | null>(null);
+  const mapRef = useRef<any>(null);
+  const maplibreglRef = useRef<any>(null);
+  const userMarkerRef = useRef<any>(null);
   const [satelliteOn, setSatelliteOn] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profileJson || !containerRef.current) return;
@@ -46,6 +51,8 @@ export default function RouteMap({
         center: coordinates[0] as [number, number],
         zoom: 11,
       });
+      mapRef.current = map;
+      maplibreglRef.current = maplibregl.default;
 
       map.addControl(new maplibregl.default.NavigationControl(), "top-left");
       map.addControl(new maplibregl.default.FullscreenControl(), "top-left");
@@ -102,6 +109,19 @@ export default function RouteMap({
   return (
     <div className={`relative ${className}`}>
       <div ref={containerRef} className="w-full h-full" />
+      <div className="absolute bottom-3 left-3 z-10 flex flex-col items-start gap-2">
+        <LocateButton
+          onClick={() =>
+            mapRef.current &&
+            locateAndFly(mapRef.current, maplibreglRef.current, userMarkerRef, setLocateError)
+          }
+        />
+        {locateError && (
+          <span className="bg-surfaceHi border border-edge text-moto text-xs px-2.5 py-1.5 max-w-[220px]">
+            {locateError}
+          </span>
+        )}
+      </div>
       <button
         onClick={() => setSatelliteOn(toggleRef.current ? toggleRef.current() : false)}
         className="absolute bottom-3 right-3 z-10 bg-surface border border-edge px-4 py-2.5 min-h-[40px] text-xs font-bold hover:border-moto transition-colors shadow-sm"
