@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { stripPoliticalLayers } from "@/lib/mapUtils";
+import { stripPoliticalLayers, ensureRTLTextPlugin } from "@/lib/mapUtils";
 
 // OpenFreeMap - שירות מפות חינמי לגמרי, בלי מפתח API, בלי הרשמה, בלי הגבלת שימוש.
 // מבוסס נתוני OpenStreetMap. ראה https://openfreemap.org
@@ -34,6 +34,7 @@ export default function RouteMap({
     // ייבוא דינמי - maplibre-gl תלוי ב-window, אסור לטעון אותו ב-SSR
     import("maplibre-gl").then((maplibregl) => {
       if (cancelled || !containerRef.current) return;
+      ensureRTLTextPlugin(maplibregl.default);
 
       const coordinates = points.map((p) => [p[1], p[0]]); // GPX הוא [lat, lon], המפה רוצה [lon, lat]
 

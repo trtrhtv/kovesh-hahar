@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { stripPoliticalLayers } from "@/lib/mapUtils";
+import { stripPoliticalLayers, ensureRTLTextPlugin } from "@/lib/mapUtils";
 import type { StoryListItem } from "@/lib/api";
 import { DIFFICULTY_COLORS } from "@/lib/labels";
 
@@ -29,6 +29,7 @@ export default function OverviewMap({
 
     import("maplibre-gl").then((maplibregl) => {
       if (cancelled || !containerRef.current) return;
+      ensureRTLTextPlugin(maplibregl.default);
 
       map = new maplibregl.default.Map({
         container: containerRef.current,
