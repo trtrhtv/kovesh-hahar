@@ -54,6 +54,7 @@ export default function SettingsPage() {
 
 function ProfileForm({ token, user, onSaved }: { token: string; user: any; onSaved: () => void }) {
   const [displayName, setDisplayName] = useState(user.display_name || "");
+  const [username, setUsername] = useState(user.username || "");
   const [phoneNumber, setPhoneNumber] = useState(user.phone_number || "");
   const [homeRegion, setHomeRegion] = useState(user.home_region || "");
   const [notificationsEnabled, setNotificationsEnabled] = useState(user.notifications_enabled !== false);
@@ -68,7 +69,7 @@ function ProfileForm({ token, user, onSaved }: { token: string; user: any; onSav
     setBusy(true);
     try {
       await updateProfile(
-        { display_name: displayName, phone_number: phoneNumber, home_region: homeRegion, notifications_enabled: notificationsEnabled },
+        { display_name: displayName, username: username || undefined, phone_number: phoneNumber, home_region: homeRegion, notifications_enabled: notificationsEnabled },
         token
       );
       await onSaved();
@@ -93,6 +94,24 @@ function ProfileForm({ token, user, onSaved }: { token: string; user: any; onSav
           required
           className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
         />
+      </label>
+
+      <label className="block">
+        <span className="block text-xs font-bold text-textDim mb-1.5">
+          שם משתמש (להתחברות מהירה, במקום אימייל מלא)
+        </span>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+          placeholder="אנגלית בלבד"
+          className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+        />
+        {!user.username && (
+          <p className="text-[11px] text-moto mt-1">
+            לא הוגדר לך שם משתמש עדיין - תוסיף אחד כאן כדי להתחבר בלעדיו בפעם הבאה בלי להקליד אימייל מלא.
+          </p>
+        )}
       </label>
 
       <label className="block">

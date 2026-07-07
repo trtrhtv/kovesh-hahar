@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { stripPoliticalLayers, ensureRTLTextPlugin } from "@/lib/mapUtils";
+import { stripPoliticalLayers, ensureRTLTextPlugin, addSatelliteToggle, locateAndFly } from "@/lib/mapUtils";
+import LocateButton from "@/components/LocateButton";
 
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const ISRAEL_CENTER: [number, number] = [35.0, 31.5];
@@ -24,6 +25,10 @@ export default function RouteDrawer({
   const pointsRef = useRef<[number, number][]>([]); // [lat, lon][]
   const markersRef = useRef<any[]>([]);
   const [pointCount, setPointCount] = useState(0);
+  const toggleSatelliteRef = useRef<(() => boolean) | null>(null);
+  const userMarkerRef = useRef<any>(null);
+  const [satelliteOn, setSatelliteOn] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
 
   function redrawLine() {
     const map = mapRef.current;
@@ -96,6 +101,9 @@ export default function RouteDrawer({
       map.on("load", () => {
         stripPoliticalLayers(map);
 
+        const baseLayerIds = map.getStyle().layers.map((l: any) => l.id);
+        toggleSatelliteRef.current = addSatelliteToggle(map, baseLayerIds);
+
         map.addSource("drawn-route", {
           type: "geojson",
           data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [] } },
@@ -127,6 +135,26 @@ export default function RouteDrawer({
       <div ref={containerRef} className="w-full h-full" />
       <div className="absolute top-3 right-3 z-10 moto-card px-3 py-2 text-xs text-ink font-bold">
         {pointCount === 0 ? "לחץ על המפה כדי להתחיל לשרטט" : `${pointCount} נקודות`}
+      </div>
+      <div className="absolute bottom-3 left-3 z-10 flex flex-col items-start gap-2">
+        <LocateButton
+          onClick={() =>
+            mapRef.current &&
+            locateAndFly(mapRef.current, maplibreglRef.current, userMarkerRef, setLocateError)
+          }
+        />
+        {locateError && (
+          <span className="bg-surfaceHi border border-edge text-moto text-xs px-2.5 py-1.5 max-w-[200px]">
+            {locateError}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => setSatelliteOn(toggleSatelliteRef.current ? toggleSatelliteRef.current() : false)}
+          className="bg-surface border border-edge px-3 py-2 text-xs font-bold text-ink hover:border-moto transition-colors shadow-sm"
+        >
+          {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
+        </button>
       </div>
       <div className="absolute bottom-3 right-3 z-10 flex gap-2">
         <button

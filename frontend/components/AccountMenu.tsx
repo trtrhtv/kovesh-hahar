@@ -8,7 +8,13 @@ export default function AccountMenu() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <Link href="/login" className="text-sm font-bold text-moto hover:underline">
+        התחבר
+      </Link>
+    );
+  }
 
   return (
     <div className="relative">

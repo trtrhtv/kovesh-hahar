@@ -4,6 +4,7 @@ import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
 import StoryCard from "@/components/StoryCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import ProfileOwnerActions from "@/components/ProfileOwnerActions";
 import { fetchUserProfile, fetchStories } from "@/lib/api";
 import { notFound } from "next/navigation";
 
@@ -31,7 +32,10 @@ export default async function UserProfilePage({ params }: { params: { id: string
               {profile.display_name.charAt(0)}
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-black text-ink truncate">{profile.display_name}</h1>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-black text-ink truncate">{profile.display_name}</h1>
+                <ProfileOwnerActions profileUserId={profile.id} />
+              </div>
               <div className="text-sm text-textDim mt-1 flex flex-wrap gap-x-3">
                 {profile.home_region && <span>📍 {profile.home_region}</span>}
                 <span>{stories.length} סיפורים</span>

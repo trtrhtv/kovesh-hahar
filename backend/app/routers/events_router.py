@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -22,9 +22,15 @@ def create_event(
     description = payload.description.strip()
     if not title:
         raise HTTPException(400, "יש למלא כותרת")
-    if len(description) < 10:
-        raise HTTPException(400, "יש למלא תיאור (לפחות כמה מילים)")
-    if payload.event_date < datetime.utcnow() - timedelta(hours=1):
+    if len(description.split()) < 3:
+        raise HTTPException(400, "יש למלא תיאור קצר (לפחות כמה מילים)")
+
+    # הפרונט שולח תאריך עם timezone (UTC), אבל datetime.utcnow() לא מודע ל-timezone -
+    # השוואה ישירה ביניהם זורקת TypeError. מנרמלים לפני ההשוואה ולפני השמירה ב-DB.
+    event_date = payload.event_date
+    if event_date.tzinfo is not None:
+        event_date = event_date.astimezone(timezone.utc).replace(tzinfo=None)
+    if event_date < datetime.utcnow() - timedelta(hours=1):
         raise HTTPException(400, "תאריך האירוע לא יכול להיות בעבר")
 
     if not locations.is_valid_country(payload.country):
@@ -38,7 +44,7 @@ def create_event(
         organizer_id=current_user.id,
         title=title,
         description=description,
-        event_date=payload.event_date,
+        event_date=event_date,
         vehicle_type=payload.vehicle_type,
         difficulty=payload.difficulty,
         country=payload.country,
@@ -109,6 +115,8 @@ def update_event(
         raise HTTPException(403, "אין לך הרשאה לערוך את האירוע הזה")
 
     data = payload.dict(exclude_unset=True)
+    if "event_date" in data and data["event_date"] is not None and data["event_date"].tzinfo is not None:
+        data["event_date"] = data["event_date"].astimezone(timezone.utc).replace(tzinfo=None)
     for field, value in data.items():
         setattr(event, field, value)
 

@@ -147,7 +147,7 @@ function EventForm({ token }: { token: string }) {
       setError(country === ISRAEL ? "יש לבחור אזור" : "יש לציין שם מקום");
       return;
     }
-    if (description.trim().length < 10) {
+    if (description.trim().split(/\s+/).filter(Boolean).length < 3) {
       setError("התיאור קצר מדי");
       return;
     }

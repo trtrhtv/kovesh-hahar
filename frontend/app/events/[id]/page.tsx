@@ -3,6 +3,7 @@ import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import NavigateButton from "@/components/NavigateButton";
 import RSVPButton from "@/components/RSVPButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import DeleteEventButton from "@/components/DeleteEventButton";
 import { fetchEvent } from "@/lib/api";
 import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS } from "@/lib/labels";
@@ -65,6 +66,12 @@ export default async function EventDetailPage({ params }: { params: { id: string
           מארגן: {event.organizer.display_name}
         </Link>
       </div>
+
+      {event.organizer.phone_number && (
+        <div className="mb-6">
+          <WhatsAppButton phoneNumber={event.organizer.phone_number} routeName={`האירוע "${event.title}"`} />
+        </div>
+      )}
 
       {event.meeting_point_lat != null && (
         <div className="mb-6">

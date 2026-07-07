@@ -75,6 +75,7 @@ export type Bike = { id: string; model_name: string; vehicle_type?: string };
 export type UserProfile = {
   id: string;
   display_name: string;
+  username?: string;
   avatar_url?: string;
   home_region?: string;
   phone_number?: string;
@@ -89,7 +90,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
 }
 
 export async function updateProfile(
-  data: { display_name?: string; phone_number?: string; home_region?: string; notifications_enabled?: boolean },
+  data: { display_name?: string; username?: string; phone_number?: string; home_region?: string; notifications_enabled?: boolean },
   token: string
 ): Promise<UserProfile> {
   const res = await fetch(`${API_BASE}/auth/me`, {
