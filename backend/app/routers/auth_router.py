@@ -22,6 +22,7 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
         email=payload.email,
         hashed_password=auth.hash_password(payload.password),
         display_name=payload.display_name,
+        phone_number=(payload.phone_number or "").strip() or None,
         accepted_disclaimer_at=datetime.utcnow(),
     )
     db.add(user)

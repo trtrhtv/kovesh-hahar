@@ -1,6 +1,6 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export type Author = { id: string; display_name: string; avatar_url?: string };
+export type Author = { id: string; display_name: string; avatar_url?: string; phone_number?: string };
 
 export type StoryListItem = {
   id: string;
@@ -28,6 +28,7 @@ export type Photo = { id: string; url: string; order_index: number };
 export type StoryDetail = StoryListItem & {
   body: string;
   meeting_point_label?: string;
+  parking_security?: string;
   start_lat?: number;
   start_lon?: number;
   photos: Photo[];
@@ -196,6 +197,7 @@ export async function createStory(
     meetingPointLabel?: string;
     meetingPointLat?: number | null;
     meetingPointLon?: number | null;
+    parkingSecurity?: string;
     gpxFile?: File | null;
     photos: File[];
   },
@@ -213,6 +215,7 @@ export async function createStory(
   if (data.meetingPointLabel) form.set("meeting_point_label", data.meetingPointLabel);
   if (data.meetingPointLat != null) form.set("meeting_point_lat", String(data.meetingPointLat));
   if (data.meetingPointLon != null) form.set("meeting_point_lon", String(data.meetingPointLon));
+  if (data.parkingSecurity) form.set("parking_security", data.parkingSecurity);
   if (data.gpxFile) form.set("gpx_file", data.gpxFile);
   data.photos.forEach((p) => form.append("photos", p));
 

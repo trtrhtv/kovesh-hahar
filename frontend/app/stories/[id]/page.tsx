@@ -14,6 +14,8 @@ import RouteMap from "@/components/RouteMap";
 import LikeButton from "@/components/LikeButton";
 import CommentsSection from "@/components/CommentsSection";
 import NavigateButton from "@/components/NavigateButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import ParkingSecurityTag from "@/components/ParkingSecurityTag";
 import TrailUpdatesSection from "@/components/TrailUpdatesSection";
 import DeleteStoryButton from "@/components/DeleteStoryButton";
 import ReadingProgressRider from "@/components/ReadingProgressRider";
@@ -119,12 +121,22 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
         )}
 
         {/* תיבת הפעולה הראשית - ניווט לנקודת הכינוס */}
-        <div className="mb-8">
+        <div className="mb-3">
           <NavigateButton
             lat={story.pin_lat}
             lon={story.pin_lon}
             label={story.meeting_point_label}
           />
+        </div>
+
+        {story.parking_security && (
+          <div className="mb-3">
+            <ParkingSecurityTag status={story.parking_security} />
+          </div>
+        )}
+
+        <div className="mb-8">
+          <WhatsAppButton phoneNumber={story.author.phone_number} routeName={story.title} />
         </div>
 
         <RouteMap profileJson={story.elevation_profile_json} className="w-full h-80 mb-8" />

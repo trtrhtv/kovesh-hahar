@@ -40,6 +40,11 @@ export const TRAIL_STATUS_LABELS: Record<string, string> = {
   unknown: "לא ידוע",
 };
 
+export const PARKING_SECURITY_LABELS: Record<string, string> = {
+  safe: "🔒 בסיס בטוח / נראות גבוהה",
+  risk: "⚠️ סיכון גניבה גבוה",
+};
+
 export const TRAIL_STATUS_COLORS: Record<string, string> = {
   open: "#3ED598",
   blocked: "#FF3B3B",

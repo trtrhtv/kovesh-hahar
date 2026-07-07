@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr
 
-from .models import VehicleType, RideStyle, Difficulty, Season, TrailStatus
+from .models import VehicleType, RideStyle, Difficulty, Season, TrailStatus, ParkingSecurity
 
 
 class UserCreate(BaseModel):
@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
     password: str
     display_name: str
     accepted_disclaimer: bool
+    phone_number: Optional[str] = None
 
 
 class UserOut(BaseModel):
@@ -18,6 +19,7 @@ class UserOut(BaseModel):
     avatar_url: Optional[str] = None
     bike_model: Optional[str] = None
     home_region: Optional[str] = None
+    phone_number: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -40,6 +42,7 @@ class StoryCreate(BaseModel):
     meeting_point_label: Optional[str] = None
     meeting_point_lat: Optional[float] = None
     meeting_point_lon: Optional[float] = None
+    parking_security: Optional[ParkingSecurity] = None
 
 
 class ContactMessageCreate(BaseModel):
@@ -109,6 +112,7 @@ class StoryOut(BaseModel):
     country: str
     region: str
     meeting_point_label: Optional[str] = None
+    parking_security: Optional[ParkingSecurity] = None
     pin_lat: Optional[float] = None
     pin_lon: Optional[float] = None
     distance_km: Optional[float] = None

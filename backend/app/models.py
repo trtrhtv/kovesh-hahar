@@ -59,10 +59,16 @@ class User(Base):
     avatar_url = Column(String, nullable=True)
     bike_model = Column(String, nullable=True)  # "KTM 500 EXC" וכו'
     home_region = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)  # לכפתור יצירת קשר ב-WhatsApp, לא חובה
     accepted_disclaimer_at = Column(DateTime, nullable=True)  # מתי אישר את הצהרת האחריות
     created_at = Column(DateTime, default=datetime.utcnow)
 
     stories = relationship("Story", back_populates="author", cascade="all, delete-orphan")
+
+
+class ParkingSecurity(str, enum.Enum):
+    SAFE = "safe"      # בסיס בטוח, נראות גבוהה
+    RISK = "risk"       # סיכון גניבה גבוה
 
 
 class Story(Base):
@@ -84,6 +90,7 @@ class Story(Base):
     meeting_point_label = Column(String, nullable=True)  # למשל "חניון עין גדי"
     meeting_point_lat = Column(Float, nullable=True)
     meeting_point_lon = Column(Float, nullable=True)
+    parking_security = Column(Enum(ParkingSecurity), nullable=True)  # לא חובה - רק אם הכותב יודע
 
     # נתונים שנגזרים אוטומטית מקובץ ה-GPX בעת ההעלאה
     gpx_url = Column(String, nullable=True)          # קובץ ה-GPX המקורי ב-R2

@@ -11,6 +11,7 @@ export type CurrentUser = {
   avatar_url?: string;
   bike_model?: string;
   home_region?: string;
+  phone_number?: string;
 };
 
 type AuthContextType = {
@@ -18,7 +19,13 @@ type AuthContextType = {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, displayName: string, acceptedDisclaimer: boolean) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    displayName: string,
+    acceptedDisclaimer: boolean,
+    phoneNumber?: string
+  ) => Promise<void>;
   logout: () => void;
 };
 
@@ -75,7 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     displayName: string,
-    acceptedDisclaimer: boolean
+    acceptedDisclaimer: boolean,
+    phoneNumber?: string
   ) {
     if (!acceptedDisclaimer) {
       throw new Error("יש לאשר את הצהרת האחריות כדי להירשם");
@@ -88,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
         display_name: displayName,
         accepted_disclaimer: acceptedDisclaimer,
+        phone_number: phoneNumber || undefined,
       }),
     });
     if (!res.ok) {

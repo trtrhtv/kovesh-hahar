@@ -7,7 +7,7 @@ import Logo from "@/components/Logo";
 import { useAuth } from "@/lib/auth";
 import { createStory } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
-import { VEHICLE_TYPE_LABELS, RIDE_STYLE_LABELS, DIFFICULTY_LABELS, SEASON_LABELS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, RIDE_STYLE_LABELS, DIFFICULTY_LABELS, SEASON_LABELS, PARKING_SECURITY_LABELS } from "@/lib/labels";
 
 const MAX_PHOTOS = 10;
 
@@ -34,13 +34,15 @@ function AuthGate({
     email: string,
     password: string,
     displayName: string,
-    acceptedDisclaimer: boolean
+    acceptedDisclaimer: boolean,
+    phoneNumber?: string
   ) => Promise<void>;
 }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,7 +55,7 @@ function AuthGate({
       if (mode === "login") {
         await onLogin(email, password);
       } else {
-        await onRegister(email, password, displayName, acceptedDisclaimer);
+        await onRegister(email, password, displayName, acceptedDisclaimer, phoneNumber);
       }
     } catch (err: any) {
       setError(err.message);
@@ -100,6 +102,21 @@ function AuthGate({
           minLength={8}
           className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
         />
+
+        {mode === "register" && (
+          <div>
+            <input
+              type="tel"
+              placeholder="טלפון (לא חובה)"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+            />
+            <p className="text-[11px] text-textDim mt-1">
+              רק אם תרצה שרוכבים אחרים יוכלו לפנות אליך ב-WhatsApp מתוך הסיפורים שלך
+            </p>
+          </div>
+        )}
 
         {mode === "register" && (
           <label className="flex items-start gap-2.5 text-xs text-textDim leading-relaxed cursor-pointer">
@@ -158,6 +175,7 @@ function StoryForm({ token }: { token: string }) {
   const [meetingLabel, setMeetingLabel] = useState("");
   const [meetingLat, setMeetingLat] = useState("");
   const [meetingLon, setMeetingLon] = useState("");
+  const [parkingSecurity, setParkingSecurity] = useState("");
   const [gpxFile, setGpxFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -211,6 +229,7 @@ function StoryForm({ token }: { token: string }) {
           meetingPointLabel: meetingLabel || undefined,
           meetingPointLat: meetingLat ? Number(meetingLat) : null,
           meetingPointLon: meetingLon ? Number(meetingLon) : null,
+          parkingSecurity: parkingSecurity || undefined,
           gpxFile,
           photos,
         },
@@ -405,6 +424,24 @@ function StoryForm({ token }: { token: string }) {
               >
                 המיקום שלי
               </button>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
+                מצב החניה באזור (לא חובה)
+              </label>
+              <select
+                value={parkingSecurity}
+                onChange={(e) => setParkingSecurity(e.target.value)}
+                className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+              >
+                <option value="">לא ידוע / לא רלוונטי</option>
+                {Object.entries(PARKING_SECURITY_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

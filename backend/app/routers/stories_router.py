@@ -25,6 +25,7 @@ async def create_story(
     meeting_point_label: Optional[str] = Form(None),
     meeting_point_lat: Optional[float] = Form(None),
     meeting_point_lon: Optional[float] = Form(None),
+    parking_security: Optional[models.ParkingSecurity] = Form(None),
     gpx_file: Optional[UploadFile] = File(None),
     photos: List[UploadFile] = File(default=[]),
     current_user: models.User = Depends(auth.get_current_user),
@@ -59,6 +60,7 @@ async def create_story(
         meeting_point_label=(meeting_point_label or "").strip() or None,
         meeting_point_lat=meeting_point_lat,
         meeting_point_lon=meeting_point_lon,
+        parking_security=parking_security,
     )
 
     # פענוח GPX אם צורף - זה מה שמפיק את המרחק, הטיפוס, וקו החתימה
