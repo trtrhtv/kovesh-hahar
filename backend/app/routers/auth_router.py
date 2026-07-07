@@ -46,7 +46,7 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
     if phone_number and not is_valid_phone(phone_number):
         raise HTTPException(400, "מספר הטלפון לא נראה תקין")
     if username:
-        username = re.sub(r"[^a-z0-9_]", "", username)
+        username = re.sub(r"[^a-z0-9_ ]", "", username)
         if not username:
             username = None
         elif db.query(models.User).filter(models.User.username == username).first():
@@ -111,7 +111,7 @@ def update_me(
             raise HTTPException(400, "שם תצוגה לא יכול להיות ריק")
         current_user.display_name = name
     if payload.username is not None:
-        new_username = re.sub(r"[^a-z0-9_]", "", payload.username.strip().lower())
+        new_username = re.sub(r"[^a-z0-9_ ]", "", payload.username.strip().lower())
         if new_username and new_username != current_user.username:
             if db.query(models.User).filter(models.User.username == new_username).first():
                 raise HTTPException(400, "שם המשתמש הזה כבר תפוס")

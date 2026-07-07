@@ -100,7 +100,7 @@ function AuthGate({
               type="text"
               placeholder="שם משתמש (לא חובה - ליצור לבד אם ריק)"
               value={username}
-              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_ ]/g, ""))}
               className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             />
             <p className="text-[11px] text-textDim mt-1">

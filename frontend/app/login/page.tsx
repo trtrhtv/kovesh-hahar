@@ -81,7 +81,7 @@ export default function LoginPage() {
               type="text"
               placeholder="שם משתמש (לא חובה - אנגלית בלבד)"
               value={username}
-              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_ ]/g, ""))}
               className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             />
           )}
