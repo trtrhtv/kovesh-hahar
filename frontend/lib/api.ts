@@ -126,6 +126,26 @@ export async function postTrailUpdate(
   return res.json();
 }
 
+export async function deleteStory(storyId: string, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/stories/${storyId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "מחיקת הסיפור נכשלה");
+  }
+}
+
+export async function checkIsAdmin(token: string): Promise<boolean> {
+  const res = await fetch(`${API_BASE}/auth/is-admin`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return false;
+  const data = await res.json();
+  return !!data.is_admin;
+}
+
 export async function toggleLike(storyId: string, token: string): Promise<{ liked: boolean }> {
   const res = await fetch(`${API_BASE}/stories/${storyId}/like`, {
     method: "POST",

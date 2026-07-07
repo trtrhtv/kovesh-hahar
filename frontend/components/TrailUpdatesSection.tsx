@@ -41,12 +41,12 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
 
   return (
     <div className="border-2 border-char/20 p-4">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 gap-3">
         <h2 className="font-bold text-sm tracking-wider text-char/60">עדכוני שטח</h2>
         {token && (
           <button
             onClick={() => setShowForm((s) => !s)}
-            className="text-xs font-bold text-oxide hover:underline"
+            className="text-sm font-bold text-oxide border-2 border-oxide px-4 py-2.5 min-h-[44px] hover:bg-oxide hover:text-sand active:bg-oxide active:text-sand transition-colors"
           >
             {showForm ? "ביטול" : "+ עדכן מצב"}
           </button>
@@ -75,7 +75,7 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
                 type="button"
                 key={s}
                 onClick={() => setStatus(s)}
-                className={`text-xs font-bold px-3 py-1.5 border transition-colors ${
+                className={`text-sm font-bold px-4 py-3 min-h-[44px] border-2 transition-colors ${
                   status === s
                     ? "text-sand"
                     : "border-char/25 hover:border-oxide"
@@ -98,7 +98,7 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
           <button
             type="submit"
             disabled={busy}
-            className="bg-char text-sand py-2 text-sm font-bold hover:bg-oxide transition-colors disabled:opacity-50 self-start px-4"
+            className="bg-char text-sand py-3.5 min-h-[48px] text-base font-bold hover:bg-oxide transition-colors disabled:opacity-50 w-full sm:w-auto sm:self-start px-6"
           >
             {busy ? "שולח..." : "פרסם עדכון"}
           </button>

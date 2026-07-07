@@ -4,10 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
-from .. import models, schemas, auth, storage, gpx_utils, locations
+from .. import models, schemas, auth, storage, gpx_utils, locations, admin
 from ..database import get_db
 
 router = APIRouter(prefix="/stories", tags=["stories"])
+
+MIN_BODY_WORDS = 30
 
 
 @router.post("", response_model=schemas.StoryOut)
@@ -30,6 +32,12 @@ async def create_story(
 ):
     if len(photos) > storage.MAX_PHOTOS_PER_STORY:
         raise HTTPException(400, f"מקסימום {storage.MAX_PHOTOS_PER_STORY} תמונות לסיפור")
+
+    word_count = len(body.split())
+    if word_count < MIN_BODY_WORDS:
+        raise HTTPException(
+            400, f"הסיפור קצר מדי - נדרשות לפחות {MIN_BODY_WORDS} מילים (יש כרגע {word_count})"
+        )
 
     if not locations.is_valid_country(country):
         raise HTTPException(400, "מדינה לא תקינה")
@@ -169,6 +177,24 @@ def toggle_like(
     db.add(like)
     db.commit()
     return {"liked": True}
+
+
+@router.delete("/{story_id}")
+def delete_story(
+    story_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if not story:
+        raise HTTPException(404, "הסיפור לא נמצא")
+
+    if story.author_id != current_user.id and not admin.is_admin(current_user):
+        raise HTTPException(403, "אין לך הרשאה למחוק את הסיפור הזה")
+
+    db.delete(story)
+    db.commit()
+    return {"deleted": True}
 
 
 def _with_extras(story: models.Story, db: Session):

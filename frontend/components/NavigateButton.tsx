@@ -24,12 +24,12 @@ export default function NavigateButton({
         <div className="text-xs font-bold text-char/60 tracking-wide mb-0.5">נקודת כינוס</div>
         <div className="text-sm">{label || "המיקום מסומן על המפה"}</div>
       </div>
-      <div className="flex gap-2 shrink-0">
+      <div className="flex gap-2 shrink-0 flex-col sm:flex-row">
         <a
           href={wazeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-char text-sand px-4 py-2 text-sm font-bold hover:bg-oxide transition-colors"
+          className="bg-char text-sand w-full sm:w-auto px-5 py-3.5 min-h-[48px] text-base font-bold hover:bg-oxide active:bg-oxide transition-colors flex items-center justify-center text-center"
         >
           נווט ב-Waze
         </a>
@@ -37,7 +37,7 @@ export default function NavigateButton({
           href={googleUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="border border-char/30 px-4 py-2 text-sm font-bold hover:border-oxide transition-colors"
+          className="border-2 border-char/30 w-full sm:w-auto px-5 py-3.5 min-h-[48px] text-base font-bold hover:border-oxide active:border-oxide transition-colors flex items-center justify-center text-center"
         >
           Google Maps
         </a>

@@ -35,7 +35,7 @@ export default function LikeButton({
     <button
       onClick={handleClick}
       disabled={busy}
-      className={`border px-4 py-2 text-sm font-bold transition-colors ${
+      className={`border-2 px-5 py-2.5 min-h-[44px] text-base font-bold transition-colors ${
         liked ? "bg-oxide text-sand border-oxide" : "border-char/25 hover:border-oxide"
       }`}
     >

@@ -104,7 +104,7 @@ export default function RouteMap({
       <div ref={containerRef} className="w-full h-full" />
       <button
         onClick={() => setSatelliteOn(toggleRef.current ? toggleRef.current() : false)}
-        className="absolute bottom-3 right-3 z-10 bg-sand border border-char/25 px-3 py-1.5 text-xs font-bold hover:border-oxide transition-colors shadow-sm"
+        className="absolute bottom-3 right-3 z-10 bg-sand border border-char/25 px-4 py-2.5 min-h-[40px] text-xs font-bold hover:border-oxide transition-colors shadow-sm"
       >
         {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
       </button>

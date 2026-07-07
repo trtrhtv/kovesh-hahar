@@ -30,12 +30,18 @@ function AuthGate({
   onRegister,
 }: {
   onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (email: string, password: string, displayName: string) => Promise<void>;
+  onRegister: (
+    email: string,
+    password: string,
+    displayName: string,
+    acceptedDisclaimer: boolean
+  ) => Promise<void>;
 }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -47,7 +53,7 @@ function AuthGate({
       if (mode === "login") {
         await onLogin(email, password);
       } else {
-        await onRegister(email, password, displayName);
+        await onRegister(email, password, displayName, acceptedDisclaimer);
       }
     } catch (err: any) {
       setError(err.message);
@@ -95,11 +101,28 @@ function AuthGate({
           className="border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
         />
 
+        {mode === "register" && (
+          <label className="flex items-start gap-2.5 text-xs text-char/70 leading-relaxed cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acceptedDisclaimer}
+              onChange={(e) => setAcceptedDisclaimer(e.target.checked)}
+              required
+              className="mt-0.5 w-5 h-5 shrink-0 accent-oxide"
+            />
+            <span>
+              האתר אינו אחראי על תוכן המסלולים, תנאי השטח, או חוקיות המעבר בהם. הרכיבה
+              היא על אחריות הרוכב בלבד. יש לבדוק שטחי אש ואישורי מעבר מול הגורמים
+              הרלוונטיים לפני היציאה לשטח.
+            </span>
+          </label>
+        )}
+
         {error && <p className="text-oxide text-sm">{error}</p>}
 
         <button
           type="submit"
-          disabled={busy}
+          disabled={busy || (mode === "register" && !acceptedDisclaimer)}
           className="bg-oxide text-sand py-3 font-bold hover:bg-oxideDark transition-colors disabled:opacity-50"
         >
           {busy ? "רגע..." : mode === "login" ? "התחבר" : "הרשם"}
@@ -114,6 +137,12 @@ function AuthGate({
       </button>
     </main>
   );
+}
+
+const MIN_BODY_WORDS = 30;
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
 function StoryForm({ token }: { token: string }) {
@@ -158,6 +187,12 @@ function StoryForm({ token }: { token: string }) {
 
     if (!region.trim()) {
       setError(country === ISRAEL ? "יש לבחור אזור" : "יש לציין שם מקום");
+      return;
+    }
+
+    const wordCount = countWords(body);
+    if (wordCount < MIN_BODY_WORDS) {
+      setError(`הסיפור קצר מדי - נדרשות לפחות ${MIN_BODY_WORDS} מילים (יש כרגע ${wordCount})`);
       return;
     }
 
@@ -221,6 +256,13 @@ function StoryForm({ token }: { token: string }) {
             placeholder="איך הייתה הרכיבה, מה כדאי לדעת לפני שיוצאים, אתגרים בדרך..."
             className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none resize-y"
           />
+          <p
+            className={`text-xs mt-1 ${
+              countWords(body) >= MIN_BODY_WORDS ? "text-olive" : "text-char/50"
+            }`}
+          >
+            {countWords(body)} / {MIN_BODY_WORDS} מילים לפחות
+          </p>
         </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

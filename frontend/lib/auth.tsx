@@ -18,7 +18,7 @@ type AuthContextType = {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, displayName: string) => Promise<void>;
+  register: (email: string, password: string, displayName: string, acceptedDisclaimer: boolean) => Promise<void>;
   logout: () => void;
 };
 
@@ -71,11 +71,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchMe(data.access_token);
   }
 
-  async function register(email: string, password: string, displayName: string) {
+  async function register(
+    email: string,
+    password: string,
+    displayName: string,
+    acceptedDisclaimer: boolean
+  ) {
+    if (!acceptedDisclaimer) {
+      throw new Error("יש לאשר את הצהרת האחריות כדי להירשם");
+    }
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, display_name: displayName }),
+      body: JSON.stringify({
+        email,
+        password,
+        display_name: displayName,
+        accepted_disclaimer: acceptedDisclaimer,
+      }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

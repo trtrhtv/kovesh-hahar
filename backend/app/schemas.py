@@ -9,6 +9,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     display_name: str
+    accepted_disclaimer: bool
 
 
 class UserOut(BaseModel):

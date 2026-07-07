@@ -15,6 +15,7 @@ import LikeButton from "@/components/LikeButton";
 import CommentsSection from "@/components/CommentsSection";
 import NavigateButton from "@/components/NavigateButton";
 import TrailUpdatesSection from "@/components/TrailUpdatesSection";
+import DeleteStoryButton from "@/components/DeleteStoryButton";
 
 export default async function StoryPage({ params }: { params: { id: string } }) {
   const story = await fetchStory(params.id);
@@ -53,10 +54,13 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
         </div>
 
         <h1 className="text-4xl font-black leading-tight mb-2">{story.title}</h1>
-        <p className="text-char/60 text-sm mb-8">
-          {story.author.display_name} ·{" "}
-          {new Date(story.created_at).toLocaleDateString("he-IL")}
-        </p>
+        <div className="flex items-center justify-between mb-8">
+          <p className="text-char/60 text-sm">
+            {story.author.display_name} ·{" "}
+            {new Date(story.created_at).toLocaleDateString("he-IL")}
+          </p>
+          <DeleteStoryButton storyId={story.id} authorId={story.author.id} />
+        </div>
 
         {(story.distance_km != null || story.elevation_gain_m != null) && (
           <div className="flex gap-8 font-mono border-y border-char/15 py-4 mb-8">

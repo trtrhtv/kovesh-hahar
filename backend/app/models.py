@@ -59,6 +59,7 @@ class User(Base):
     avatar_url = Column(String, nullable=True)
     bike_model = Column(String, nullable=True)  # "KTM 500 EXC" וכו'
     home_region = Column(String, nullable=True)
+    accepted_disclaimer_at = Column(DateTime, nullable=True)  # מתי אישר את הצהרת האחריות
     created_at = Column(DateTime, default=datetime.utcnow)
 
     stories = relationship("Story", back_populates="author", cascade="all, delete-orphan")
@@ -101,6 +102,7 @@ class Story(Base):
     photos = relationship("StoryPhoto", back_populates="story", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="story", cascade="all, delete-orphan")
     likes = relationship("Like", back_populates="story", cascade="all, delete-orphan")
+    trail_updates = relationship("TrailUpdate", back_populates="story", cascade="all, delete-orphan")
 
 
 class StoryPhoto(Base):
@@ -138,7 +140,7 @@ class TrailUpdate(Base):
     note = Column(Text, nullable=True)  # למשל "קריסה אחרי הגשם - 05/2026"
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
-    story = relationship("Story")
+    story = relationship("Story", back_populates="trail_updates")
     author = relationship("User")
 
 
