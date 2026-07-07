@@ -1,4 +1,5 @@
 import type { StoryListItem } from "@/lib/api";
+import { getFeaturedStory } from "@/lib/stories";
 
 /**
  * לוקחת את תמונת השער של הסיפור עם הכי הרבה לייקים ומציבה אותה "פורצת"
@@ -7,9 +8,7 @@ import type { StoryListItem } from "@/lib/api";
  * תמונה אמיתית שרוכב אמיתי העלה.
  */
 export default function BreakoutRiderImage({ stories }: { stories: StoryListItem[] }) {
-  const featured = [...stories]
-    .filter((s) => s.cover_photo_url)
-    .sort((a, b) => b.like_count - a.like_count)[0];
+  const featured = getFeaturedStory(stories);
 
   if (!featured?.cover_photo_url) return null;
 
