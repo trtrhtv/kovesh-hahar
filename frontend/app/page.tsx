@@ -20,7 +20,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/stories/new"
-              className="bg-moto text-carbon px-4 py-2 font-bold hover:bg-motoDark transition-colors"
+              className="moto-btn bg-moto text-carbon px-4 py-2 font-bold hover:bg-motoDark transition-colors"
             >
               העלה סיפור
             </Link>
@@ -28,53 +28,42 @@ export default async function HomePage() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden max-w-5xl mx-auto px-5 pt-16 pb-12">
-        <svg
-          className="absolute -left-24 -top-16 w-[520px] h-[520px] opacity-[0.12] pointer-events-none"
-          viewBox="0 0 400 400"
+      {/* Hero - פאנל אלכסוני א-סימטרי, לא עוד קישוט עדין */}
+      <section className="relative overflow-hidden">
+        <div
+          className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none"
+          style={{ clipPath: "polygon(30% 0, 100% 0, 100% 100%, 0 100%)" }}
           aria-hidden="true"
-        >
-          {[60, 95, 130, 165, 200, 235].map((r, i) => (
-            <ellipse
-              key={r}
-              cx="200"
-              cy="220"
-              rx={r * 1.3}
-              ry={r}
-              fill="none"
-              stroke={i % 2 === 0 ? "#FF6600" : "#00E5FF"}
-              strokeWidth="1.5"
-              transform={`rotate(${i * 3} 200 220)`}
-            />
-          ))}
-        </svg>
+        />
 
-        <div className="relative font-mono text-xs text-cyan tracking-widest mb-4">
-          ROADBOOK · אנדורו · סינגלים · מוטוקרוס · אדוונצ'ר
-        </div>
-        <h1 className="relative text-5xl md:text-7xl font-black leading-[0.95] max-w-3xl">
-          כל רכיבה משאירה
-          <br />
-          <span className="text-moto">קו על המפה.</span>
-        </h1>
-        <p className="relative mt-6 text-lg text-white/80 max-w-xl leading-relaxed">
-          מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
-          ועדכוני שטח בזמן אמת. בלי מנויים.
-        </p>
-        <div className="relative mt-8 flex gap-3">
-          <Link
-            href="/stories/new"
-            className="bg-moto text-carbon px-6 py-3 font-bold hover:bg-motoDark transition-colors"
-          >
-            שתף סיפור נסיעה
-          </Link>
-          <Link
-            href="/stories"
-            className="border border-edge px-6 py-3 font-bold hover:border-moto transition-colors"
-          >
-            עיין במסלולים
-          </Link>
+        <div className="relative max-w-5xl mx-auto px-5 pt-14 pb-12">
+          <div className="font-mono text-xs text-cyan tracking-[0.3em] mb-3">
+            ROADBOOK // אנדורו · סינגלים · מוטוקרוס · אדוונצ'ר
+          </div>
+          <h1 className="leading-[0.85]">
+            <span className="block text-7xl md:text-9xl font-black text-white">כובשים.</span>
+            <span className="block text-2xl md:text-4xl font-bold text-moto mt-2">
+              כל רכיבה משאירה קו על המפה
+            </span>
+          </h1>
+          <p className="mt-6 text-lg text-white/70 max-w-lg leading-relaxed">
+            מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
+            ועדכוני שטח בזמן אמת.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/stories/new"
+              className="moto-btn bg-moto text-carbon px-6 py-3 font-bold hover:bg-motoDark transition-colors"
+            >
+              שתף סיפור נסיעה
+            </Link>
+            <Link
+              href="/stories"
+              className="border border-edge px-6 py-3 font-bold hover:border-moto transition-colors"
+            >
+              עיין במסלולים
+            </Link>
+          </div>
         </div>
       </section>
 

@@ -29,7 +29,7 @@ export default function NavigateButton({
           href={wazeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-press bg-moto text-carbon w-full sm:w-auto px-6 py-4 min-h-[52px] text-base font-black hover:bg-motoDark hover:shadow-glow-moto transition-colors flex items-center justify-center text-center"
+          className="btn-press moto-btn bg-moto text-carbon w-full sm:w-auto px-6 py-4 min-h-[52px] text-base font-black hover:bg-motoDark hover:shadow-glow-moto transition-colors flex items-center justify-center text-center"
         >
           נווט ב-Waze
         </a>

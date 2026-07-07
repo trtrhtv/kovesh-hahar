@@ -100,7 +100,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
           <div className="flex gap-8 font-mono border-y border-edge py-4 mb-8">
             {story.distance_km != null && (
               <div>
-                <div className="text-3xl font-black leading-none text-white">
+                <div className="stat-number text-3xl font-black leading-none text-white">
                   {story.distance_km}
                 </div>
                 <div className="text-xs text-textDim tracking-wider mt-1">ק״מ</div>
@@ -108,7 +108,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
             )}
             {story.elevation_gain_m != null && (
               <div>
-                <div className="text-3xl font-black leading-none text-white">
+                <div className="stat-number text-3xl font-black leading-none text-white">
                   {Math.round(story.elevation_gain_m)}
                 </div>
                 <div className="text-xs text-textDim tracking-wider mt-1">מ׳ טיפוס מצטבר</div>

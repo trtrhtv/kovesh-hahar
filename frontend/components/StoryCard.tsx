@@ -37,7 +37,7 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
           <div className="flex gap-4 font-mono text-sm">
             {story.distance_km != null && (
               <div>
-                <div className="text-2xl font-black leading-none text-white">
+                <div className="stat-number text-2xl font-black leading-none text-white">
                   {story.distance_km}
                 </div>
                 <div className="text-[10px] text-textDim tracking-wider">ק״מ</div>
@@ -45,7 +45,7 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
             )}
             {story.elevation_gain_m != null && (
               <div>
-                <div className="text-2xl font-black leading-none text-white">
+                <div className="stat-number text-2xl font-black leading-none text-white">
                   {Math.round(story.elevation_gain_m)}
                 </div>
                 <div className="text-[10px] text-textDim tracking-wider">מ׳ טיפוס</div>

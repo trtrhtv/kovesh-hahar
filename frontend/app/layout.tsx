@@ -30,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={`${heebo.variable} ${mono.variable}`}>
       <body className="font-heebo antialiased min-h-screen flex flex-col">
+        <div className="livery-stripe h-[3px] w-full shrink-0" />
         <AuthProvider>
           <div className="flex-1">{children}</div>
           <Footer />

@@ -123,7 +123,7 @@ function AuthGate({
         <button
           type="submit"
           disabled={busy || (mode === "register" && !acceptedDisclaimer)}
-          className="bg-moto text-carbon py-3 font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
+          className="moto-btn bg-moto text-carbon py-3 font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
         >
           {busy ? "רגע..." : mode === "login" ? "התחבר" : "הרשם"}
         </button>
@@ -436,7 +436,7 @@ function StoryForm({ token }: { token: string }) {
         <button
           type="submit"
           disabled={busy}
-          className="bg-moto text-carbon py-3 font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
+          className="moto-btn bg-moto text-carbon py-3 font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
         >
           {busy ? "מעלה..." : "פרסם סיפור"}
         </button>

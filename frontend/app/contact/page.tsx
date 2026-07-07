@@ -80,7 +80,7 @@ export default function ContactPage() {
             <button
               type="submit"
               disabled={busy}
-              className="bg-moto text-carbon py-3.5 min-h-[48px] text-base font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
+              className="moto-btn bg-moto text-carbon py-3.5 min-h-[48px] text-base font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
             >
               {busy ? "שולח..." : "שלח הודעה"}
             </button>
