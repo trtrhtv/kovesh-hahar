@@ -99,12 +99,12 @@ export default async function HomePage() {
               </span>
             </div>
 
-            <div className="border-t border-dashed border-edge mt-4 pt-6">
+            <div className="border-t border-dashed border-edge mt-4 pt-6 px-1 sm:px-4">
               <p className="text-lg text-ink/70 max-w-lg leading-relaxed">
                 מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
                 ועדכוני שטח בזמן אמת.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-12 flex flex-wrap gap-3">
                 <Link
                   href="/stories/new"
                   className="tactical-btn bg-moto text-carbon hover:bg-motoDark"
