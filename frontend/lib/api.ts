@@ -408,6 +408,64 @@ export async function fetchContactMessages(token: string): Promise<ContactMessag
   return res.json();
 }
 
+export async function addStoryPhotos(
+  storyId: string,
+  photos: File[],
+  token: string
+): Promise<StoryDetail> {
+  const form = new FormData();
+  photos.forEach((p) => form.append("photos", p));
+  const res = await fetch(`${API_BASE}/stories/${storyId}/photos`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "הוספת התמונות נכשלה"));
+  }
+  return res.json();
+}
+
+export async function deleteStoryPhoto(
+  storyId: string,
+  photoId: string,
+  token: string
+): Promise<StoryDetail> {
+  const res = await fetch(`${API_BASE}/stories/${storyId}/photos/${photoId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "מחיקת התמונה נכשלה"));
+  }
+  return res.json();
+}
+
+export async function replaceStoryRoute(
+  storyId: string,
+  data: { gpxFile?: File | null; drawnRoutePoints?: [number, number][] },
+  token: string
+): Promise<StoryDetail> {
+  const form = new FormData();
+  if (data.gpxFile) {
+    form.set("gpx_file", data.gpxFile);
+  } else if (data.drawnRoutePoints && data.drawnRoutePoints.length >= 2) {
+    form.set("drawn_route_json", JSON.stringify(data.drawnRoutePoints));
+  }
+  const res = await fetch(`${API_BASE}/stories/${storyId}/route`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "עדכון המסלול נכשל"));
+  }
+  return res.json();
+}
+
 export async function updateStory(
   storyId: string,
   data: Partial<{

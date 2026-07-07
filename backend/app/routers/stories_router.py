@@ -353,6 +353,142 @@ def update_story(
     return _with_extras(story, db)
 
 
+def _check_story_edit_permission(story: models.Story, current_user: models.User):
+    if story.author_id != current_user.id and not admin.is_admin(current_user):
+        raise HTTPException(403, "אין לך הרשאה לערוך את הסיפור הזה")
+
+
+@router.post("/{story_id}/photos", response_model=schemas.StoryOut)
+async def add_story_photos(
+    story_id: str,
+    photos: List[UploadFile] = File(...),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if not story:
+        raise HTTPException(404, "הסיפור לא נמצא")
+    _check_story_edit_permission(story, current_user)
+
+    existing_count = db.query(func.count(models.StoryPhoto.id)).filter(
+        models.StoryPhoto.story_id == story_id
+    ).scalar() or 0
+    if existing_count + len(photos) > storage.MAX_PHOTOS_PER_STORY:
+        raise HTTPException(
+            400, f"מקסימום {storage.MAX_PHOTOS_PER_STORY} תמונות לסיפור (יש כבר {existing_count})"
+        )
+
+    for idx, photo in enumerate(photos):
+        raw = await photo.read()
+        if photo.content_type not in storage.ALLOWED_IMAGE_TYPES:
+            raise HTTPException(400, "פורמט תמונה לא נתמך - יש להעלות JPEG/PNG/WebP בלבד")
+        if len(raw) > storage.MAX_PHOTO_SIZE_MB * 1024 * 1024:
+            raise HTTPException(400, f"כל תמונה עד {storage.MAX_PHOTO_SIZE_MB}MB")
+
+        ext = photo.content_type.split("/")[-1]
+        url = storage.upload_file(raw, photo.content_type, "photos", ext)
+        db.add(models.StoryPhoto(story_id=story.id, url=url, order_index=existing_count + idx))
+        if not story.cover_photo_url:
+            story.cover_photo_url = url
+
+    db.commit()
+    db.refresh(story)
+    return _with_extras(story, db)
+
+
+@router.delete("/{story_id}/photos/{photo_id}", response_model=schemas.StoryOut)
+def delete_story_photo(
+    story_id: str,
+    photo_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if not story:
+        raise HTTPException(404, "הסיפור לא נמצא")
+    _check_story_edit_permission(story, current_user)
+
+    photo = (
+        db.query(models.StoryPhoto)
+        .filter(models.StoryPhoto.id == photo_id, models.StoryPhoto.story_id == story_id)
+        .first()
+    )
+    if not photo:
+        raise HTTPException(404, "התמונה לא נמצאה")
+
+    was_cover = story.cover_photo_url == photo.url
+    db.delete(photo)
+    db.flush()
+
+    if was_cover:
+        # אם מחקנו את תמונת השער, מקדמים את התמונה הבאה בתור (אם יש)
+        next_photo = (
+            db.query(models.StoryPhoto)
+            .filter(models.StoryPhoto.story_id == story_id)
+            .order_by(models.StoryPhoto.order_index.asc())
+            .first()
+        )
+        story.cover_photo_url = next_photo.url if next_photo else None
+
+    db.commit()
+    db.refresh(story)
+    return _with_extras(story, db)
+
+
+@router.put("/{story_id}/route", response_model=schemas.StoryOut)
+async def replace_story_route(
+    story_id: str,
+    gpx_file: Optional[UploadFile] = File(None),
+    drawn_route_json: Optional[str] = Form(None),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """מחליף את המסלול הקיים (GPX או משורטט) בחדש - לא מוסיף, מחליף לגמרי"""
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if not story:
+        raise HTTPException(404, "הסיפור לא נמצא")
+    _check_story_edit_permission(story, current_user)
+
+    if not gpx_file and not drawn_route_json:
+        raise HTTPException(400, "יש לצרף קובץ GPX או מסלול משורטט")
+
+    if gpx_file is not None:
+        raw = await gpx_file.read()
+        if len(raw) > storage.MAX_GPX_SIZE_MB * 1024 * 1024:
+            raise HTTPException(400, f"קובץ ה-GPX גדול מ-{storage.MAX_GPX_SIZE_MB}MB")
+        try:
+            parsed = gpx_utils.parse_gpx(raw)
+        except Exception as e:
+            raise HTTPException(400, f"לא הצלחתי לקרוא את קובץ ה-GPX: {e}")
+
+        story.gpx_url = storage.upload_file(raw, "application/gpx+xml", "gpx", "gpx")
+        story.distance_km = parsed["distance_km"]
+        story.elevation_gain_m = parsed["elevation_gain_m"]
+        story.elevation_profile_json = gpx_utils.profile_to_json(parsed["elevation_profile"])
+        story.start_lat = parsed["start_lat"]
+        story.start_lon = parsed["start_lon"]
+    else:
+        try:
+            points = json.loads(drawn_route_json)
+        except Exception:
+            raise HTTPException(400, "מסלול משורטט לא תקין")
+        if not isinstance(points, list) or len(points) < 2:
+            raise HTTPException(400, "מסלול משורטט צריך לפחות 2 נקודות")
+        if len(points) > 500:
+            raise HTTPException(400, "יותר מדי נקודות במסלול המשורטט")
+
+        story.gpx_url = None
+        story.distance_km = round(route_distance_km(points), 2)
+        story.elevation_gain_m = None
+        story.elevation_profile_json = json.dumps([[p[0], p[1], 0] for p in points])
+        story.start_lat = points[0][0]
+        story.start_lon = points[0][1]
+
+    db.commit()
+    db.refresh(story)
+    return _with_extras(story, db)
+
+
 def _with_extras(story: models.Story, db: Session):
     like_count = db.query(func.count(models.Like.id)).filter(models.Like.story_id == story.id).scalar()
     comment_count = (

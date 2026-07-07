@@ -6,8 +6,17 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
+import RouteDrawer from "@/components/RouteDrawer";
 import { useAuth } from "@/lib/auth";
-import { fetchStory, updateStory, checkIsAdmin, type StoryDetail } from "@/lib/api";
+import {
+  fetchStory,
+  updateStory,
+  checkIsAdmin,
+  addStoryPhotos,
+  deleteStoryPhoto,
+  replaceStoryRoute,
+  type StoryDetail,
+} from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
 import {
   VEHICLE_TYPE_LABELS,
@@ -66,7 +75,12 @@ export default function EditStoryPage() {
 
   return (
     <PageBackdrop>
-      <EditForm story={story} token={token!} onDone={() => router.push(`/stories/${storyId}`)} />
+      <EditForm
+        story={story}
+        token={token!}
+        onDone={() => router.push(`/stories/${storyId}`)}
+        onStoryUpdated={setStory}
+      />
     </PageBackdrop>
   );
 }
@@ -75,10 +89,12 @@ function EditForm({
   story,
   token,
   onDone,
+  onStoryUpdated,
 }: {
   story: StoryDetail;
   token: string;
   onDone: () => void;
+  onStoryUpdated: (story: StoryDetail) => void;
 }) {
   const [title, setTitle] = useState(story.title);
   const [body, setBody] = useState(story.body);
@@ -158,8 +174,14 @@ function EditForm({
       </Link>
       <h1 className="text-3xl font-black mb-1">עריכת סיפור</h1>
       <p className="text-textDim mb-8 text-sm">
-        לא ניתן לשנות כאן תמונות או קובץ GPX בשלב הזה - רק את פרטי הסיפור.
+        שינויים בתמונות ובמסלול נשמרים מייד עם הלחיצה, בנפרד משאר פרטי הסיפור למטה.
       </p>
+
+      <PhotosSection story={story} token={token} onStoryUpdated={onStoryUpdated} />
+      <div className="mt-6">
+        <RouteSection story={story} token={token} onStoryUpdated={onStoryUpdated} />
+      </div>
+      <div className="contour-divider my-8" />
 
       <form onSubmit={requestSave} className="flex flex-col gap-5">
         <Field label="כותרת">
@@ -368,5 +390,192 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">{label}</span>
       {children}
     </label>
+  );
+}
+
+function PhotosSection({
+  story,
+  token,
+  onStoryUpdated,
+}: {
+  story: StoryDetail;
+  token: string;
+  onStoryUpdated: (story: StoryDetail) => void;
+}) {
+  const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleAdd() {
+    if (newPhotos.length === 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await addStoryPhotos(story.id, newPhotos, token);
+      onStoryUpdated(updated);
+      setNewPhotos([]);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDelete(photoId: string) {
+    setDeletingId(photoId);
+    setError(null);
+    try {
+      const updated = await deleteStoryPhoto(story.id, photoId, token);
+      onStoryUpdated(updated);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  return (
+    <div className="moto-card p-4">
+      <h2 className="font-bold text-sm tracking-wider text-textDim mb-4">
+        תמונות ({story.photos.length}/10)
+      </h2>
+
+      {story.photos.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">
+          {story.photos.map((photo) => (
+            <div key={photo.id} className="relative aspect-square">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo.url} alt="" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => handleDelete(photo.id)}
+                disabled={deletingId === photo.id}
+                className="absolute top-1 left-1 bg-carbon/80 text-moto w-7 h-7 flex items-center justify-center text-sm font-bold disabled:opacity-50"
+              >
+                {deletingId === photo.id ? "…" : "✕"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {story.photos.length < 10 && (
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={(e) => setNewPhotos(Array.from(e.target.files || []))}
+            className="text-sm flex-1"
+          />
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={busy || newPhotos.length === 0}
+            className="switch-btn text-sm font-bold text-ink px-4 py-2.5 disabled:opacity-50 whitespace-nowrap"
+          >
+            {busy ? "מעלה..." : "+ הוסף תמונות"}
+          </button>
+        </div>
+      )}
+      {error && <p className="text-moto text-xs mt-2">{error}</p>}
+    </div>
+  );
+}
+
+function RouteSection({
+  story,
+  token,
+  onStoryUpdated,
+}: {
+  story: StoryDetail;
+  token: string;
+  onStoryUpdated: (story: StoryDetail) => void;
+}) {
+  const [mode, setMode] = useState<"gpx" | "draw" | null>(null);
+  const [gpxFile, setGpxFile] = useState<File | null>(null);
+  const [drawnPoints, setDrawnPoints] = useState<[number, number][]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSave() {
+    setError(null);
+    if (mode === "gpx" && !gpxFile) {
+      setError("יש לבחור קובץ GPX");
+      return;
+    }
+    if (mode === "draw" && drawnPoints.length < 2) {
+      setError("צריך לשרטט לפחות 2 נקודות");
+      return;
+    }
+    setBusy(true);
+    try {
+      const updated = await replaceStoryRoute(
+        story.id,
+        { gpxFile: mode === "gpx" ? gpxFile : null, drawnRoutePoints: mode === "draw" ? drawnPoints : undefined },
+        token
+      );
+      onStoryUpdated(updated);
+      setMode(null);
+      setGpxFile(null);
+      setDrawnPoints([]);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="moto-card p-4">
+      <h2 className="font-bold text-sm tracking-wider text-textDim mb-1">מסלול</h2>
+      <p className="text-xs text-textDim mb-4">
+        {story.distance_km != null
+          ? `יש מסלול קיים - ${story.distance_km} ק"מ. שינוי כאן יחליף אותו לגמרי.`
+          : "אין עדיין מסלול לסיפור הזה."}
+      </p>
+
+      <div className="flex gap-2 mb-3">
+        <button
+          type="button"
+          onClick={() => setMode(mode === "gpx" ? null : "gpx")}
+          className={`switch-btn text-xs font-bold px-3 py-2 ${mode === "gpx" ? "active text-moto" : "text-ink"}`}
+        >
+          החלף עם GPX
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode(mode === "draw" ? null : "draw")}
+          className={`switch-btn text-xs font-bold px-3 py-2 ${mode === "draw" ? "active text-moto" : "text-ink"}`}
+        >
+          שרטט מסלול חדש
+        </button>
+      </div>
+
+      {mode === "gpx" && (
+        <input
+          type="file"
+          accept=".gpx"
+          onChange={(e) => setGpxFile(e.target.files?.[0] || null)}
+          className="text-sm mb-3"
+        />
+      )}
+      {mode === "draw" && (
+        <RouteDrawer onPointsChange={setDrawnPoints} className="w-full h-64 border border-edge mb-3" />
+      )}
+
+      {mode && (
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={busy}
+          className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50 !py-2.5 !px-5"
+        >
+          {busy ? "שומר..." : "שמור מסלול"}
+        </button>
+      )}
+      {error && <p className="text-moto text-xs mt-2">{error}</p>}
+    </div>
   );
 }
