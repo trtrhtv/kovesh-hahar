@@ -7,7 +7,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import WeatherWidget from "@/components/WeatherWidget";
 import DeleteEventButton from "@/components/DeleteEventButton";
 import { fetchEvent } from "@/lib/api";
-import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS, TIME_PERIOD_LABELS } from "@/lib/labels";
 import { notFound } from "next/navigation";
 
 export default async function EventDetailPage({ params }: { params: { id: string } }) {
@@ -15,6 +15,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
   if (!event) notFound();
 
   const date = new Date(event.event_date);
+  const endDate = event.end_date ? new Date(event.end_date) : null;
   const locationLabel = event.country !== "ישראל" ? `${event.region}, ${event.country}` : event.region;
 
   return (
@@ -54,9 +55,19 @@ export default async function EventDetailPage({ params }: { params: { id: string
         <div>
           <div className="text-ink font-bold">
             {date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            {endDate && (
+              <>
+                {" "}
+                עד{" "}
+                {endDate.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              </>
+            )}
           </div>
           <div className="text-textDim text-sm">
-            {date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+            {event.time_is_approximate
+              ? TIME_PERIOD_LABELS[event.approximate_period || ""] || "זמן משוער"
+              : date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+            {endDate && ` · טיול ${Math.round((endDate.getTime() - date.getTime()) / 86400000) + 1} ימים`}
           </div>
         </div>
       </div>

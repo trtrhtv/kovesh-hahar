@@ -171,6 +171,9 @@ class Event(Base):
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
     event_date = Column(DateTime, nullable=False, index=True)
+    end_date = Column(DateTime, nullable=True)  # אם מוגדר - טיול רב-יומי
+    time_is_approximate = Column(Boolean, default=False)  # "בוקר" במקום שעה מדויקת
+    approximate_period = Column(String, nullable=True)  # למשל "morning" - לתצוגה בלבד
 
     vehicle_type = Column(Enum(VehicleType), nullable=True)
     difficulty = Column(Enum(Difficulty), nullable=True)

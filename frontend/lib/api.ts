@@ -182,6 +182,9 @@ export type EventItem = {
   title: string;
   description: string;
   event_date: string;
+  end_date?: string;
+  time_is_approximate: boolean;
+  approximate_period?: string;
   vehicle_type?: string;
   difficulty?: string;
   country: string;
@@ -223,6 +226,9 @@ export async function createEvent(
     title: string;
     description: string;
     event_date: string;
+    end_date?: string;
+    time_is_approximate: boolean;
+    approximate_period?: string;
     vehicle_type?: string;
     difficulty?: string;
     country: string;

@@ -47,6 +47,24 @@ export const PARKING_SECURITY_LABELS: Record<string, string> = {
   risk: "⚠️ סיכון גניבה גבוה",
 };
 
+export const TIME_PERIOD_LABELS: Record<string, string> = {
+  early_morning: "בוקר מוקדם",
+  morning: "בוקר",
+  noon: "צהריים",
+  afternoon: "אחר הצהריים",
+  evening: "ערב",
+  night: "לילה",
+};
+
+export const TIME_PERIOD_HOURS: Record<string, string> = {
+  early_morning: "06:00",
+  morning: "08:00",
+  noon: "12:00",
+  afternoon: "15:00",
+  evening: "18:00",
+  night: "21:00",
+};
+
 export const TRAIL_STATUS_COLORS: Record<string, string> = {
   open: "#3ED598",
   blocked: "#FF3B3B",

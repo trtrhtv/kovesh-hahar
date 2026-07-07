@@ -42,6 +42,13 @@ def create_event(
     if event_date < datetime.utcnow() - timedelta(hours=1):
         raise HTTPException(400, "תאריך האירוע לא יכול להיות בעבר")
 
+    end_date = payload.end_date
+    if end_date is not None:
+        if end_date.tzinfo is not None:
+            end_date = end_date.astimezone(timezone.utc).replace(tzinfo=None)
+        if end_date < event_date:
+            raise HTTPException(400, "תאריך הסיום לא יכול להיות לפני תאריך ההתחלה")
+
     if not locations.is_valid_country(payload.country):
         raise HTTPException(400, "מדינה לא תקינה")
     if payload.country == locations.ISRAEL and not locations.is_valid_israel_region(payload.region):
@@ -54,6 +61,9 @@ def create_event(
         title=title,
         description=description,
         event_date=event_date,
+        end_date=end_date,
+        time_is_approximate=payload.time_is_approximate,
+        approximate_period=payload.approximate_period if payload.time_is_approximate else None,
         vehicle_type=payload.vehicle_type,
         difficulty=payload.difficulty,
         country=payload.country,

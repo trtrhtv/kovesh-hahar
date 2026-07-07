@@ -10,7 +10,7 @@ import PasswordInput from "@/components/PasswordInput";
 import { useAuth } from "@/lib/auth";
 import { createEvent } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
-import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS, TIME_PERIOD_LABELS, TIME_PERIOD_HOURS } from "@/lib/labels";
 
 export default function NewEventPage() {
   const { user, token, loading, login, register } = useAuth();
@@ -127,7 +127,12 @@ function EventForm({ token }: { token: string }) {
   const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [eventDate, setEventDate] = useState("");
+  const [eventDateOnly, setEventDateOnly] = useState("");
+  const [eventTime, setEventTime] = useState("09:00");
+  const [multiDay, setMultiDay] = useState(false);
+  const [endDate, setEndDate] = useState("");
+  const [timeMode, setTimeMode] = useState<"exact" | "approximate">("exact");
+  const [approxPeriod, setApproxPeriod] = useState("morning");
   const [vehicleType, setVehicleType] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [country, setCountry] = useState(ISRAEL);
@@ -141,8 +146,12 @@ function EventForm({ token }: { token: string }) {
     e.preventDefault();
     setError(null);
 
-    if (!eventDate) {
-      setError("יש לבחור תאריך ושעה");
+    if (!eventDateOnly) {
+      setError("יש לבחור תאריך");
+      return;
+    }
+    if (multiDay && !endDate) {
+      setError("יש לבחור תאריך סיום לטיול");
       return;
     }
     if (!region.trim()) {
@@ -162,13 +171,18 @@ function EventForm({ token }: { token: string }) {
       return;
     }
 
+    const timeToUse = timeMode === "exact" ? eventTime : TIME_PERIOD_HOURS[approxPeriod];
+
     setBusy(true);
     try {
       const event = await createEvent(
         {
           title,
           description,
-          event_date: new Date(eventDate).toISOString(),
+          event_date: new Date(`${eventDateOnly}T${timeToUse}`).toISOString(),
+          end_date: multiDay && endDate ? new Date(`${endDate}T23:59`).toISOString() : undefined,
+          time_is_approximate: timeMode === "approximate",
+          approximate_period: timeMode === "approximate" ? approxPeriod : undefined,
           vehicle_type: vehicleType || undefined,
           difficulty: difficulty || undefined,
           country,
@@ -210,15 +224,79 @@ function EventForm({ token }: { token: string }) {
           />
         </Field>
 
-        <Field label="תאריך ושעה">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label={multiDay ? "תאריך התחלה" : "תאריך"}>
+            <input
+              type="date"
+              value={eventDateOnly}
+              onChange={(e) => setEventDateOnly(e.target.value)}
+              required
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+            />
+          </Field>
+
+          <Field label="שעה">
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setTimeMode("exact")}
+                className={`switch-btn text-xs font-bold px-3 py-2 flex-1 ${timeMode === "exact" ? "active text-moto" : "text-ink"}`}
+              >
+                שעה מדויקת
+              </button>
+              <button
+                type="button"
+                onClick={() => setTimeMode("approximate")}
+                className={`switch-btn text-xs font-bold px-3 py-2 flex-1 ${timeMode === "approximate" ? "active text-moto" : "text-ink"}`}
+              >
+                זמן כללי
+              </button>
+            </div>
+            {timeMode === "exact" ? (
+              <input
+                type="time"
+                value={eventTime}
+                onChange={(e) => setEventTime(e.target.value)}
+                className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+              />
+            ) : (
+              <select
+                value={approxPeriod}
+                onChange={(e) => setApproxPeriod(e.target.value)}
+                className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+              >
+                {Object.entries(TIME_PERIOD_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Field>
+        </div>
+
+        <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer">
           <input
-            type="datetime-local"
-            value={eventDate}
-            onChange={(e) => setEventDate(e.target.value)}
-            required
-            className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+            type="checkbox"
+            checked={multiDay}
+            onChange={(e) => setMultiDay(e.target.checked)}
+            className="w-5 h-5 accent-moto"
           />
-        </Field>
+          זה טיול של כמה ימים
+        </label>
+
+        {multiDay && (
+          <Field label="תאריך סיום">
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={eventDateOnly}
+              required
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+            />
+          </Field>
+        )}
 
         <Field label="תיאור">
           <textarea

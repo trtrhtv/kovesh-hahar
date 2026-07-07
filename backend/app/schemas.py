@@ -86,6 +86,9 @@ class EventCreate(BaseModel):
     title: str
     description: str
     event_date: datetime
+    end_date: Optional[datetime] = None
+    time_is_approximate: bool = False
+    approximate_period: Optional[str] = None
     vehicle_type: Optional[VehicleType] = None
     difficulty: Optional[Difficulty] = None
     country: str
@@ -100,6 +103,9 @@ class EventUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     event_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    time_is_approximate: Optional[bool] = None
+    approximate_period: Optional[str] = None
     vehicle_type: Optional[VehicleType] = None
     difficulty: Optional[Difficulty] = None
     country: Optional[str] = None
@@ -115,6 +121,9 @@ class EventOut(BaseModel):
     title: str
     description: str
     event_date: datetime
+    end_date: Optional[datetime] = None
+    time_is_approximate: bool = False
+    approximate_period: Optional[str] = None
     vehicle_type: Optional[str] = None
     difficulty: Optional[str] = None
     country: str
