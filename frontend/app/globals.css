@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  direction: rtl;
+}
+
+body {
+  background-color: #e8e1d3;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(35,32,27,0.06) 1px, transparent 0);
+  background-size: 22px 22px;
+  color: #23201b;
+}
+
+/* פס מקווקו בסגנון קווי קונטור על מפה - משמש כמפריד בין אזורים באתר */
+.contour-divider {
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #8b7355 0px,
+    #8b7355 6px,
+    transparent 6px,
+    transparent 11px
+  );
+  opacity: 0.5;
+}
+
+/* חותמת קושי - כמו מדבקת סקרוטינירינג בראלי */
+.difficulty-stamp {
+  border: 2px solid currentColor;
+  transform: rotate(-3deg);
+  letter-spacing: 0.05em;
+}
+
+::selection {
+  background-color: #a8462e;
+  color: #e8e1d3;
+}
+
+:focus-visible {
+  outline: 2px solid #a8462e;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
