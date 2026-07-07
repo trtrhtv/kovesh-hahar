@@ -56,6 +56,7 @@ function ProfileForm({ token, user, onSaved }: { token: string; user: any; onSav
   const [displayName, setDisplayName] = useState(user.display_name || "");
   const [phoneNumber, setPhoneNumber] = useState(user.phone_number || "");
   const [homeRegion, setHomeRegion] = useState(user.home_region || "");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(user.notifications_enabled !== false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -66,7 +67,10 @@ function ProfileForm({ token, user, onSaved }: { token: string; user: any; onSav
     setSaved(false);
     setBusy(true);
     try {
-      await updateProfile({ display_name: displayName, phone_number: phoneNumber, home_region: homeRegion }, token);
+      await updateProfile(
+        { display_name: displayName, phone_number: phoneNumber, home_region: homeRegion, notifications_enabled: notificationsEnabled },
+        token
+      );
       await onSaved();
       setSaved(true);
     } catch (err: any) {
@@ -118,6 +122,16 @@ function ProfileForm({ token, user, onSaved }: { token: string; user: any; onSav
             </option>
           ))}
         </select>
+      </label>
+
+      <label className="flex items-center gap-2.5 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={notificationsEnabled}
+          onChange={(e) => setNotificationsEnabled(e.target.checked)}
+          className="w-5 h-5 accent-moto"
+        />
+        <span className="text-sm text-ink">קבל התראות (תגובות, לייקים, עדכוני שטח)</span>
       </label>
 
       {error && <p className="text-moto text-sm">{error}</p>}

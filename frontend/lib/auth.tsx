@@ -11,6 +11,7 @@ export type CurrentUser = {
   avatar_url?: string;
   home_region?: string;
   phone_number?: string;
+  notifications_enabled?: boolean;
   bikes?: { id: string; model_name: string; vehicle_type?: string }[];
 };
 

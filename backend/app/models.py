@@ -60,6 +60,7 @@ class User(Base):
     bike_model = Column(String, nullable=True)  # legacy - נשמר לתאימות, לא בשימוש בממשק החדש
     home_region = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)  # לכפתור יצירת קשר ב-WhatsApp, לא חובה
+    notifications_enabled = Column(Boolean, default=True)  # השתקת כל ההתראות
     accepted_disclaimer_at = Column(DateTime, nullable=True)  # מתי אישר את הצהרת האחריות
     created_at = Column(DateTime, default=datetime.utcnow)
 

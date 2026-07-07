@@ -13,6 +13,11 @@ def create_notification(
 ):
     if user_id == actor_id:
         return  # לא מתריעים למישהו על הפעולה של עצמו
+
+    recipient = db.query(models.User).filter(models.User.id == user_id).first()
+    if not recipient or not recipient.notifications_enabled:
+        return  # השתיק התראות - לא יוצרים בכלל
+
     db.add(
         models.Notification(
             user_id=user_id,

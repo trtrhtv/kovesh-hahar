@@ -31,6 +31,7 @@ class UserUpdate(BaseModel):
     display_name: Optional[str] = None
     phone_number: Optional[str] = None
     home_region: Optional[str] = None
+    notifications_enabled: Optional[bool] = None
 
 
 class UserOut(BaseModel):
@@ -39,6 +40,7 @@ class UserOut(BaseModel):
     avatar_url: Optional[str] = None
     home_region: Optional[str] = None
     phone_number: Optional[str] = None
+    notifications_enabled: bool = True
     bikes: List[BikeOut] = []
 
     class Config:

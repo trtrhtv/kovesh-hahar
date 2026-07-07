@@ -65,6 +65,8 @@ def update_me(
         current_user.phone_number = payload.phone_number.strip() or None
     if payload.home_region is not None:
         current_user.home_region = payload.home_region.strip() or None
+    if payload.notifications_enabled is not None:
+        current_user.notifications_enabled = payload.notifications_enabled
 
     db.commit()
     db.refresh(current_user)
