@@ -42,6 +42,23 @@ class StoryCreate(BaseModel):
     meeting_point_lon: Optional[float] = None
 
 
+class ContactMessageCreate(BaseModel):
+    name: str
+    email: EmailStr
+    message: str
+
+
+class ContactMessageOut(BaseModel):
+    id: str
+    name: str
+    email: str
+    message: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class TrailUpdateCreate(BaseModel):
     status: TrailStatus
     note: Optional[str] = None

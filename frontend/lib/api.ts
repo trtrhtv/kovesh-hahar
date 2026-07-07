@@ -126,6 +126,34 @@ export async function postTrailUpdate(
   return res.json();
 }
 
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
+};
+
+export async function sendContactMessage(name: string, email: string, message: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/contact`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, message }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "שליחת ההודעה נכשלה");
+  }
+}
+
+export async function fetchContactMessages(token: string): Promise<ContactMessage[]> {
+  const res = await fetch(`${API_BASE}/contact`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
 export async function deleteStory(storyId: string, token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/stories/${storyId}`, {
     method: "DELETE",
