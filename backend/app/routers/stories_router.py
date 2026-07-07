@@ -17,6 +17,7 @@ async def create_story(
     title: str = Form(...),
     body: str = Form(...),
     vehicle_type: models.VehicleType = Form(...),
+    vehicle_type_other: Optional[str] = Form(None),
     ride_style: models.RideStyle = Form(...),
     difficulty: models.Difficulty = Form(...),
     season: models.Season = Form(...),
@@ -33,6 +34,9 @@ async def create_story(
 ):
     if len(photos) > storage.MAX_PHOTOS_PER_STORY:
         raise HTTPException(400, f"מקסימום {storage.MAX_PHOTOS_PER_STORY} תמונות לסיפור")
+
+    if vehicle_type == models.VehicleType.OTHER and not (vehicle_type_other or "").strip():
+        raise HTTPException(400, "יש לפרט את סוג האופנוע כשבוחרים 'אחר'")
 
     word_count = len(body.split())
     if word_count < MIN_BODY_WORDS:
@@ -52,6 +56,7 @@ async def create_story(
         title=title,
         body=body,
         vehicle_type=vehicle_type,
+        vehicle_type_other=(vehicle_type_other or "").strip() or None,
         ride_style=ride_style,
         difficulty=difficulty,
         season=season,

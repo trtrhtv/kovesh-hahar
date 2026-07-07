@@ -93,7 +93,14 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
 
         {/* דשבורד מטא-דאטה - 4 עמודות */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          <MetaTile label="סוג אופנוע" value={VEHICLE_TYPE_LABELS[story.vehicle_type]} />
+          <MetaTile
+            label="סוג אופנוע"
+            value={
+              story.vehicle_type === "other" && story.vehicle_type_other
+                ? story.vehicle_type_other
+                : VEHICLE_TYPE_LABELS[story.vehicle_type]
+            }
+          />
           <MetaTile label="עונה מומלצת" value={SEASON_LABELS[story.season]} />
           <MetaTile label="סגנון רכיבה" value={RIDE_STYLE_LABELS[story.ride_style]} />
           <MetaTile label="זמן קריאה" value={`~${readingMinutes} דק׳`} />

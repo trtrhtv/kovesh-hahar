@@ -166,7 +166,8 @@ function StoryForm({ token }: { token: string }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [vehicleType, setVehicleType] = useState("enduro_light");
+  const [vehicleType, setVehicleType] = useState("adventure");
+  const [vehicleTypeOther, setVehicleTypeOther] = useState("");
   const [rideStyle, setRideStyle] = useState("technical_singles");
   const [difficulty, setDifficulty] = useState("moderate");
   const [season, setSeason] = useState("all_year");
@@ -208,6 +209,11 @@ function StoryForm({ token }: { token: string }) {
       return;
     }
 
+    if (vehicleType === "other" && !vehicleTypeOther.trim()) {
+      setError("יש לפרט את סוג האופנוע");
+      return;
+    }
+
     const wordCount = countWords(body);
     if (wordCount < MIN_BODY_WORDS) {
       setError(`הסיפור קצר מדי - נדרשות לפחות ${MIN_BODY_WORDS} מילים (יש כרגע ${wordCount})`);
@@ -221,6 +227,7 @@ function StoryForm({ token }: { token: string }) {
           title,
           body,
           vehicle_type: vehicleType,
+          vehicleTypeOther: vehicleType === "other" ? vehicleTypeOther : undefined,
           ride_style: rideStyle,
           difficulty,
           season,
@@ -297,6 +304,16 @@ function StoryForm({ token }: { token: string }) {
                 </option>
               ))}
             </select>
+            {vehicleType === "other" && (
+              <input
+                type="text"
+                value={vehicleTypeOther}
+                onChange={(e) => setVehicleTypeOther(e.target.value)}
+                placeholder="איזה סוג אופנוע?"
+                maxLength={60}
+                className="w-full border border-edge bg-surface px-3 py-2.5 mt-2 focus:border-moto outline-none text-sm"
+              />
+            )}
           </Field>
 
           <Field label="סגנון רכיבה">

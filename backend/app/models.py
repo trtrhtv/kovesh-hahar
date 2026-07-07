@@ -15,11 +15,11 @@ def gen_uuid():
 
 
 class VehicleType(str, enum.Enum):
-    ADV_HEAVY = "adv_heavy"                # אדוונצ'ר כבד / דו-צילינדר
-    DUAL_SPORT_LIGHT = "dual_sport_light"  # דו-שימושי קל
-    ENDURO_PRO = "enduro_pro"              # אנדורו מקצועי
-    ENDURO_LIGHT = "enduro_light"          # אנדורו קל
-    MOTOCROSS = "motocross"                # מוטוקרוס (מסלולים סגורים/דיונות, בלי רישוי צהוב)
+    ADVENTURE = "adventure"        # אדוונצ'ר
+    FOUR_STROKE = "four_stroke"    # 4 פעימות
+    TWO_STROKE = "two_stroke"      # 2 פעימות
+    DUAL_SPORT = "dual_sport"      # דו"ש (דו-שימושי)
+    OTHER = "other"                # אחר - עם טקסט חופשי
 
 
 class RideStyle(str, enum.Enum):
@@ -80,6 +80,7 @@ class Story(Base):
     title = Column(String, nullable=False)
     body = Column(Text, nullable=False)
     vehicle_type = Column(Enum(VehicleType), nullable=False, index=True)
+    vehicle_type_other = Column(String, nullable=True)  # טקסט חופשי כשvehicle_type="other"
     ride_style = Column(Enum(RideStyle), nullable=False, index=True)
     difficulty = Column(Enum(Difficulty), nullable=False, index=True)
     season = Column(Enum(Season), nullable=False, default=Season.ALL_YEAR, index=True)

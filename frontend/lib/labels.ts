@@ -1,9 +1,9 @@
 export const VEHICLE_TYPE_LABELS: Record<string, string> = {
-  adv_heavy: "אדוונצ'ר כבד / דו-צילינדר",
-  dual_sport_light: "דו-שימושי קל",
-  enduro_pro: "אנדורו מקצועי",
-  enduro_light: "אנדורו קל",
-  motocross: "מוטוקרוס",
+  adventure: "אדוונצ'ר",
+  four_stroke: "4 פעימות",
+  two_stroke: "2 פעימות",
+  dual_sport: 'דו"ש (דו-שימושי)',
+  other: "אחר",
 };
 
 export const RIDE_STYLE_LABELS: Record<string, string> = {

@@ -34,6 +34,7 @@ class StoryCreate(BaseModel):
     title: str
     body: str
     vehicle_type: VehicleType
+    vehicle_type_other: Optional[str] = None
     ride_style: RideStyle
     difficulty: Difficulty
     season: Season
@@ -106,6 +107,7 @@ class StoryOut(BaseModel):
     title: str
     body: str
     vehicle_type: VehicleType
+    vehicle_type_other: Optional[str] = None
     ride_style: RideStyle
     difficulty: Difficulty
     season: Season
@@ -136,6 +138,7 @@ class StoryListItem(BaseModel):
     id: str
     title: str
     vehicle_type: VehicleType
+    vehicle_type_other: Optional[str] = None
     ride_style: RideStyle
     difficulty: Difficulty
     season: Season

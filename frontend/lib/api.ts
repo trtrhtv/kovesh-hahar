@@ -6,6 +6,7 @@ export type StoryListItem = {
   id: string;
   title: string;
   vehicle_type: string;
+  vehicle_type_other?: string;
   ride_style: string;
   difficulty: string;
   season: string;
@@ -189,6 +190,7 @@ export async function createStory(
     title: string;
     body: string;
     vehicle_type: string;
+    vehicleTypeOther?: string;
     ride_style: string;
     difficulty: string;
     season: string;
@@ -207,6 +209,7 @@ export async function createStory(
   form.set("title", data.title);
   form.set("body", data.body);
   form.set("vehicle_type", data.vehicle_type);
+  if (data.vehicleTypeOther) form.set("vehicle_type_other", data.vehicleTypeOther);
   form.set("ride_style", data.ride_style);
   form.set("difficulty", data.difficulty);
   form.set("season", data.season);

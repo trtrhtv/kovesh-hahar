@@ -29,7 +29,11 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
               {story.country !== "ישראל" ? `${story.region}, ${story.country}` : story.region}
             </span>
             <span>·</span>
-            <span>{VEHICLE_TYPE_LABELS[story.vehicle_type] || story.vehicle_type}</span>
+            <span>
+              {story.vehicle_type === "other" && story.vehicle_type_other
+                ? story.vehicle_type_other
+                : VEHICLE_TYPE_LABELS[story.vehicle_type] || story.vehicle_type}
+            </span>
             <span>·</span>
             <span>{RIDE_STYLE_LABELS[story.ride_style] || story.ride_style}</span>
           </div>
