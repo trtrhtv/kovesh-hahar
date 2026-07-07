@@ -2,6 +2,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
+import NotificationBell from "@/components/NotificationBell";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { fetchStory } from "@/lib/api";
@@ -45,7 +46,10 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
             <Link href="/">
               <Logo />
             </Link>
-            <BackNav />
+            <div className="flex items-center gap-3">
+              <NotificationBell />
+              <BackNav />
+            </div>
           </div>
         </header>
 

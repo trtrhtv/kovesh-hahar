@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List
 
 from .. import models, schemas, auth
+from ..notifications import create_notification
 from ..database import get_db
 
 router = APIRouter(prefix="/stories/{story_id}/trail-updates", tags=["trail-updates"])
@@ -41,6 +42,21 @@ def create_trail_update(
         note=note,
     )
     db.add(update)
+
+    # מתריעים לכל מי שאהב את הסיפור (חוץ מהמדווח עצמו) - הם אלה שרלוונטי להם לדעת
+    liker_ids = (
+        db.query(models.Like.user_id).filter(models.Like.story_id == story_id).distinct().all()
+    )
+    for (liker_id,) in liker_ids:
+        create_notification(
+            db,
+            user_id=liker_id,
+            actor_id=current_user.id,
+            notif_type=models.NotificationType.TRAIL_UPDATE,
+            story_id=story_id,
+            message=f'עדכון שטח חדש על "{story.title}"',
+        )
+
     db.commit()
     db.refresh(update)
     return update

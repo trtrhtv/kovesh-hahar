@@ -269,6 +269,48 @@ export async function updateStory(
   return res.json();
 }
 
+export type Notification = {
+  id: string;
+  type: string;
+  story_id?: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+export async function fetchNotifications(token: string): Promise<Notification[]> {
+  const res = await fetch(`${API_BASE}/notifications`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchUnreadCount(token: string): Promise<number> {
+  const res = await fetch(`${API_BASE}/notifications/unread-count`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return 0;
+  const data = await res.json();
+  return data.count || 0;
+}
+
+export async function markNotificationRead(id: string, token: string): Promise<void> {
+  await fetch(`${API_BASE}/notifications/${id}/read`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function markAllNotificationsRead(token: string): Promise<void> {
+  await fetch(`${API_BASE}/notifications/read-all`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export async function deleteStory(storyId: string, token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/stories/${storyId}`, {
     method: "DELETE",

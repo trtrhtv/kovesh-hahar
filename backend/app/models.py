@@ -150,6 +150,25 @@ class Comment(Base):
     author = relationship("User")
 
 
+class NotificationType(str, enum.Enum):
+    COMMENT = "comment"            # מישהו הגיב לסיפור שלך
+    TRAIL_UPDATE = "trail_update"  # עדכון שטח על סיפור שאהבת
+    LIKE = "like"                  # מישהו אהב את הסיפור שלך
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)  # מי מקבל
+    actor_id = Column(String, ForeignKey("users.id"), nullable=True)  # מי גרם להתראה
+    type = Column(Enum(NotificationType), nullable=False)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=True)
+    message = Column(String, nullable=False)
+    is_read = Column(Boolean, default=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
 class ContactMessage(Base):
     __tablename__ = "contact_messages"
 

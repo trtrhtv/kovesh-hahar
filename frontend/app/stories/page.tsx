@@ -4,6 +4,7 @@ import StoryCard from "@/components/StoryCard";
 import FilterSidebar from "@/components/FilterSidebar";
 import OverviewMap from "@/components/OverviewMap";
 import Pagination from "@/components/Pagination";
+import NotificationBell from "@/components/NotificationBell";
 import { fetchStories, countStories } from "@/lib/api";
 
 const LIMIT = 20;
@@ -40,12 +41,15 @@ export default async function StoriesPage({
           <Link href="/" className="font-black text-lg tracking-tight">
             <Logo />
           </Link>
-          <Link
-            href="/stories/new"
-            className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
-          >
-            העלה סיפור
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/stories/new"
+              className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
+            >
+              העלה סיפור
+            </Link>
+            <NotificationBell />
+          </div>
         </div>
       </header>
 

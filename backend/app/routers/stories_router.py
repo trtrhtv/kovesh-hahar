@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from .. import models, schemas, auth, storage, gpx_utils, locations, admin
+from ..notifications import create_notification
 from ..database import get_db
 
 router = APIRouter(prefix="/stories", tags=["stories"])
@@ -219,6 +220,18 @@ def toggle_like(
 
     like = models.Like(story_id=story_id, user_id=current_user.id)
     db.add(like)
+
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if story:
+        create_notification(
+            db,
+            user_id=story.author_id,
+            actor_id=current_user.id,
+            notif_type=models.NotificationType.LIKE,
+            story_id=story_id,
+            message=f'{current_user.display_name} אהב/ה את הסיפור "{story.title}"',
+        )
+
     db.commit()
     return {"liked": True}
 

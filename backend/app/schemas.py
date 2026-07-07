@@ -66,6 +66,18 @@ class StoryCreate(BaseModel):
     parking_security: Optional[ParkingSecurity] = None
 
 
+class NotificationOut(BaseModel):
+    id: str
+    type: str
+    story_id: Optional[str] = None
+    message: str
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class ContactMessageCreate(BaseModel):
     name: str
     email: EmailStr

@@ -5,6 +5,7 @@ import Logo from "@/components/Logo";
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
+import NotificationBell from "@/components/NotificationBell";
 import { fetchStories } from "@/lib/api";
 import { RIDE_STYLE_LABELS } from "@/lib/labels";
 import { ISRAEL_REGIONS } from "@/lib/locations";
@@ -19,6 +20,7 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center flex-wrap gap-y-2 justify-between">
           <Logo />
           <nav className="flex items-center flex-wrap gap-3 sm:gap-5 text-sm">
+            <NotificationBell />
             <Link href="/stories" className="hover:text-moto transition-colors">
               כל הסיפורים
             </Link>

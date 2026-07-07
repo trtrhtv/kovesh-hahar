@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List
 
 from .. import models, schemas, auth
+from ..notifications import create_notification
 from ..database import get_db
 
 router = APIRouter(prefix="/stories/{story_id}/comments", tags=["comments"])
@@ -38,6 +39,16 @@ def create_comment(
 
     comment = models.Comment(story_id=story_id, author_id=current_user.id, body=body)
     db.add(comment)
+
+    create_notification(
+        db,
+        user_id=story.author_id,
+        actor_id=current_user.id,
+        notif_type=models.NotificationType.COMMENT,
+        story_id=story_id,
+        message=f'{current_user.display_name} הגיב/ה לסיפור "{story.title}"',
+    )
+
     db.commit()
     db.refresh(comment)
     return comment
