@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const TOKEN_KEY = "roadstory_token";
 
 export type CurrentUser = {
   id: string;
@@ -35,30 +34,32 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // token נשאר כאן רק בזיכרון (לא ב-localStorage) - נועד להצגה/תאימות עם
+  // רכיבים קיימים שעדיין מצפים לערך truthy כדי לדעת "האם מחובר", אבל האימות
+  // האמיתי מול השרת קורה כולו דרך ה-httpOnly cookie (credentials: "include").
+  // בלי localStorage, אין שום עותק של הטוקן שקוד JavaScript יכול לגנוב.
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMe = useCallback(async (t?: string | null) => {
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: t ? { Authorization: `Bearer ${t}` } : {},
-      credentials: "include", // אם יש עוגיית התחברות תקינה, זה מספיק גם בלי טוקן
-    });
+  const fetchMe = useCallback(async () => {
+    const res = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
     if (res.ok) {
       setUser(await res.json());
+      // token עצמו לא נחשף לנו יותר (הוא ב-httpOnly cookie, בכוונה) - אבל כמה
+      // רכיבים קיימים עדיין בודקים "if (token)" כדי לדעת אם המשתמש מחובר.
+      // שם placeholder לא-ריק שומר על ההתנהגות הזו בלי לחשוף שום דבר אמיתי.
+      setToken((prev) => prev || "authenticated");
     } else {
-      localStorage.removeItem(TOKEN_KEY);
       setToken(null);
       setUser(null);
     }
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem(TOKEN_KEY);
-    if (stored) setToken(stored);
-    // תמיד מנסים - גם בלי טוקן שמור, כי יכול להיות שיש עוגיית התחברות תקינה
-    // (למשל אחרי שניקו את localStorage, או בטאב/מכשיר אחר)
-    fetchMe(stored).finally(() => setLoading(false));
+    // בעליית הדף אין לנו טוקן בזיכרון (זה טרי בכל טעינה) - אבל אם יש עוגיית
+    // התחברות תקינה מפעם קודמת, fetchMe יזהה את זה דרך credentials:"include"
+    fetchMe().finally(() => setLoading(false));
   }, [fetchMe]);
 
   async function login(email: string, password: string) {
@@ -69,18 +70,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form,
-      credentials: "include", // מקבלים את ה-httpOnly cookie מהשרת
+      credentials: "include", // מקבלים את ה-httpOnly cookie מהשרת - זה מה שבאמת מבצע את ההתחברות
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.detail || "ההתחברות נכשלה");
     }
     const data = await res.json();
-    // עדיין שומרים גם ב-localStorage לתאימות לאחור עם קריאות API קיימות שמצרפות
-    // Authorization header ידנית - השרת תומך בשתי השיטות במקביל (ראה auth.py).
-    localStorage.setItem(TOKEN_KEY, data.access_token);
     setToken(data.access_token);
-    await fetchMe(data.access_token);
+    await fetchMe();
   }
 
   async function register(
@@ -112,9 +110,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(err.detail || "ההרשמה נכשלה");
     }
     const data = await res.json();
-    localStorage.setItem(TOKEN_KEY, data.access_token);
     setToken(data.access_token);
-    await fetchMe(data.access_token);
+    await fetchMe();
   }
 
   async function logout() {
@@ -123,13 +120,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // גם אם קריאת הרשת נכשלת, עדיין מנקים את המצב המקומי למטה
     }
-    localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
   }
 
   async function refreshUser() {
-    await fetchMe(token);
+    await fetchMe();
   }
 
   return (

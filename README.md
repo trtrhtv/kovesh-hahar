@@ -183,6 +183,7 @@ alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 - **הגבלת ניסיונות (Rate Limiting)** - מגביל התחברות/הרשמה/בקשות איפוס סיסמה לפי IP (זיכרון תהליך - מתאים לאינסטנס יחיד, ידרוש Redis אם יהיו כמה workers/instances במקביל)
 - **איפוס סיסמה** - זרימה מלאה: `/forgot-password` → מייל עם קישור חד-פעמי (תוקף שעה) → `/reset-password`. **דורש הגדרת שירות מייל, ראה למטה**
+- **JWT ב-httpOnly cookies (לא localStorage)** - הושלם. הטוקן עצמו כבר לא נגיש לקוד JavaScript בכלל (מגן מפני גניבה דרך XSS). כל קריאות ה-API עוברות עם `credentials: "include"` והשרת מזהה לפי העוגייה
 
 ### הגדרה נדרשת - Resend (שליחת מיילים)
 

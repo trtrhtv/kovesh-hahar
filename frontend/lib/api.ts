@@ -95,7 +95,7 @@ export async function updateProfile(
 ): Promise<UserProfile> {
   const res = await fetch(`${API_BASE}/auth/me`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", },
     credentials: "include",
     body: JSON.stringify(data),
   });
@@ -113,7 +113,7 @@ export async function addBike(
 ): Promise<Bike> {
   const res = await fetch(`${API_BASE}/auth/me/bikes`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", },
     credentials: "include",
     body: JSON.stringify({ model_name: modelName, vehicle_type: vehicleType || undefined }),
   });
@@ -127,7 +127,6 @@ export async function addBike(
 export async function deleteBike(bikeId: string, token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/auth/me/bikes/${bikeId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) throw new Error("מחיקת האופנוע נכשלה");
@@ -245,7 +244,7 @@ export async function createEvent(
 ): Promise<EventItem> {
   const res = await fetch(`${API_BASE}/events`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", },
     credentials: "include",
     body: JSON.stringify(data),
   });
@@ -259,7 +258,6 @@ export async function createEvent(
 export async function deleteEvent(eventId: string, token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/events/${eventId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) throw new Error("מחיקת האירוע נכשלה");
@@ -272,7 +270,7 @@ export async function setEventRSVP(
 ): Promise<{ attending: boolean; guest_count: number }> {
   const res = await fetch(`${API_BASE}/events/${eventId}/rsvp`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", },
     credentials: "include",
     body: JSON.stringify({ guest_count: guestCount }),
   });
@@ -286,7 +284,6 @@ export async function setEventRSVP(
 export async function cancelEventRSVP(eventId: string, token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/events/${eventId}/rsvp`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) {
@@ -349,7 +346,6 @@ export async function postComment(storyId: string, body: string, token: string):
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
     body: JSON.stringify({ body }),
@@ -377,7 +373,6 @@ export async function postTrailUpdate(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
     body: JSON.stringify({ status, note }),
@@ -411,7 +406,6 @@ export async function sendContactMessage(name: string, email: string, message: s
 
 export async function fetchContactMessages(token: string): Promise<ContactMessage[]> {
   const res = await fetch(`${API_BASE}/contact`, {
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) return [];
@@ -427,7 +421,6 @@ export async function addStoryPhotos(
   photos.forEach((p) => form.append("photos", p));
   const res = await fetch(`${API_BASE}/stories/${storyId}/photos`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
     body: form,
   });
@@ -445,7 +438,6 @@ export async function deleteStoryPhoto(
 ): Promise<StoryDetail> {
   const res = await fetch(`${API_BASE}/stories/${storyId}/photos/${photoId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) {
@@ -468,7 +460,6 @@ export async function replaceStoryRoute(
   }
   const res = await fetch(`${API_BASE}/stories/${storyId}/route`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
     body: form,
   });
@@ -500,7 +491,7 @@ export async function updateStory(
 ): Promise<StoryDetail> {
   const res = await fetch(`${API_BASE}/stories/${storyId}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", },
     credentials: "include",
     body: JSON.stringify(data),
   });
@@ -522,7 +513,6 @@ export type Notification = {
 
 export async function fetchNotifications(token: string): Promise<Notification[]> {
   const res = await fetch(`${API_BASE}/notifications`, {
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
     cache: "no-store",
   });
@@ -532,7 +522,6 @@ export async function fetchNotifications(token: string): Promise<Notification[]>
 
 export async function fetchUnreadCount(token: string): Promise<number> {
   const res = await fetch(`${API_BASE}/notifications/unread-count`, {
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
     cache: "no-store",
   });
@@ -544,7 +533,6 @@ export async function fetchUnreadCount(token: string): Promise<number> {
 export async function markNotificationRead(id: string, token: string): Promise<void> {
   await fetch(`${API_BASE}/notifications/${id}/read`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
 }
@@ -552,7 +540,6 @@ export async function markNotificationRead(id: string, token: string): Promise<v
 export async function markAllNotificationsRead(token: string): Promise<void> {
   await fetch(`${API_BASE}/notifications/read-all`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
 }
@@ -560,7 +547,6 @@ export async function markAllNotificationsRead(token: string): Promise<void> {
 export async function deleteStory(storyId: string, token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/stories/${storyId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) {
@@ -571,7 +557,6 @@ export async function deleteStory(storyId: string, token: string): Promise<void>
 
 export async function checkIsAdmin(token: string): Promise<boolean> {
   const res = await fetch(`${API_BASE}/auth/is-admin`, {
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) return false;
@@ -582,7 +567,6 @@ export async function checkIsAdmin(token: string): Promise<boolean> {
 export async function toggleLike(storyId: string, token: string): Promise<{ liked: boolean }> {
   const res = await fetch(`${API_BASE}/stories/${storyId}/like`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
   });
   if (!res.ok) throw new Error("הפעולה נכשלה");
@@ -632,7 +616,6 @@ export async function createStory(
 
   const res = await fetch(`${API_BASE}/stories`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
     body: form,
   });
