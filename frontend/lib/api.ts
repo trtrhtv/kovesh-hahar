@@ -254,7 +254,7 @@ export async function deleteEvent(eventId: string, token: string): Promise<void>
   if (!res.ok) throw new Error("מחיקת האירוע נכשלה");
 }
 
-export async function toggleEventRSVP(
+export async function setEventRSVP(
   eventId: string,
   token: string,
   guestCount = 1
@@ -269,6 +269,17 @@ export async function toggleEventRSVP(
     throw new Error(extractErrorMessage(err, "הפעולה נכשלה"));
   }
   return res.json();
+}
+
+export async function cancelEventRSVP(eventId: string, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/events/${eventId}/rsvp`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "ביטול ההגעה נכשל"));
+  }
 }
 
 export async function fetchNearbyStories(

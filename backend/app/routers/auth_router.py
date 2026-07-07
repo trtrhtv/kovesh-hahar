@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from .. import models, schemas, auth, admin
+from ..phone import is_valid_phone
 from ..database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -40,6 +41,9 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="כבר קיים משתמש עם האימייל הזה")
 
     username = (payload.username or "").strip().lower() or None
+    phone_number = (payload.phone_number or "").strip() or None
+    if phone_number and not is_valid_phone(phone_number):
+        raise HTTPException(400, "מספר הטלפון לא נראה תקין")
     if username:
         username = re.sub(r"[^a-z0-9_]", "", username)
         if not username:
@@ -54,7 +58,7 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
         username=username,
         hashed_password=auth.hash_password(payload.password),
         display_name=payload.display_name,
-        phone_number=(payload.phone_number or "").strip() or None,
+        phone_number=phone_number,
         accepted_disclaimer_at=datetime.utcnow(),
     )
     db.add(user)
@@ -106,7 +110,10 @@ def update_me(
                 raise HTTPException(400, "שם המשתמש הזה כבר תפוס")
             current_user.username = new_username
     if payload.phone_number is not None:
-        current_user.phone_number = payload.phone_number.strip() or None
+        new_phone = payload.phone_number.strip() or None
+        if new_phone and not is_valid_phone(new_phone):
+            raise HTTPException(400, "מספר הטלפון לא נראה תקין")
+        current_user.phone_number = new_phone
     if payload.home_region is not None:
         current_user.home_region = payload.home_region.strip() or None
     if payload.notifications_enabled is not None:

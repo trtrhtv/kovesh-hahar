@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { toggleEventRSVP } from "@/lib/api";
+import { setEventRSVP, cancelEventRSVP } from "@/lib/api";
 
 export default function RSVPButton({
   eventId,
@@ -19,10 +19,11 @@ export default function RSVPButton({
   const [attending, setAttending] = useState(initialAttending);
   const [count, setCount] = useState(initialCount);
   const [myGuests, setMyGuests] = useState(initialGuestCount || 1);
+  const [savedGuests, setSavedGuests] = useState(initialGuestCount || 0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleClick() {
+  async function handleSetRSVP() {
     if (!token) {
       window.location.href = "/login";
       return;
@@ -30,15 +31,10 @@ export default function RSVPButton({
     setBusy(true);
     setError(null);
     try {
-      if (attending) {
-        await toggleEventRSVP(eventId, token);
-        setAttending(false);
-        setCount((c) => Math.max(0, c - myGuests));
-      } else {
-        const res = await toggleEventRSVP(eventId, token, myGuests);
-        setAttending(true);
-        setCount((c) => c + res.guest_count);
-      }
+      const res = await setEventRSVP(eventId, token, myGuests);
+      setCount((c) => c - savedGuests + res.guest_count);
+      setSavedGuests(res.guest_count);
+      setAttending(true);
     } catch (err: any) {
       setError(err.message || "הפעולה נכשלה - נסה שוב");
     } finally {
@@ -46,34 +42,66 @@ export default function RSVPButton({
     }
   }
 
+  async function handleCancel() {
+    if (!token) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await cancelEventRSVP(eventId, token);
+      setCount((c) => Math.max(0, c - savedGuests));
+      setSavedGuests(0);
+      setAttending(false);
+    } catch (err: any) {
+      setError(err.message || "הביטול נכשל - נסה שוב");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const changed = attending && myGuests !== savedGuests;
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 flex-wrap">
-        {!attending && (
-          <label className="flex items-center gap-1.5 text-xs text-textDim">
-            כמה מגיעים:
-            <select
-              value={myGuests}
-              onChange={(e) => setMyGuests(Number(e.target.value))}
-              className="border border-edge bg-surface px-2 py-1.5 focus:border-moto outline-none"
-            >
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        <label className="flex items-center gap-1.5 text-xs text-textDim">
+          כמה מגיעים:
+          <select
+            value={myGuests}
+            onChange={(e) => setMyGuests(Number(e.target.value))}
+            className="border border-edge bg-surface px-2 py-1.5 focus:border-moto outline-none"
+          >
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <button
-          onClick={handleClick}
-          disabled={busy}
+          onClick={handleSetRSVP}
+          disabled={busy || (attending && !changed)}
           className={`tactical-btn disabled:opacity-50 ${
             attending ? "bg-emerald-600 text-carbon hover:bg-emerald-500" : "bg-moto text-carbon hover:bg-motoDark"
           }`}
         >
-          {attending ? `✓ אני מגיע (${myGuests}) - 👥` : "אני מגיע 👥"} {count}
+          {attending
+            ? changed
+              ? `עדכן ל-${myGuests} 👥`
+              : `✓ אני מגיע (${savedGuests}) - 👥`
+            : "אני מגיע 👥"}{" "}
+          {count}
         </button>
+
+        {attending && (
+          <button
+            onClick={handleCancel}
+            disabled={busy}
+            className="text-xs text-textDim hover:text-moto underline disabled:opacity-50"
+          >
+            ביטול הגעה
+          </button>
+        )}
       </div>
       {error && <p className="text-moto text-xs">{error}</p>}
     </div>

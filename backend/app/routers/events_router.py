@@ -7,6 +7,7 @@ from sqlalchemy import func
 
 from .. import models, schemas, auth, admin, locations
 from ..notifications import create_notification
+from ..phone import is_valid_phone
 from ..database import get_db
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -30,6 +31,8 @@ def create_event(
         raise HTTPException(400, "יש לציין נקודת כינוס")
     if not contact_phone:
         raise HTTPException(400, "יש לציין טלפון ליצירת קשר")
+    if not is_valid_phone(contact_phone):
+        raise HTTPException(400, "מספר הטלפון לא נראה תקין")
 
     # הפרונט שולח תאריך עם timezone (UTC), אבל datetime.utcnow() לא מודע ל-timezone -
     # השוואה ישירה ביניהם זורקת TypeError. מנרמלים לפני ההשוואה ולפני השמירה ב-DB.
@@ -150,12 +153,13 @@ def delete_event(
 
 
 @router.post("/{event_id}/rsvp")
-def toggle_rsvp(
+def set_rsvp(
     event_id: str,
     payload: schemas.RSVPRequest = schemas.RSVPRequest(),
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db),
 ):
+    """קובע/מעדכן את ההרשמה שלך לאירוע - אם כבר רשום, רק מעדכן את מספר האנשים, לא מוחק ומוסיף מחדש"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
         raise HTTPException(404, "האירוע לא נמצא")
@@ -168,9 +172,9 @@ def toggle_rsvp(
         .first()
     )
     if existing:
-        db.delete(existing)
+        existing.guest_count = guest_count
         db.commit()
-        return {"attending": False, "guest_count": 0}
+        return {"attending": True, "guest_count": guest_count}
 
     db.add(models.EventRSVP(event_id=event_id, user_id=current_user.id, guest_count=guest_count))
     extra_note = f' (עם עוד {guest_count - 1} אנשים)' if guest_count > 1 else ""
@@ -184,6 +188,23 @@ def toggle_rsvp(
     )
     db.commit()
     return {"attending": True, "guest_count": guest_count}
+
+
+@router.delete("/{event_id}/rsvp")
+def cancel_rsvp(
+    event_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    existing = (
+        db.query(models.EventRSVP)
+        .filter(models.EventRSVP.event_id == event_id, models.EventRSVP.user_id == current_user.id)
+        .first()
+    )
+    if existing:
+        db.delete(existing)
+        db.commit()
+    return {"attending": False, "guest_count": 0}
 
 
 def _with_extras(event: models.Event, db: Session, current_user_id: Optional[str]):

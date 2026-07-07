@@ -39,6 +39,26 @@ export default async function WeatherWidget({ lat, lon }: { lat?: number | null;
           הערכה אוטומטית לפי כמות גשם - לא תחליף לעדכון שטח אמיתי מרוכב שהיה שם
         </p>
       </div>
+
+      {weather.forecast.length > 1 && (
+        <div className="flex gap-3 sm:border-r sm:border-edge sm:pr-4 sm:mr-1">
+          {weather.forecast.slice(1).map((day) => {
+            const d = describeWeatherCode(day.weatherCode);
+            return (
+              <div key={day.date} className="text-center">
+                <div className="text-[10px] text-textDim">
+                  {new Date(day.date).toLocaleDateString("he-IL", { weekday: "short" })}
+                </div>
+                <div className="text-lg">{d.icon}</div>
+                <div className="text-[11px] text-ink font-bold">
+                  {day.tempMaxC}°/{day.tempMinC}°
+                </div>
+                {day.rainMm > 0 && <div className="text-[9px] text-cyan">{day.rainMm}mm</div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
