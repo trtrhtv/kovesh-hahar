@@ -6,7 +6,7 @@ import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
 import { useAuth } from "@/lib/auth";
-import { updateProfile, addBike, deleteBike } from "@/lib/api";
+import { updateProfile, addBike, deleteBike, resendVerificationEmail } from "@/lib/api";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
 import { ISRAEL_REGIONS } from "@/lib/locations";
 
@@ -41,6 +41,8 @@ export default function SettingsPage() {
           <Logo />
         </Link>
         <h1 className="text-3xl font-black mb-8">הגדרות פרופיל</h1>
+
+        {user.email_verified === false && <VerifyEmailBanner />}
 
         <ProfileForm token={token} user={user} onSaved={refreshUser} />
 
@@ -269,6 +271,43 @@ function BikesSection({
         </button>
       </form>
       {error && <p className="text-moto text-sm mt-2">{error}</p>}
+    </div>
+  );
+}
+
+function VerifyEmailBanner() {
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleResend() {
+    setBusy(true);
+    setError(null);
+    try {
+      await resendVerificationEmail();
+      setSent(true);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="border border-amber-800 bg-amber-950/30 text-amber-400 text-sm px-4 py-3 mb-6 flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
+      <span>⚠️ המייל שלך עדיין לא מאומת</span>
+      {sent ? (
+        <span className="text-emerald-400 text-xs">✓ נשלח מייל חדש - תבדוק גם ספאם</span>
+      ) : (
+        <button
+          onClick={handleResend}
+          disabled={busy}
+          className="switch-btn text-xs font-bold text-ink px-3 py-2 disabled:opacity-50 whitespace-nowrap"
+        >
+          {busy ? "שולח..." : "שלח שוב"}
+        </button>
+      )}
+      {error && <p className="text-moto text-xs">{error}</p>}
     </div>
   );
 }

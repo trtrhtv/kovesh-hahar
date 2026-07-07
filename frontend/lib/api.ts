@@ -292,6 +292,29 @@ export async function cancelEventRSVP(eventId: string, token: string): Promise<v
   }
 }
 
+export async function verifyEmail(token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/auth/verify-email`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "האימות נכשל"));
+  }
+}
+
+export async function resendVerificationEmail(): Promise<void> {
+  const res = await fetch(`${API_BASE}/auth/resend-verification`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "השליחה נכשלה"));
+  }
+}
+
 export async function requestPasswordReset(email: string): Promise<void> {
   const res = await fetch(`${API_BASE}/auth/forgot-password`, {
     method: "POST",

@@ -35,6 +35,10 @@ class UserUpdate(BaseModel):
     notifications_enabled: Optional[bool] = None
 
 
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
 class UserOut(BaseModel):
     id: str
     display_name: str
@@ -43,6 +47,7 @@ class UserOut(BaseModel):
     home_region: Optional[str] = None
     phone_number: Optional[str] = None
     notifications_enabled: bool = True
+    email_verified: bool = False
     bikes: List[BikeOut] = []
 
     class Config:

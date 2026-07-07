@@ -7,6 +7,44 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "כובש ההר <onboarding@resend.dev>")
 
 
+def send_verification_email(to_email: str, token: str) -> bool:
+    """שולח מייל אימות כתובת. מחזיר True/False, אף פעם לא זורק שגיאה כלפי חוץ."""
+    if not RESEND_API_KEY:
+        print("[EMAIL] RESEND_API_KEY לא מוגדר - לא נשלח מייל בפועל")
+        return False
+
+    verify_url = f"{FRONTEND_URL}/verify-email?token={token}"
+    html = f"""
+    <div dir="rtl" style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2>אימות כתובת מייל - כובש ההר</h2>
+      <p>עוד צעד אחד קטן - תלחץ על הכפתור כדי לאמת את כתובת המייל שלך:</p>
+      <p style="margin: 24px 0;">
+        <a href="{verify_url}" style="background:#FF5500;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;">
+          אימות מייל
+        </a>
+      </p>
+      <p style="color:#888;font-size:13px;">אם לא נרשמת לאתר, אפשר להתעלם מהמייל הזה בבטחה.</p>
+    </div>
+    """
+
+    try:
+        res = requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}"},
+            json={
+                "from": FROM_EMAIL,
+                "to": [to_email],
+                "subject": "אימות כתובת מייל - כובש ההר",
+                "html": html,
+            },
+            timeout=10,
+        )
+        return res.status_code < 300
+    except Exception as e:
+        print(f"[EMAIL] שליחה נכשלה: {e}")
+        return False
+
+
 def send_password_reset_email(to_email: str, reset_token: str) -> bool:
     """שולח מייל איפוס סיסמה. מחזיר True/False בהצלחה - אף פעם לא זורק שגיאה
     כלפי חוץ, כדי לא לחשוף למשתמש אם המייל שלו קיים במערכת או לא (אבטחה)."""

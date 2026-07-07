@@ -9,7 +9,7 @@ from sqlalchemy import or_, func
 from .. import models, schemas, auth, admin
 from ..phone import is_valid_phone
 from ..rate_limit import check_rate_limit
-from ..email import send_password_reset_email
+from ..email import send_password_reset_email, send_verification_email
 from ..database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -76,6 +76,7 @@ def register(payload: schemas.UserCreate, request: Request, response: Response, 
     if not username:
         username = _generate_unique_username(db, payload.display_name)
 
+    verify_token = secrets.token_urlsafe(32)
     user = models.User(
         email=payload.email,
         username=username,
@@ -83,10 +84,14 @@ def register(payload: schemas.UserCreate, request: Request, response: Response, 
         display_name=payload.display_name,
         phone_number=phone_number,
         accepted_disclaimer_at=datetime.utcnow(),
+        email_verify_token=verify_token,
+        email_verify_token_expires=datetime.utcnow() + timedelta(days=1),
     )
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    send_verification_email(user.email, verify_token)
 
     token = auth.create_access_token(user.id)
     _set_auth_cookie(response, token)
@@ -123,6 +128,43 @@ def login(
     token = auth.create_access_token(user.id)
     _set_auth_cookie(response, token)
     return schemas.Token(access_token=token)
+
+
+@router.post("/verify-email")
+def verify_email(payload: schemas.VerifyEmailRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email_verify_token == payload.token).first()
+    if (
+        not user
+        or not user.email_verify_token_expires
+        or user.email_verify_token_expires < datetime.utcnow()
+    ):
+        raise HTTPException(400, "הקישור לא תקין או שפג תוקפו - אפשר לבקש קישור חדש מההגדרות")
+
+    user.email_verified = True
+    user.email_verify_token = None
+    user.email_verify_token_expires = None
+    db.commit()
+    return {"message": "האימייל אומת בהצלחה"}
+
+
+@router.post("/resend-verification")
+def resend_verification(
+    request: Request,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    check_rate_limit(request, "resend-verification", max_attempts=3, window_seconds=3600)
+
+    if current_user.email_verified:
+        return {"message": "האימייל כבר מאומת"}
+
+    token = secrets.token_urlsafe(32)
+    current_user.email_verify_token = token
+    current_user.email_verify_token_expires = datetime.utcnow() + timedelta(days=1)
+    db.commit()
+
+    send_verification_email(current_user.email, token)
+    return {"message": "נשלח מייל אימות חדש"}
 
 
 @router.post("/logout")
