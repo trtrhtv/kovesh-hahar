@@ -202,6 +202,60 @@ body {
     border-radius: 6px;
     letter-spacing: 0.04em;
   }
+
+  /* רשת סורק טכנית - שכבת העומק העמוקה ביותר */
+  .scanline-grid {
+    background-image:
+      linear-gradient(rgb(var(--border-rgb) / 0.6) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--border-rgb) / 0.6) 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+
+  /* מסגרת א-סימטרית - חיתוך פינות "כוונת" במקום גבול סימטרי משעמם */
+  .corner-frame {
+    position: relative;
+  }
+  .corner-frame::before,
+  .corner-frame::after {
+    content: "";
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    pointer-events: none;
+  }
+  .corner-frame::before {
+    top: -2px;
+    right: -2px;
+    border-top: 2px solid rgb(var(--accent-rgb));
+    border-right: 2px solid rgb(var(--accent-rgb));
+  }
+  .corner-frame::after {
+    bottom: -2px;
+    left: -2px;
+    border-bottom: 2px solid rgb(var(--accent-rgb));
+    border-left: 2px solid rgb(var(--accent-rgb));
+  }
+
+  /* ריחוף אורגני של סילואטת האופנוע ברקע - לא סטטי */
+  .bike-drift {
+    animation: bike-drift 16s ease-in-out infinite;
+    will-change: transform, opacity;
+    filter: drop-shadow(0 0 18px rgb(var(--accent-rgb) / 0.35));
+  }
+
+  /* כפתור טקטי - מלבני, כבד, היפוך צבע מיידי */
+  .tactical-btn {
+    border-radius: 0;
+    padding: 1rem 2rem;
+    font-weight: 900;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: all 75ms linear;
+  }
+  .tactical-btn:hover {
+    box-shadow: 0 0 0 1px rgb(var(--accent-rgb)), 0 0 26px rgb(var(--accent-rgb) / 0.55);
+  }
 }
 
 @keyframes pulse-live {
@@ -217,6 +271,11 @@ body {
   70% { transform: scaleX(1); }
   85% { transform: scaleX(1); filter: brightness(1.6); }
   100% { transform: scaleX(0); }
+}
+@keyframes bike-drift {
+  0% { transform: translate3d(-2%, 0, 0) scale(1); opacity: 0.045; }
+  50% { transform: translate3d(4%, -3%, 0) scale(1.04); opacity: 0.075; }
+  100% { transform: translate3d(-2%, 0, 0) scale(1); opacity: 0.045; }
 }
 
 input, select, textarea {

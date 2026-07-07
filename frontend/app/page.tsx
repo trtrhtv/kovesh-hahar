@@ -23,7 +23,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/stories/new"
-              className="moto-btn bg-moto text-carbon px-4 py-2 font-bold hover:bg-motoDark transition-colors"
+              className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
             >
               העלה סיפור
             </Link>
@@ -31,37 +31,63 @@ export default async function HomePage() {
         </div>
       </header>
 
-      {/* Hero - פאנל אלכסוני א-סימטרי, לא עוד קישוט עדין */}
+      {/* Hero - 3 שכבות עומק: רשת סורק → אופנוע מרחף → ליבת הממשק */}
       <section className="relative overflow-hidden">
         <CinematicVideoBackground />
+
+        {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה */}
+        <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
         <div
-          className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none"
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, transparent, rgb(var(--bg-main-rgb)))" }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none z-0"
           style={{ clipPath: "polygon(30% 0, 100% 0, 100% 100%, 0 100%)" }}
           aria-hidden="true"
         />
 
-        <div className="relative max-w-5xl mx-auto px-5 pt-14 pb-12">
-          {/* קונטיינר תעשייתי מאוחד - לוח מכשירים אחד, לא טקסט צף */}
-          <div className="relative overflow-hidden bg-surfaceHi border border-edge p-6 sm:p-10">
-            <BikeSilhouette className="absolute inset-y-0 left-0 w-[70%] h-full text-moto opacity-[0.04] pointer-events-none" />
+        {/* שכבה 2 - האופנוע המרחף, זוהר בצבע האקצנט הפעיל */}
+        <BikeSilhouette className="bike-drift absolute inset-y-0 left-0 z-10 w-[70%] h-full text-moto pointer-events-none" />
 
-            <div className="relative font-mono text-xs text-cyan tracking-[0.25em]">
+        {/* שכבה 3 - ליבת הממשק, זכוכית קפואה מעל התנועה */}
+        <div className="relative z-20 max-w-5xl mx-auto px-5 pt-14 pb-12">
+          <div className="corner-frame relative overflow-hidden backdrop-blur-md bg-surfaceHi/75 border border-edge p-6 sm:p-10">
+            {/* טלמטריית פינות - מדמה מחשב ניווט פיזי */}
+            <span className="hidden sm:block absolute top-2 left-2 font-mono text-[10px] text-cyan/70 tracking-wider">
+              [SYS.LOC // 31.7683°N 35.2137°E]
+            </span>
+            <span className="hidden sm:block absolute bottom-2 right-2 font-mono text-[10px] text-cyan/70 tracking-wider">
+              [RALLY.ENG // ACTIVE]
+            </span>
+
+            <div className="font-mono text-xs text-cyan tracking-[0.25em]">
               [ROADBOOK] // [אנדורו] · [סינגלים] · [מוטוקרוס] · [אדוונצ'ר]
             </div>
 
-            <h1 className="relative leading-[0.85] mt-3">
+            <h1 className="leading-[0.85] mt-3">
               <span className="block text-7xl md:text-9xl font-black text-ink">כובשים.</span>
               <span className="block text-2xl md:text-4xl font-bold text-moto mt-2">
                 כל רכיבה משאירה קו על המפה
               </span>
             </h1>
 
-            {/* מד טלמטריה מזויף - מרגיש כמו דשבורד חי */}
-            <div className="relative font-mono text-xs text-moto tracking-widest mt-4 flex items-center gap-3">
-              <span>{"▮".repeat(18)}</span>
-              <span className="text-textDim">100% READY</span>
+            {/* אשכול טלמטריה דיגיטלי - מד מקוטע + משואת סכנה מהבהבת */}
+            <div className="flex items-center gap-3 mt-5">
+              <div className="flex gap-[3px]">
+                {Array.from({ length: 18 }).map((_, i) => (
+                  <span key={i} className="w-1.5 h-4 bg-moto" style={{ opacity: 1 - i * 0.02 }} />
+                ))}
+              </div>
+              <span className="font-mono text-xs font-bold text-moto tracking-widest">READY 100%</span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              </span>
             </div>
-            <div className="relative border-t border-dashed border-edge mt-3 pt-6">
+
+            <div className="border-t border-dashed border-edge mt-4 pt-6">
               <p className="text-lg text-ink/70 max-w-lg leading-relaxed">
                 מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
                 ועדכוני שטח בזמן אמת.
@@ -69,13 +95,13 @@ export default async function HomePage() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/stories/new"
-                  className="moto-btn bg-moto text-carbon px-6 py-3 font-bold hover:bg-motoDark transition-colors"
+                  className="tactical-btn bg-moto text-carbon hover:bg-motoDark"
                 >
                   שתף סיפור נסיעה
                 </Link>
                 <Link
                   href="/stories"
-                  className="border border-edge px-6 py-3 font-bold hover:border-moto transition-colors"
+                  className="tactical-btn border-2 border-edge text-ink hover:border-moto"
                 >
                   עיין במסלולים
                 </Link>

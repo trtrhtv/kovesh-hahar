@@ -36,7 +36,7 @@ export default async function StoriesPage({
           </Link>
           <Link
             href="/stories/new"
-            className="moto-btn bg-moto text-carbon px-4 py-2 font-bold hover:bg-motoDark transition-colors text-sm"
+            className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
           >
             העלה סיפור
           </Link>
