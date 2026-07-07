@@ -1,7 +1,7 @@
 import CinematicVideoBackground from "@/components/CinematicVideoBackground";
 import BreakoutRiderImage from "@/components/BreakoutRiderImage";
-import BikeSilhouette from "@/components/BikeSilhouette";
 import Logo from "@/components/Logo";
+import Image from "next/image";
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
@@ -37,13 +37,25 @@ export default async function HomePage() {
 
         {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן */}
         <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, transparent, rgb(var(--bg-main-rgb)))" }}
-          aria-hidden="true"
-        />
-        {/* שכבה 2 - האופנוע המרחף, האלמנט הקבוע והבלתי-מותנה של ה-hero */}
-        <BikeSilhouette className="bike-drift absolute inset-y-0 left-0 z-10 w-[85%] h-full text-moto pointer-events-none" />
+
+        {/* שכבה 2 - תמונת האקשן הקבועה, עם פאן איטי */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <Image
+            src="/hero-action.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="slow-pan object-cover"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgb(var(--bg-main-rgb) / 0.6), rgb(var(--bg-main-rgb) / 0.85), rgb(var(--bg-main-rgb)))",
+            }}
+          />
+        </div>
 
         <div
           className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none z-0"
@@ -101,7 +113,7 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/stories"
-                  className="tactical-btn border-2 border-moto text-ink hover:bg-moto hover:text-carbon"
+                  className="tactical-btn border-2 border-ink text-ink font-black hover:bg-ink hover:text-carbon"
                 >
                   עיין במסלולים
                 </Link>
