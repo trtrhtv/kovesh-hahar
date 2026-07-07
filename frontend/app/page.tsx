@@ -65,7 +65,7 @@ export default async function HomePage() {
 
         {/* שכבה 3 - ליבת הממשק, זכוכית קפואה מעל התנועה */}
         <div className="relative z-20 max-w-5xl mx-auto px-5 py-20">
-          <div className="corner-frame relative overflow-hidden backdrop-blur-lg bg-surfaceHi/40 border border-edge p-6 sm:p-10">
+          <div className="corner-frame relative overflow-hidden backdrop-blur-xl bg-surfaceHi/20 border border-edge p-6 sm:p-10">
             {/* טלמטריית פינות - מדמה מחשב ניווט פיזי */}
             <span className="hidden sm:block absolute top-2 left-2 font-mono text-[10px] text-cyan/70 tracking-wider">
               [SYS.LOC // 31.7683°N 35.2137°E]
@@ -100,11 +100,11 @@ export default async function HomePage() {
             </div>
 
             <div className="border-t border-dashed border-edge mt-4 pt-6 px-1 sm:px-4">
-              <p className="text-lg text-ink/70 max-w-lg leading-relaxed">
+              <p className="text-lg text-ink/70 max-w-2xl mx-auto leading-relaxed">
                 מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
                 ועדכוני שטח בזמן אמת.
               </p>
-              <div className="mt-12 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/stories/new"
                   className="tactical-btn bg-moto text-carbon hover:bg-motoDark"
