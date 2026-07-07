@@ -19,17 +19,17 @@ export default function NavigateButton({
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
 
   return (
-    <div className="border border-char/20 p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+    <div className="moto-card p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
       <div>
-        <div className="text-xs font-bold text-char/60 tracking-wide mb-0.5">נקודת כינוס</div>
-        <div className="text-sm">{label || "המיקום מסומן על המפה"}</div>
+        <div className="text-xs font-bold text-cyan tracking-widest mb-1">🧭 נקודת כינוס</div>
+        <div className="text-white font-bold">{label || "המיקום מסומן על המפה"}</div>
       </div>
       <div className="flex gap-2 shrink-0 flex-col sm:flex-row">
         <a
           href={wazeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-char text-sand w-full sm:w-auto px-5 py-3.5 min-h-[48px] text-base font-bold hover:bg-oxide active:bg-oxide transition-colors flex items-center justify-center text-center"
+          className="btn-press bg-moto text-carbon w-full sm:w-auto px-6 py-4 min-h-[52px] text-base font-black hover:bg-motoDark hover:shadow-glow-moto transition-colors flex items-center justify-center text-center"
         >
           נווט ב-Waze
         </a>
@@ -37,7 +37,7 @@ export default function NavigateButton({
           href={googleUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="border-2 border-char/30 w-full sm:w-auto px-5 py-3.5 min-h-[48px] text-base font-bold hover:border-oxide active:border-oxide transition-colors flex items-center justify-center text-center"
+          className="btn-press border-2 border-edge text-white w-full sm:w-auto px-6 py-4 min-h-[52px] text-base font-bold hover:border-moto transition-colors flex items-center justify-center text-center"
         >
           Google Maps
         </a>

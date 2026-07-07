@@ -34,17 +34,17 @@ export default function ContactPage() {
       </Link>
 
       {sent ? (
-        <div className="border border-char/20 p-8 text-center">
+        <div className="border border-edge p-8 text-center">
           <h1 className="text-2xl font-black mb-2">ההודעה נשלחה</h1>
-          <p className="text-char/70">תודה שפנית - נחזור אליך בהקדם.</p>
-          <Link href="/" className="text-oxide font-bold hover:underline mt-4 inline-block">
+          <p className="text-textDim">תודה שפנית - נחזור אליך בהקדם.</p>
+          <Link href="/" className="text-moto font-bold hover:underline mt-4 inline-block">
             חזרה לעמוד הבית ←
           </Link>
         </div>
       ) : (
         <>
           <h1 className="text-3xl font-black mb-1">צור קשר</h1>
-          <p className="text-char/60 mb-8 text-sm">
+          <p className="text-textDim mb-8 text-sm">
             שאלה, הצעה, דיווח על בעיה, או כל דבר אחר - נשמח לשמוע.
           </p>
 
@@ -55,7 +55,7 @@ export default function ContactPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="border border-char/25 bg-sand px-3 py-3 min-h-[48px] focus:border-oxide outline-none"
+              className="border border-edge bg-surface px-3 py-3 min-h-[48px] focus:border-moto outline-none"
             />
             <input
               type="email"
@@ -63,7 +63,7 @@ export default function ContactPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="border border-char/25 bg-sand px-3 py-3 min-h-[48px] focus:border-oxide outline-none"
+              className="border border-edge bg-surface px-3 py-3 min-h-[48px] focus:border-moto outline-none"
             />
             <textarea
               placeholder="ההודעה שלך"
@@ -72,15 +72,15 @@ export default function ContactPage() {
               required
               rows={6}
               minLength={10}
-              className="border border-char/25 bg-sand px-3 py-3 focus:border-oxide outline-none resize-y"
+              className="border border-edge bg-surface px-3 py-3 focus:border-moto outline-none resize-y"
             />
 
-            {error && <p className="text-oxide text-sm">{error}</p>}
+            {error && <p className="text-moto text-sm">{error}</p>}
 
             <button
               type="submit"
               disabled={busy}
-              className="bg-oxide text-sand py-3.5 min-h-[48px] text-base font-bold hover:bg-oxideDark transition-colors disabled:opacity-50"
+              className="bg-moto text-carbon py-3.5 min-h-[48px] text-base font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
             >
               {busy ? "שולח..." : "שלח הודעה"}
             </button>

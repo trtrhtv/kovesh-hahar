@@ -21,10 +21,10 @@ export const DIFFICULTY_LABELS: Record<string, string> = {
 };
 
 export const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: "#5C6B47",
-  moderate: "#8B7355",
-  hard: "#A8462E",
-  extreme: "#23201B",
+  easy: "#3ED598",
+  moderate: "#FFB020",
+  hard: "#FF6600",
+  extreme: "#FF3B3B",
 };
 
 export const SEASON_LABELS: Record<string, string> = {
@@ -41,8 +41,8 @@ export const TRAIL_STATUS_LABELS: Record<string, string> = {
 };
 
 export const TRAIL_STATUS_COLORS: Record<string, string> = {
-  open: "#5C6B47",
-  blocked: "#A8462E",
-  muddy: "#8B7355",
-  unknown: "#23201B",
+  open: "#3ED598",
+  blocked: "#FF3B3B",
+  muddy: "#C9873A",
+  unknown: "#94A3B8",
 };

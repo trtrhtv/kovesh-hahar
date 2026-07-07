@@ -27,7 +27,7 @@ export default function FilterSidebar({
   return (
     <form method="get" className="flex flex-col gap-5 sticky top-6">
       <div>
-        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+        <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
           חיפוש חופשי
         </label>
         <input
@@ -35,19 +35,19 @@ export default function FilterSidebar({
           name="search"
           defaultValue={defaults.search}
           placeholder="שם מסלול..."
-          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+          className="w-full border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+        <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
           מדינה
         </label>
         <select
           name="country"
           value={country}
           onChange={(e) => setCountry(e.target.value)}
-          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+          className="w-full border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
         >
           <option value="">כל המדינות</option>
           {COUNTRIES.map((c) => (
@@ -60,13 +60,13 @@ export default function FilterSidebar({
 
       {country === ISRAEL && (
         <div>
-          <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+          <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
             אזור בארץ
           </label>
           <select
             name="region"
             defaultValue={defaults.region}
-            className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+            className="w-full border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
           >
             <option value="">כל האזורים</option>
             {ISRAEL_REGIONS.map((r) => (
@@ -79,13 +79,13 @@ export default function FilterSidebar({
       )}
 
       <div>
-        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+        <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
           סוג אופנוע
         </label>
         <select
           name="vehicle_type"
           defaultValue={defaults.vehicle_type}
-          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+          className="w-full border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
         >
           <option value="">הכל</option>
           {Object.entries(VEHICLE_TYPE_LABELS).map(([key, label]) => (
@@ -97,13 +97,13 @@ export default function FilterSidebar({
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+        <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
           סגנון רכיבה
         </label>
         <select
           name="ride_style"
           defaultValue={defaults.ride_style}
-          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+          className="w-full border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
         >
           <option value="">הכל</option>
           {Object.entries(RIDE_STYLE_LABELS).map(([key, label]) => (
@@ -115,13 +115,13 @@ export default function FilterSidebar({
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+        <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
           רמת קושי
         </label>
         <select
           name="difficulty"
           defaultValue={defaults.difficulty}
-          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+          className="w-full border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
         >
           <option value="">הכל</option>
           {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
@@ -133,13 +133,13 @@ export default function FilterSidebar({
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">
+        <label className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
           עונה מומלצת
         </label>
         <select
           name="season"
           defaultValue={defaults.season}
-          className="w-full border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+          className="w-full border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
         >
           <option value="">הכל</option>
           {Object.entries(SEASON_LABELS).map(([key, label]) => (
@@ -152,7 +152,7 @@ export default function FilterSidebar({
 
       <button
         type="submit"
-        className="bg-char text-sand py-2.5 font-bold text-sm hover:bg-oxide transition-colors"
+        className="bg-surfaceHi text-white py-2.5 font-bold text-sm hover:bg-moto hover:text-carbon transition-colors"
       >
         סנן תוצאות
       </button>

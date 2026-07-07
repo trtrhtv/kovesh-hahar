@@ -36,7 +36,7 @@ export default function LikeButton({
       onClick={handleClick}
       disabled={busy}
       className={`border-2 px-5 py-2.5 min-h-[44px] text-base font-bold transition-colors ${
-        liked ? "bg-oxide text-sand border-oxide" : "border-char/25 hover:border-oxide"
+        liked ? "bg-moto text-carbon border-moto" : "border-edge hover:border-moto"
       }`}
     >
       {liked ? "אהבתי ✓" : "אהבתי"} · {count}

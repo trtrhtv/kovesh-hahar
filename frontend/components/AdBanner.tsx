@@ -5,7 +5,7 @@
 export default function AdBanner({ variant = "horizontal" }: { variant?: "horizontal" | "square" }) {
   return (
     <div
-      className={`border border-dashed border-char/25 flex items-center justify-center text-char/30 text-xs tracking-wider ${
+      className={`border border-dashed border-edge flex items-center justify-center text-textDim text-xs tracking-wider ${
         variant === "horizontal" ? "h-20" : "h-40"
       }`}
     >

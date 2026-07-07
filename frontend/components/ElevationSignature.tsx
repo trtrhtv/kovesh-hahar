@@ -8,7 +8,7 @@
 export default function ElevationSignature({
   profileJson,
   className = "",
-  color = "#A8462E",
+  color = "#FF6600",
 }: {
   profileJson?: string | null;
   className?: string;

@@ -40,13 +40,16 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
   const latest = updates[0];
 
   return (
-    <div className="border-2 border-char/20 p-4">
+    <div className="moto-card p-4">
       <div className="flex items-center justify-between mb-3 gap-3">
-        <h2 className="font-bold text-sm tracking-wider text-char/60">עדכוני שטח</h2>
+        <h2 className="font-black text-sm tracking-widest text-white flex items-center gap-2">
+          <span className="live-dot" />
+          עדכוני שטח חיים
+        </h2>
         {token && (
           <button
             onClick={() => setShowForm((s) => !s)}
-            className="text-sm font-bold text-oxide border-2 border-oxide px-4 py-2.5 min-h-[44px] hover:bg-oxide hover:text-sand active:bg-oxide active:text-sand transition-colors"
+            className="btn-press text-sm font-bold text-moto border-2 border-moto px-4 py-2.5 min-h-[44px] hover:bg-moto hover:text-carbon active:bg-moto active:text-carbon transition-colors"
           >
             {showForm ? "ביטול" : "+ עדכן מצב"}
           </button>
@@ -61,14 +64,14 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
           >
             {TRAIL_STATUS_LABELS[latest.status] || latest.status}
           </span>
-          <span className="text-xs text-char/50">
+          <span className="text-xs text-textDim">
             עודכן {new Date(latest.created_at).toLocaleDateString("he-IL")}
           </span>
         </div>
       )}
 
       {showForm && (
-        <form onSubmit={submit} className="flex flex-col gap-3 mb-4 bg-sandDark/40 p-3">
+        <form onSubmit={submit} className="flex flex-col gap-3 mb-4 bg-surfaceHi p-3">
           <div className="flex gap-2 flex-wrap">
             {STATUS_OPTIONS.map((s) => (
               <button
@@ -77,8 +80,8 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
                 onClick={() => setStatus(s)}
                 className={`text-sm font-bold px-4 py-3 min-h-[44px] border-2 transition-colors ${
                   status === s
-                    ? "text-sand"
-                    : "border-char/25 hover:border-oxide"
+                    ? "text-carbon"
+                    : "border-edge hover:border-moto"
                 }`}
                 style={status === s ? { backgroundColor: TRAIL_STATUS_COLORS[s], borderColor: TRAIL_STATUS_COLORS[s] } : {}}
               >
@@ -92,13 +95,13 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
             onChange={(e) => setNote(e.target.value)}
             placeholder="פרטים נוספים (לא חובה) - למשל 'קריסה אחרי הגשם'"
             maxLength={500}
-            className="border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+            className="border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
           />
-          {error && <p className="text-oxide text-sm">{error}</p>}
+          {error && <p className="text-moto text-sm">{error}</p>}
           <button
             type="submit"
             disabled={busy}
-            className="bg-char text-sand py-3.5 min-h-[48px] text-base font-bold hover:bg-oxide transition-colors disabled:opacity-50 w-full sm:w-auto sm:self-start px-6"
+            className="bg-surfaceHi text-white py-3.5 min-h-[48px] text-base font-bold hover:bg-moto hover:text-carbon transition-colors disabled:opacity-50 w-full sm:w-auto sm:self-start px-6"
           >
             {busy ? "שולח..." : "פרסם עדכון"}
           </button>
@@ -108,12 +111,12 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
       {updates.length > 1 && (
         <div className="flex flex-col gap-2 mt-2">
           {updates.slice(1, 5).map((u) => (
-            <div key={u.id} className="text-xs text-char/60 flex items-center gap-2">
+            <div key={u.id} className="text-xs text-textDim flex items-center gap-2">
               <span style={{ color: TRAIL_STATUS_COLORS[u.status] }} className="font-bold">
                 {TRAIL_STATUS_LABELS[u.status]}
               </span>
               <span>{u.note}</span>
-              <span className="text-char/40">
+              <span className="text-textDim">
                 · {new Date(u.created_at).toLocaleDateString("he-IL")}
               </span>
             </div>
@@ -122,11 +125,11 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
       )}
 
       {updates.length === 0 && (
-        <p className="text-char/50 text-sm">עדיין אין עדכוני שטח על המסלול הזה.</p>
+        <p className="text-textDim text-sm">עדיין אין עדכוני שטח על המסלול הזה.</p>
       )}
 
       {!token && (
-        <a href="/stories/new" className="text-oxide text-sm hover:underline block mt-2">
+        <a href="/stories/new" className="text-moto text-sm hover:underline block mt-2">
           התחבר כדי לעדכן על מצב המסלול
         </a>
       )}

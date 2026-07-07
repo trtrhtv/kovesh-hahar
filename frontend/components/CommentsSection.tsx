@@ -33,24 +33,24 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
 
   return (
     <div>
-      <h2 className="font-bold text-sm tracking-wider text-char/60 mb-4">
+      <h2 className="font-bold text-sm tracking-wider text-textDim mb-4">
         תגובות ({comments.length})
       </h2>
 
       <div className="flex flex-col gap-4 mb-6">
         {comments.map((c) => (
-          <div key={c.id} className="border-b border-char/10 pb-4">
+          <div key={c.id} className="border-b border-edge/10 pb-4">
             <div className="flex items-center gap-2 text-sm mb-1">
               <span className="font-bold">{c.author.display_name}</span>
-              <span className="text-char/40 text-xs">
+              <span className="text-textDim text-xs">
                 {new Date(c.created_at).toLocaleDateString("he-IL")}
               </span>
             </div>
-            <p className="text-char/80 text-sm">{c.body}</p>
+            <p className="text-white/80 text-sm">{c.body}</p>
           </div>
         ))}
         {comments.length === 0 && (
-          <p className="text-char/50 text-sm">עדיין אין תגובות - היה הראשון להגיב.</p>
+          <p className="text-textDim text-sm">עדיין אין תגובות - היה הראשון להגיב.</p>
         )}
       </div>
 
@@ -62,22 +62,22 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
             onChange={(e) => setText(e.target.value)}
             placeholder="הוסף תגובה..."
             maxLength={2000}
-            className="flex-1 border border-char/25 bg-sand px-3 py-2 text-sm focus:border-oxide outline-none"
+            className="flex-1 border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
           />
           <button
             type="submit"
             disabled={busy || !text.trim()}
-            className="bg-char text-sand px-4 py-2 text-sm font-bold hover:bg-oxide transition-colors disabled:opacity-50"
+            className="bg-surfaceHi text-white px-4 py-2 text-sm font-bold hover:bg-moto hover:text-carbon transition-colors disabled:opacity-50"
           >
             שלח
           </button>
         </form>
       ) : (
-        <a href="/stories/new" className="text-oxide text-sm hover:underline">
+        <a href="/stories/new" className="text-moto text-sm hover:underline">
           התחבר כדי להגיב
         </a>
       )}
-      {error && <p className="text-oxide text-sm mt-2">{error}</p>}
+      {error && <p className="text-moto text-sm mt-2">{error}</p>}
     </div>
   );
 }

@@ -7,60 +7,105 @@ html {
 }
 
 body {
-  background-color: #e8e1d3;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(35,32,27,0.06) 1px, transparent 0);
-  background-size: 22px 22px;
-  color: #23201b;
+  background-color: #12161a;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+  background-size: 24px 24px;
+  color: #ffffff;
   position: relative;
 }
 
-/* טקסטורת גרעיניות עדינה - שכבה קבועה מעל כל התוכן, בלי לפגוע בקריאות */
+/* גרעיניות עדינה - שומרת על תחושת מוצר בנוי, לא רק מסך שטוח */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.035;
-  mix-blend-mode: multiply;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* פרפורציה בסגנון כרטיס ראלי - עיגולים מנוקבים בין שני חלקי כרטיס */
-.ticket-perforation {
-  background-image: radial-gradient(circle, #e8e1d3 2px, transparent 2.5px);
-  background-size: 100% 14px;
-  background-position: center;
+/* מעבר חלק אחיד לכל אלמנט אינטראקטיבי */
+button, a, .transition-smooth {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* פס מקווקו בסגנון קווי קונטור על מפה - משמש כמפריד בין אזורים באתר */
+/* כרטיס בסגנון דשבורד רכב מרוץ - זוהר עדין באקצנט כשפעיל/hover */
+.moto-card {
+  background-color: #1a1f26;
+  border: 1px solid #2d3748;
+  border-radius: 10px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.moto-card:hover {
+  border-color: rgba(255,102,0,0.5);
+  box-shadow: 0 0 24px rgba(255,102,0,0.15);
+  transform: translateY(-2px);
+}
+
+/* פילס סינון צפים - כפתורים מוצפים על גבי המפה */
+.filter-pill {
+  border-radius: 999px;
+  border: 1px solid #2d3748;
+  background-color: rgba(26,31,38,0.85);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.filter-pill.active {
+  border-color: #ff6600;
+  background-color: rgba(255,102,0,0.12);
+  box-shadow: 0 0 16px rgba(255,102,0,0.25);
+}
+
+/* נקודה אדומה פועמת - מציינת "חי" לעדכוני שטח */
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ff3b3b;
+  box-shadow: 0 0 8px rgba(255,59,59,0.8);
+  animation: pulse-live 1.6s ease-in-out infinite;
+}
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* לחיצה על כפתור עיקרי - שקיעה עדינה */
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* מפריד דק בין אזורים באתר */
 .contour-divider {
   height: 1px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    #8b7355 0px,
-    #8b7355 6px,
-    transparent 6px,
-    transparent 11px
-  );
-  opacity: 0.5;
+  background-color: #2d3748;
 }
 
-/* חותמת קושי - כמו מדבקת סקרוטינירינג בראלי */
+/* חותמת רמת קושי/סטטוס - גיאומטרית, לא מוטה */
 .difficulty-stamp {
-  border: 2px solid currentColor;
-  transform: rotate(-3deg);
-  letter-spacing: 0.05em;
+  border: 1.5px solid currentColor;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
+/* עיגול פינות גיאומטרי אחיד (8px) - התאמות ספציפיות (rounded-full לפילס) גוברות */
+input, select, textarea, button {
+  border-radius: 8px;
+  color: inherit;
+}
+input::placeholder, textarea::placeholder {
+  color: #64748B;
 }
 
 ::selection {
-  background-color: #a8462e;
-  color: #e8e1d3;
+  background-color: #ff6600;
+  color: #12161a;
 }
 
 :focus-visible {
-  outline: 2px solid #a8462e;
+  outline: 2px solid #ff6600;
   outline-offset: 2px;
 }
 

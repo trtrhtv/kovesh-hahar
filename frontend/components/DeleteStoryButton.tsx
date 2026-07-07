@@ -41,7 +41,7 @@ export default function DeleteStoryButton({
     return (
       <button
         onClick={() => setConfirming(true)}
-        className="text-xs text-char/50 hover:text-oxide underline"
+        className="text-xs text-textDim hover:text-moto underline"
       >
         {isAdmin && user.id !== authorId ? "מחק סיפור (מנהל)" : "מחק את הסיפור שלי"}
       </button>
@@ -50,15 +50,15 @@ export default function DeleteStoryButton({
 
   return (
     <div className="flex items-center gap-2 text-xs">
-      <span className="text-char/70">בטוח שאתה רוצה למחוק לצמיתות?</span>
+      <span className="text-textDim">בטוח שאתה רוצה למחוק לצמיתות?</span>
       <button
         onClick={handleDelete}
         disabled={busy}
-        className="text-oxide font-bold hover:underline disabled:opacity-50"
+        className="text-moto font-bold hover:underline disabled:opacity-50"
       >
         {busy ? "מוחק..." : "כן, מחק"}
       </button>
-      <button onClick={() => setConfirming(false)} className="text-char/50 hover:underline">
+      <button onClick={() => setConfirming(false)} className="text-textDim hover:underline">
         ביטול
       </button>
     </div>

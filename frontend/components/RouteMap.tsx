@@ -70,7 +70,7 @@ export default function RouteMap({
           type: "line",
           source: "route",
           layout: { "line-join": "round", "line-cap": "round" },
-          paint: { "line-color": "#A8462E", "line-width": 4 },
+          paint: { "line-color": "#FF6600", "line-width": 4 },
         });
 
         new maplibregl.default.Marker({ color: "#5C6B47" })
@@ -93,7 +93,7 @@ export default function RouteMap({
 
   if (!profileJson) {
     return (
-      <div className={`flex items-center justify-center bg-sandDark text-char/50 text-sm ${className}`}>
+      <div className={`flex items-center justify-center bg-surfaceHi text-textDim text-sm ${className}`}>
         לא צורף מסלול GPX לסיפור הזה
       </div>
     );
@@ -104,7 +104,7 @@ export default function RouteMap({
       <div ref={containerRef} className="w-full h-full" />
       <button
         onClick={() => setSatelliteOn(toggleRef.current ? toggleRef.current() : false)}
-        className="absolute bottom-3 right-3 z-10 bg-sand border border-char/25 px-4 py-2.5 min-h-[40px] text-xs font-bold hover:border-oxide transition-colors shadow-sm"
+        className="absolute bottom-3 right-3 z-10 bg-surface border border-edge px-4 py-2.5 min-h-[40px] text-xs font-bold hover:border-moto transition-colors shadow-sm"
       >
         {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
       </button>

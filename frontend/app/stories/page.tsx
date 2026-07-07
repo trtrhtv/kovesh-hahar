@@ -29,14 +29,14 @@ export default async function StoriesPage({
 
   return (
     <main>
-      <header className="border-b border-char/15">
+      <header className="border-b border-edge">
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center flex-wrap gap-y-2 justify-between">
           <Link href="/" className="font-black text-lg tracking-tight">
             <Logo />
           </Link>
           <Link
             href="/stories/new"
-            className="bg-oxide text-sand px-4 py-2 font-bold hover:bg-oxideDark transition-colors text-sm"
+            className="bg-moto text-carbon px-4 py-2 font-bold hover:bg-motoDark transition-colors text-sm"
           >
             העלה סיפור
           </Link>
@@ -52,17 +52,17 @@ export default async function StoriesPage({
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-black">כל הסיפורים</h1>
             {activeFilters.length > 0 && (
-              <Link href="/stories" className="text-sm text-oxide hover:underline">
+              <Link href="/stories" className="text-sm text-moto hover:underline">
                 נקה סינון
               </Link>
             )}
           </div>
 
-          <OverviewMap stories={stories} className="w-full h-72 mb-8 border border-char/15" />
+          <OverviewMap stories={stories} className="w-full h-72 mb-8 border border-edge" />
 
           <div className="grid gap-4">
             {stories.length === 0 ? (
-              <div className="border border-dashed border-char/30 p-12 text-center text-char/60">
+              <div className="border border-dashed border-edge p-12 text-center text-textDim">
                 לא נמצאו סיפורים שתואמים לסינון הזה.
               </div>
             ) : (
@@ -77,7 +77,7 @@ export default async function StoriesPage({
                   ...searchParams,
                   offset: String(Math.max(0, offset - limit)),
                 }).toString()}`}
-                className="border border-char/25 px-4 py-2 hover:border-oxide"
+                className="border border-edge px-4 py-2 hover:border-moto"
               >
                 ← הקודמים
               </Link>
@@ -90,7 +90,7 @@ export default async function StoriesPage({
                   ...searchParams,
                   offset: String(offset + limit),
                 }).toString()}`}
-                className="border border-char/25 px-4 py-2 hover:border-oxide"
+                className="border border-edge px-4 py-2 hover:border-moto"
               >
                 הבאים →
               </Link>

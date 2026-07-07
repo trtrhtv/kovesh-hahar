@@ -52,7 +52,7 @@ export default function OverviewMap({
         if (!pinned.length) return;
 
         pinned.forEach((story) => {
-          const color = DIFFICULTY_COLORS[story.difficulty] || "#A8462E";
+          const color = DIFFICULTY_COLORS[story.difficulty] || "#FF6600";
           const el = document.createElement("a");
           el.href = `/stories/${story.id}`;
           el.style.display = "block";
@@ -99,7 +99,7 @@ export default function OverviewMap({
       <div ref={containerRef} className="w-full h-full" />
       <button
         onClick={() => setSatelliteOn(toggleRef.current ? toggleRef.current() : false)}
-        className="absolute bottom-3 right-3 z-10 bg-sand border border-char/25 px-4 py-2.5 min-h-[40px] text-xs font-bold hover:border-oxide transition-colors shadow-sm"
+        className="absolute bottom-3 right-3 z-10 bg-surface border border-edge px-4 py-2.5 min-h-[40px] text-xs font-bold hover:border-moto transition-colors shadow-sm"
       >
         {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
       </button>

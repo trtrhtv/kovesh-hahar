@@ -15,7 +15,7 @@ export default function NewStoryPage() {
   const { user, token, loading, login, register } = useAuth();
 
   if (loading) {
-    return <div className="max-w-2xl mx-auto px-5 py-24 text-center text-char/60">טוען...</div>;
+    return <div className="max-w-2xl mx-auto px-5 py-24 text-center text-textDim">טוען...</div>;
   }
 
   if (!user || !token) {
@@ -70,7 +70,7 @@ function AuthGate({
       <h1 className="text-2xl font-black mb-1">
         {mode === "login" ? "התחברות" : "הרשמה"}
       </h1>
-      <p className="text-char/60 mb-6 text-sm">כדי לשתף סיפור נסיעה, צריך קודם חשבון.</p>
+      <p className="text-textDim mb-6 text-sm">כדי לשתף סיפור נסיעה, צריך קודם חשבון.</p>
 
       <form onSubmit={submit} className="flex flex-col gap-4">
         {mode === "register" && (
@@ -80,7 +80,7 @@ function AuthGate({
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             required
-            className="border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
           />
         )}
         <input
@@ -89,7 +89,7 @@ function AuthGate({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+          className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
         />
         <input
           type="password"
@@ -98,17 +98,17 @@ function AuthGate({
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={8}
-          className="border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+          className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
         />
 
         {mode === "register" && (
-          <label className="flex items-start gap-2.5 text-xs text-char/70 leading-relaxed cursor-pointer">
+          <label className="flex items-start gap-2.5 text-xs text-textDim leading-relaxed cursor-pointer">
             <input
               type="checkbox"
               checked={acceptedDisclaimer}
               onChange={(e) => setAcceptedDisclaimer(e.target.checked)}
               required
-              className="mt-0.5 w-5 h-5 shrink-0 accent-oxide"
+              className="mt-0.5 w-5 h-5 shrink-0 accent-moto"
             />
             <span>
               האתר אינו אחראי על תוכן המסלולים, תנאי השטח, או חוקיות המעבר בהם. הרכיבה
@@ -118,12 +118,12 @@ function AuthGate({
           </label>
         )}
 
-        {error && <p className="text-oxide text-sm">{error}</p>}
+        {error && <p className="text-moto text-sm">{error}</p>}
 
         <button
           type="submit"
           disabled={busy || (mode === "register" && !acceptedDisclaimer)}
-          className="bg-oxide text-sand py-3 font-bold hover:bg-oxideDark transition-colors disabled:opacity-50"
+          className="bg-moto text-carbon py-3 font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
         >
           {busy ? "רגע..." : mode === "login" ? "התחבר" : "הרשם"}
         </button>
@@ -131,7 +131,7 @@ function AuthGate({
 
       <button
         onClick={() => setMode(mode === "login" ? "register" : "login")}
-        className="text-sm text-oxide hover:underline mt-4"
+        className="text-sm text-moto hover:underline mt-4"
       >
         {mode === "login" ? "אין לך חשבון? הרשם" : "כבר יש לך חשבון? התחבר"}
       </button>
@@ -230,7 +230,7 @@ function StoryForm({ token }: { token: string }) {
         <Logo />
       </Link>
       <h1 className="text-3xl font-black mb-1">שתף סיפור נסיעה</h1>
-      <p className="text-char/60 mb-8 text-sm">
+      <p className="text-textDim mb-8 text-sm">
         קובץ GPX מומלץ מאוד - הוא זה שמפיק את המרחק, הטיפוס, ואת קו החתימה של הסיפור.
       </p>
 
@@ -243,7 +243,7 @@ function StoryForm({ token }: { token: string }) {
             required
             maxLength={120}
             placeholder="לדוגמה: מכתש רמון בשקיעה"
-            className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+            className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
           />
         </Field>
 
@@ -254,11 +254,11 @@ function StoryForm({ token }: { token: string }) {
             required
             rows={8}
             placeholder="איך הייתה הרכיבה, מה כדאי לדעת לפני שיוצאים, אתגרים בדרך..."
-            className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none resize-y"
+            className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none resize-y"
           />
           <p
             className={`text-xs mt-1 ${
-              countWords(body) >= MIN_BODY_WORDS ? "text-olive" : "text-char/50"
+              countWords(body) >= MIN_BODY_WORDS ? "text-cyan" : "text-textDim"
             }`}
           >
             {countWords(body)} / {MIN_BODY_WORDS} מילים לפחות
@@ -270,7 +270,7 @@ function StoryForm({ token }: { token: string }) {
             <select
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
-              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             >
               {Object.entries(VEHICLE_TYPE_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -284,7 +284,7 @@ function StoryForm({ token }: { token: string }) {
             <select
               value={rideStyle}
               onChange={(e) => setRideStyle(e.target.value)}
-              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             >
               {Object.entries(RIDE_STYLE_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -300,7 +300,7 @@ function StoryForm({ token }: { token: string }) {
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
-              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             >
               {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -314,7 +314,7 @@ function StoryForm({ token }: { token: string }) {
             <select
               value={season}
               onChange={(e) => setSeason(e.target.value)}
-              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             >
               {Object.entries(SEASON_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -333,7 +333,7 @@ function StoryForm({ token }: { token: string }) {
                 setCountry(e.target.value);
                 setRegion("");
               }}
-              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             >
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>
@@ -348,7 +348,7 @@ function StoryForm({ token }: { token: string }) {
               <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+                className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
               >
                 <option value="">בחר אזור...</option>
                 {ISRAEL_REGIONS.map((r) => (
@@ -363,14 +363,14 @@ function StoryForm({ token }: { token: string }) {
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
                 placeholder="עיר / אזור"
-                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+                className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
               />
             )}
           </Field>
         </div>
 
-        <div className="border border-char/20 p-4">
-          <p className="text-xs font-bold text-char/60 mb-3 tracking-wide">
+        <div className="border border-edge p-4">
+          <p className="text-xs font-bold text-textDim mb-3 tracking-wide">
             נקודת כינוס (לא חובה, אבל מייצרת כפתור ניווט ישיר ל-Waze/Google Maps בסיפור)
           </p>
           <div className="flex flex-col gap-3">
@@ -379,7 +379,7 @@ function StoryForm({ token }: { token: string }) {
               value={meetingLabel}
               onChange={(e) => setMeetingLabel(e.target.value)}
               placeholder="שם המקום - לדוגמה: חניון עין גדי"
-              className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none"
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
             />
             <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-2">
               <input
@@ -388,7 +388,7 @@ function StoryForm({ token }: { token: string }) {
                 value={meetingLat}
                 onChange={(e) => setMeetingLat(e.target.value)}
                 placeholder="קו רוחב (lat)"
-                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none text-sm"
+                className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none text-sm"
               />
               <input
                 type="text"
@@ -396,12 +396,12 @@ function StoryForm({ token }: { token: string }) {
                 value={meetingLon}
                 onChange={(e) => setMeetingLon(e.target.value)}
                 placeholder="קו אורך (lon)"
-                className="w-full border border-char/25 bg-sand px-3 py-2.5 focus:border-oxide outline-none text-sm"
+                className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none text-sm"
               />
               <button
                 type="button"
                 onClick={useMyLocation}
-                className="col-span-2 sm:col-span-1 border border-char/25 px-3 py-2 sm:py-0 text-xs font-bold hover:border-oxide whitespace-nowrap"
+                className="col-span-2 sm:col-span-1 border border-edge px-3 py-2 sm:py-0 text-xs font-bold hover:border-moto whitespace-nowrap"
               >
                 המיקום שלי
               </button>
@@ -427,16 +427,16 @@ function StoryForm({ token }: { token: string }) {
             className="w-full text-sm"
           />
           {photos.length > 0 && (
-            <p className="text-xs text-char/60 mt-1">{photos.length} תמונות נבחרו</p>
+            <p className="text-xs text-textDim mt-1">{photos.length} תמונות נבחרו</p>
           )}
         </Field>
 
-        {error && <p className="text-oxide text-sm">{error}</p>}
+        {error && <p className="text-moto text-sm">{error}</p>}
 
         <button
           type="submit"
           disabled={busy}
-          className="bg-oxide text-sand py-3 font-bold hover:bg-oxideDark transition-colors disabled:opacity-50"
+          className="bg-moto text-carbon py-3 font-bold hover:bg-motoDark transition-colors disabled:opacity-50"
         >
           {busy ? "מעלה..." : "פרסם סיפור"}
         </button>
@@ -448,7 +448,7 @@ function StoryForm({ token }: { token: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-xs font-bold text-char/60 mb-1.5 tracking-wide">{label}</span>
+      <span className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">{label}</span>
       {children}
     </label>
   );
