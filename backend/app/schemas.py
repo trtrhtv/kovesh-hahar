@@ -20,13 +20,10 @@ class BikeCreate(BaseModel):
 
 
 class BikeOut(BaseModel):
-    model_config = {"protected_namespaces": ()}
+    model_config = {"protected_namespaces": (), "from_attributes": True}
     id: str
     model_name: str
     vehicle_type: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class UserUpdate(BaseModel):
