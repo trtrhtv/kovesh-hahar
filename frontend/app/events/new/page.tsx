@@ -133,7 +133,7 @@ function EventForm({ token }: { token: string }) {
   const [country, setCountry] = useState(ISRAEL);
   const [region, setRegion] = useState("");
   const [meetingLabel, setMeetingLabel] = useState("");
-  const [contactPhone, setContactPhone] = useState(user?.phone_number || "");
+  const [contactPhone, setContactPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -318,16 +318,27 @@ function EventForm({ token }: { token: string }) {
         </Field>
 
         <Field label="טלפון ליצירת קשר">
-          <input
-            type="tel"
-            value={contactPhone}
-            onChange={(e) => setContactPhone(e.target.value)}
-            required
-            placeholder="050-1234567"
-            className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-          />
+          <div className="flex gap-2">
+            <input
+              type="tel"
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+              required
+              placeholder="050-1234567"
+              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+            />
+            {user?.phone_number && !contactPhone && (
+              <button
+                type="button"
+                onClick={() => setContactPhone(user.phone_number!)}
+                className="switch-btn text-xs font-bold text-ink px-3 whitespace-nowrap"
+              >
+                מהפרופיל שלי
+              </button>
+            )}
+          </div>
           <p className="text-[11px] text-textDim mt-1">
-            כדי שמי שבא לאירוע יוכל לתאם איתך ישירות ב-WhatsApp
+            כדי שמי שבא לאירוע יוכל לתאם איתך ישירות ב-WhatsApp - לא חייב להיות אותו מספר שבפרופיל שלך
           </p>
         </Field>
 
