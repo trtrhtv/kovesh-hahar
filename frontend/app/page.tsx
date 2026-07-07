@@ -1,3 +1,5 @@
+import CinematicVideoBackground from "@/components/CinematicVideoBackground";
+import BreakoutRiderImage from "@/components/BreakoutRiderImage";
 import Logo from "@/components/Logo";
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
@@ -30,6 +32,7 @@ export default async function HomePage() {
 
       {/* Hero - פאנל אלכסוני א-סימטרי, לא עוד קישוט עדין */}
       <section className="relative overflow-hidden">
+        <CinematicVideoBackground />
         <div
           className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none"
           style={{ clipPath: "polygon(30% 0, 100% 0, 100% 100%, 0 100%)" }}
@@ -72,6 +75,7 @@ export default async function HomePage() {
       {/* תצוגה היברידית - מפה עם כל הנעצים + פילטרים צפים */}
       <section className="max-w-5xl mx-auto px-5 py-8">
         <div className="relative">
+          <BreakoutRiderImage stories={stories} />
           <OverviewMap stories={stories} className="w-full h-80 border border-edge" />
           <div className="absolute top-3 right-3 left-3 z-10 flex flex-wrap gap-2 pointer-events-none">
             {Object.entries(RIDE_STYLE_LABELS).map(([key, label]) => (

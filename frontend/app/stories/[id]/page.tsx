@@ -16,6 +16,7 @@ import CommentsSection from "@/components/CommentsSection";
 import NavigateButton from "@/components/NavigateButton";
 import TrailUpdatesSection from "@/components/TrailUpdatesSection";
 import DeleteStoryButton from "@/components/DeleteStoryButton";
+import ReadingProgressRider from "@/components/ReadingProgressRider";
 
 function estimateReadingMinutes(text: string): number {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -128,7 +129,9 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
 
         <RouteMap profileJson={story.elevation_profile_json} className="w-full h-80 mb-8" />
 
-        <div className="whitespace-pre-line leading-relaxed text-ink/90 mb-8">{story.body}</div>
+        <ReadingProgressRider>
+          <div className="whitespace-pre-line leading-relaxed text-ink/90 mb-8">{story.body}</div>
+        </ReadingProgressRider>
 
         {story.photos.length > 0 && (
           <div className="grid grid-cols-2 gap-2 mb-8">
