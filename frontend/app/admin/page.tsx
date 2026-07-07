@@ -56,7 +56,7 @@ export default function AdminPage() {
               <a href={`mailto:${m.email}`} className="text-moto text-xs hover:underline">
                 {m.email}
               </a>
-              <p className="text-white/80 text-sm mt-2 whitespace-pre-line">{m.message}</p>
+              <p className="text-ink/80 text-sm mt-2 whitespace-pre-line">{m.message}</p>
             </div>
           ))}
         </div>

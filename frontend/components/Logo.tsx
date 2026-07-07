@@ -13,7 +13,7 @@ export default function Logo({ className = "" }: { className?: string }) {
         />
         <path d="M5.5 19L9 12.5L11 15.5" stroke="#12161A" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
-      <span className="font-black text-lg tracking-tight text-white">כובש ההר</span>
+      <span className="font-black text-lg tracking-tight text-ink">כובש ההר</span>
     </span>
   );
 }

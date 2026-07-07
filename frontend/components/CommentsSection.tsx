@@ -46,7 +46,7 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
                 {new Date(c.created_at).toLocaleDateString("he-IL")}
               </span>
             </div>
-            <p className="text-white/80 text-sm">{c.body}</p>
+            <p className="text-ink/80 text-sm">{c.body}</p>
           </div>
         ))}
         {comments.length === 0 && (
@@ -67,7 +67,7 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
           <button
             type="submit"
             disabled={busy || !text.trim()}
-            className="bg-surfaceHi text-white px-4 py-2 text-sm font-bold hover:bg-moto hover:text-carbon transition-colors disabled:opacity-50"
+            className="bg-surfaceHi text-ink px-4 py-2 text-sm font-bold hover:bg-moto hover:text-carbon transition-colors disabled:opacity-50"
           >
             שלח
           </button>

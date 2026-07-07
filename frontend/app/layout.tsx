@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Heebo, Roboto_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
+import { ThemeProvider } from "@/lib/theme";
 import Footer from "@/components/Footer";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -28,13 +30,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="he" dir="rtl" className={`${heebo.variable} ${mono.variable}`}>
+    <html lang="he" dir="rtl" data-theme="oled" className={`${heebo.variable} ${mono.variable}`}>
       <body className="font-heebo antialiased min-h-screen flex flex-col">
         <div className="livery-stripe h-[3px] w-full shrink-0" />
-        <AuthProvider>
-          <div className="flex-1">{children}</div>
-          <Footer />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="flex-1">{children}</div>
+            <Footer />
+            <ThemeSwitcher />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

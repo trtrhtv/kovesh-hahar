@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { fetchTrailUpdates, postTrailUpdate, type TrailUpdate } from "@/lib/api";
 import { TRAIL_STATUS_LABELS, TRAIL_STATUS_COLORS } from "@/lib/labels";
+import { spawnDustBurst } from "@/lib/effects";
 
 const STATUS_OPTIONS = ["open", "blocked", "muddy", "unknown"];
+
+function formatTerminalTimestamp(iso: string): string {
+  const d = new Date(iso);
+  const time = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  const date = d.toLocaleDateString("he-IL", { month: "2-digit", year: "numeric" });
+  return `[${time}] [${date}]`;
+}
 
 export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
   const { token } = useAuth();
@@ -15,6 +23,7 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const submitRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     fetchTrailUpdates(storyId).then(setUpdates);
@@ -23,6 +32,7 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!token) return;
+    spawnDustBurst(submitRef.current);
     setBusy(true);
     setError(null);
     try {
@@ -37,53 +47,37 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
     }
   }
 
-  const latest = updates[0];
-
   return (
     <div className="moto-card p-4">
       <div className="flex items-center justify-between mb-3 gap-3">
-        <h2 className="font-black text-sm tracking-widest text-white flex items-center gap-2">
+        <h2 className="font-black text-sm tracking-widest text-ink flex items-center gap-2">
           <span className="live-dot" />
-          עדכוני שטח חיים
+          COMMS // עדכוני שטח חיים
         </h2>
         {token && (
           <button
             onClick={() => setShowForm((s) => !s)}
-            className="btn-press text-sm font-bold text-moto border-2 border-moto px-4 py-2.5 min-h-[44px] hover:bg-moto hover:text-carbon active:bg-moto active:text-carbon transition-colors"
+            className="switch-btn text-sm font-bold text-moto px-4 py-2.5 min-h-[44px]"
           >
             {showForm ? "ביטול" : "+ עדכן מצב"}
           </button>
         )}
       </div>
 
-      {latest && (
-        <div className="flex items-center gap-2 mb-3">
-          <span
-            className="difficulty-stamp text-xs font-bold px-2 py-0.5"
-            style={{ color: TRAIL_STATUS_COLORS[latest.status] }}
-          >
-            {TRAIL_STATUS_LABELS[latest.status] || latest.status}
-          </span>
-          <span className="text-xs text-textDim">
-            עודכן {new Date(latest.created_at).toLocaleDateString("he-IL")}
-          </span>
-        </div>
-      )}
-
       {showForm && (
         <form onSubmit={submit} className="flex flex-col gap-3 mb-4 bg-surfaceHi p-3">
-          <div className="flex gap-2 flex-wrap">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {STATUS_OPTIONS.map((s) => (
               <button
                 type="button"
                 key={s}
                 onClick={() => setStatus(s)}
-                className={`text-sm font-bold px-4 py-3 min-h-[44px] border-2 transition-colors ${
+                className={`switch-btn text-sm font-bold px-3 py-3 min-h-[44px] ${status === s ? "active" : ""}`}
+                style={
                   status === s
-                    ? "text-carbon"
-                    : "border-edge hover:border-moto"
-                }`}
-                style={status === s ? { backgroundColor: TRAIL_STATUS_COLORS[s], borderColor: TRAIL_STATUS_COLORS[s] } : {}}
+                    ? { color: TRAIL_STATUS_COLORS[s], borderColor: TRAIL_STATUS_COLORS[s] }
+                    : {}
+                }
               >
                 {TRAIL_STATUS_LABELS[s]}
               </button>
@@ -99,37 +93,37 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
           />
           {error && <p className="text-moto text-sm">{error}</p>}
           <button
+            ref={submitRef}
             type="submit"
             disabled={busy}
-            className="bg-surfaceHi text-white py-3.5 min-h-[48px] text-base font-bold hover:bg-moto hover:text-carbon transition-colors disabled:opacity-50 w-full sm:w-auto sm:self-start px-6"
+            className="btn-press moto-btn relative bg-moto text-carbon py-3.5 min-h-[48px] text-base font-black hover:bg-motoDark transition-colors disabled:opacity-50 w-full sm:w-auto sm:self-start px-6"
           >
-            {busy ? "שולח..." : "פרסם עדכון"}
+            {busy ? "שולח..." : "שלח דיווח סטטוס"}
           </button>
         </form>
       )}
 
-      {updates.length > 1 && (
-        <div className="flex flex-col gap-2 mt-2">
-          {updates.slice(1, 5).map((u) => (
-            <div key={u.id} className="text-xs text-textDim flex items-center gap-2">
-              <span style={{ color: TRAIL_STATUS_COLORS[u.status] }} className="font-bold">
-                {TRAIL_STATUS_LABELS[u.status]}
-              </span>
-              <span>{u.note}</span>
-              <span className="text-textDim">
-                · {new Date(u.created_at).toLocaleDateString("he-IL")}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {updates.length === 0 && (
-        <p className="text-textDim text-sm">עדיין אין עדכוני שטח על המסלול הזה.</p>
-      )}
+      {/* טרמינל תקשורת - כל העדכונים, כולל האחרון */}
+      <div className="comms-terminal p-3">
+        {updates.length === 0 ? (
+          <p className="text-textDim text-sm font-mono">// אין עדיין עדכוני שטח על המסלול הזה</p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {updates.map((u) => (
+              <div key={u.id} className="text-xs sm:text-sm font-mono flex flex-wrap gap-x-2">
+                <span className="text-textDim shrink-0">{formatTerminalTimestamp(u.created_at)}</span>
+                <span style={{ color: TRAIL_STATUS_COLORS[u.status] }} className="font-bold shrink-0">
+                  {TRAIL_STATUS_LABELS[u.status]}
+                </span>
+                {u.note && <span className="text-ink/80">- {u.note}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {!token && (
-        <a href="/stories/new" className="text-moto text-sm hover:underline block mt-2">
+        <a href="/stories/new" className="text-moto text-sm hover:underline block mt-3">
           התחבר כדי לעדכן על מצב המסלול
         </a>
       )}

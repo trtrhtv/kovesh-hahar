@@ -41,12 +41,12 @@ export default async function HomePage() {
             ROADBOOK // אנדורו · סינגלים · מוטוקרוס · אדוונצ'ר
           </div>
           <h1 className="leading-[0.85]">
-            <span className="block text-7xl md:text-9xl font-black text-white">כובשים.</span>
+            <span className="block text-7xl md:text-9xl font-black text-ink">כובשים.</span>
             <span className="block text-2xl md:text-4xl font-bold text-moto mt-2">
               כל רכיבה משאירה קו על המפה
             </span>
           </h1>
-          <p className="mt-6 text-lg text-white/70 max-w-lg leading-relaxed">
+          <p className="mt-6 text-lg text-ink/70 max-w-lg leading-relaxed">
             מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
             ועדכוני שטח בזמן אמת.
           </p>
@@ -78,7 +78,7 @@ export default async function HomePage() {
               <Link
                 key={key}
                 href={`/stories?ride_style=${key}`}
-                className="filter-pill pointer-events-auto text-xs font-bold text-white px-3.5 py-2 min-h-[36px] flex items-center"
+                className="switch-btn pointer-events-auto text-xs font-bold text-ink px-3.5 py-2.5 min-h-[40px] flex items-center"
               >
                 {label}
               </Link>

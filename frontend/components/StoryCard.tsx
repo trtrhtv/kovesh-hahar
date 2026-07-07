@@ -10,11 +10,16 @@ import type { StoryListItem } from "@/lib/api";
  */
 export default function StoryCard({ story }: { story: StoryListItem }) {
   const difficultyColor = DIFFICULTY_COLORS[story.difficulty] || "#FF6600";
+  const ambientClass = /נגב|ערבה|אילת|מכתש/.test(story.region)
+    ? "ambient-desert"
+    : /גליל|גולן|כרמל/.test(story.region)
+    ? "ambient-galilee"
+    : "";
 
   return (
     <Link
       href={`/stories/${story.id}`}
-      className="moto-card group grid grid-cols-[1fr_auto] gap-0 overflow-hidden"
+      className={`moto-card group grid grid-cols-[1fr_auto] gap-0 overflow-hidden ${ambientClass}`}
     >
       {/* תוכן */}
       <div className="p-4 sm:p-5 flex flex-col justify-between min-w-0">
@@ -28,7 +33,7 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
             <span>·</span>
             <span>{RIDE_STYLE_LABELS[story.ride_style] || story.ride_style}</span>
           </div>
-          <h3 className="text-lg sm:text-xl font-black leading-snug text-white group-hover:text-moto transition-colors">
+          <h3 className="text-lg sm:text-xl font-black leading-snug text-ink group-hover:text-moto transition-colors">
             {story.title}
           </h3>
         </div>
@@ -37,7 +42,7 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
           <div className="flex gap-4 font-mono text-sm">
             {story.distance_km != null && (
               <div>
-                <div className="stat-number text-2xl font-black leading-none text-white">
+                <div className="stat-number text-2xl font-black leading-none text-ink">
                   {story.distance_km}
                 </div>
                 <div className="text-[10px] text-textDim tracking-wider">ק״מ</div>
@@ -45,7 +50,7 @@ export default function StoryCard({ story }: { story: StoryListItem }) {
             )}
             {story.elevation_gain_m != null && (
               <div>
-                <div className="stat-number text-2xl font-black leading-none text-white">
+                <div className="stat-number text-2xl font-black leading-none text-ink">
                   {Math.round(story.elevation_gain_m)}
                 </div>
                 <div className="text-[10px] text-textDim tracking-wider">מ׳ טיפוס</div>

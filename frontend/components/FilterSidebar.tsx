@@ -152,7 +152,7 @@ export default function FilterSidebar({
 
       <button
         type="submit"
-        className="bg-surfaceHi text-white py-2.5 font-bold text-sm hover:bg-moto hover:text-carbon transition-colors"
+        className="bg-surfaceHi text-ink py-2.5 font-bold text-sm hover:bg-moto hover:text-carbon transition-colors"
       >
         סנן תוצאות
       </button>

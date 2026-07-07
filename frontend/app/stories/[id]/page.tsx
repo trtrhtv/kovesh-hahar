@@ -68,14 +68,14 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
               {DIFFICULTY_LABELS[story.difficulty] || story.difficulty}
             </span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black leading-tight text-white drop-shadow-lg">
+          <h1 className="text-3xl sm:text-5xl font-black leading-tight text-ink drop-shadow-lg">
             {story.title}
           </h1>
           <div className="flex items-center gap-2 mt-3">
             <div className="w-8 h-8 rounded-full bg-moto/20 border border-moto/50 flex items-center justify-center text-moto font-black text-sm">
               {story.author.display_name.charAt(0)}
             </div>
-            <span className="text-white/90 text-sm font-bold">{story.author.display_name}</span>
+            <span className="text-ink/90 text-sm font-bold">{story.author.display_name}</span>
             <span className="text-textDim text-sm">
               · {new Date(story.created_at).toLocaleDateString("he-IL")}
             </span>
@@ -100,7 +100,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
           <div className="flex gap-8 font-mono border-y border-edge py-4 mb-8">
             {story.distance_km != null && (
               <div>
-                <div className="stat-number text-3xl font-black leading-none text-white">
+                <div className="stat-number text-3xl font-black leading-none text-ink">
                   {story.distance_km}
                 </div>
                 <div className="text-xs text-textDim tracking-wider mt-1">ק״מ</div>
@@ -108,7 +108,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
             )}
             {story.elevation_gain_m != null && (
               <div>
-                <div className="stat-number text-3xl font-black leading-none text-white">
+                <div className="stat-number text-3xl font-black leading-none text-ink">
                   {Math.round(story.elevation_gain_m)}
                 </div>
                 <div className="text-xs text-textDim tracking-wider mt-1">מ׳ טיפוס מצטבר</div>
@@ -128,7 +128,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
 
         <RouteMap profileJson={story.elevation_profile_json} className="w-full h-80 mb-8" />
 
-        <div className="whitespace-pre-line leading-relaxed text-white/90 mb-8">{story.body}</div>
+        <div className="whitespace-pre-line leading-relaxed text-ink/90 mb-8">{story.body}</div>
 
         {story.photos.length > 0 && (
           <div className="grid grid-cols-2 gap-2 mb-8">
@@ -166,7 +166,7 @@ function MetaTile({ label, value }: { label: string; value?: string }) {
   return (
     <div className="moto-card px-3 py-3">
       <div className="text-[10px] text-textDim tracking-wider mb-1">{label}</div>
-      <div className="text-sm font-bold text-white leading-snug">{value || "—"}</div>
+      <div className="text-sm font-bold text-ink leading-snug">{value || "—"}</div>
     </div>
   );
 }
