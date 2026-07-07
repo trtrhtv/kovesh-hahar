@@ -7,6 +7,7 @@ import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
 import PasswordInput from "@/components/PasswordInput";
+import RouteDrawer from "@/components/RouteDrawer";
 import { useAuth } from "@/lib/auth";
 import { createStory } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
@@ -192,6 +193,8 @@ function StoryForm({ token }: { token: string }) {
   const [meetingLon, setMeetingLon] = useState("");
   const [parkingSecurity, setParkingSecurity] = useState("");
   const [gpxFile, setGpxFile] = useState<File | null>(null);
+  const [routeSource, setRouteSource] = useState<"none" | "gpx" | "draw">("gpx");
+  const [drawnPoints, setDrawnPoints] = useState<[number, number][]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -234,6 +237,11 @@ function StoryForm({ token }: { token: string }) {
       return;
     }
 
+    if (routeSource === "draw" && drawnPoints.length < 2) {
+      setError("צריך לשרטט לפחות 2 נקודות על המפה");
+      return;
+    }
+
     setBusy(true);
     try {
       const story = await createStory(
@@ -251,7 +259,8 @@ function StoryForm({ token }: { token: string }) {
           meetingPointLat: meetingLat ? Number(meetingLat) : null,
           meetingPointLon: meetingLon ? Number(meetingLon) : null,
           parkingSecurity: parkingSecurity || undefined,
-          gpxFile,
+          gpxFile: routeSource === "gpx" ? gpxFile : null,
+          drawnRoutePoints: routeSource === "draw" ? drawnPoints : undefined,
           photos,
         },
         token
@@ -478,14 +487,53 @@ function StoryForm({ token }: { token: string }) {
           </div>
         </div>
 
-        <Field label="קובץ GPX (לא חובה, אבל ממש מומלץ)">
-          <input
-            type="file"
-            accept=".gpx"
-            onChange={(e) => setGpxFile(e.target.files?.[0] || null)}
-            className="w-full text-sm"
-          />
-        </Field>
+        <div>
+          <span className="block text-xs font-bold text-textDim mb-1.5 tracking-wide">
+            מסלול (לא חובה, אבל ממש מומלץ)
+          </span>
+          <div className="flex gap-2 mb-3">
+            <button
+              type="button"
+              onClick={() => setRouteSource("gpx")}
+              className={`switch-btn text-xs font-bold px-3 py-2 ${routeSource === "gpx" ? "active text-moto" : "text-ink"}`}
+            >
+              קובץ GPX
+            </button>
+            <button
+              type="button"
+              onClick={() => setRouteSource("draw")}
+              className={`switch-btn text-xs font-bold px-3 py-2 ${routeSource === "draw" ? "active text-moto" : "text-ink"}`}
+            >
+              שרטוט על המפה
+            </button>
+            <button
+              type="button"
+              onClick={() => setRouteSource("none")}
+              className={`switch-btn text-xs font-bold px-3 py-2 ${routeSource === "none" ? "active text-moto" : "text-ink"}`}
+            >
+              בלי מסלול
+            </button>
+          </div>
+
+          {routeSource === "gpx" && (
+            <input
+              type="file"
+              accept=".gpx"
+              onChange={(e) => setGpxFile(e.target.files?.[0] || null)}
+              className="w-full text-sm"
+            />
+          )}
+
+          {routeSource === "draw" && (
+            <div>
+              <p className="text-[11px] text-textDim mb-2">
+                לחץ על המפה כדי לסמן נקודות לאורך המסלול שרכבת בו. אין כאן נתוני גובה אמיתיים -
+                רק המרחק והקו יחושבו, לא הטיפוס.
+              </p>
+              <RouteDrawer onPointsChange={setDrawnPoints} className="w-full h-72 border border-edge" />
+            </div>
+          )}
+        </div>
 
         <Field label={`תמונות (עד ${MAX_PHOTOS})`}>
           <input

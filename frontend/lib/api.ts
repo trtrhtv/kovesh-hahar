@@ -473,6 +473,7 @@ export async function createStory(
     meetingPointLon?: number | null;
     parkingSecurity?: string;
     gpxFile?: File | null;
+    drawnRoutePoints?: [number, number][];
     photos: File[];
   },
   token: string
@@ -492,6 +493,9 @@ export async function createStory(
   if (data.meetingPointLon != null) form.set("meeting_point_lon", String(data.meetingPointLon));
   if (data.parkingSecurity) form.set("parking_security", data.parkingSecurity);
   if (data.gpxFile) form.set("gpx_file", data.gpxFile);
+  if (!data.gpxFile && data.drawnRoutePoints && data.drawnRoutePoints.length >= 2) {
+    form.set("drawn_route_json", JSON.stringify(data.drawnRoutePoints));
+  }
   data.photos.forEach((p) => form.append("photos", p));
 
   const res = await fetch(`${API_BASE}/stories`, {

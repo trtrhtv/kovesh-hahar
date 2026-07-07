@@ -1,3 +1,4 @@
+import json
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
@@ -5,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from .. import models, schemas, auth, storage, gpx_utils, locations, admin
+from ..geo import haversine_km, route_distance_km
 from ..notifications import create_notification
 from ..database import get_db
 
@@ -29,6 +31,7 @@ async def create_story(
     meeting_point_lon: Optional[float] = Form(None),
     parking_security: Optional[models.ParkingSecurity] = Form(None),
     gpx_file: Optional[UploadFile] = File(None),
+    drawn_route_json: Optional[str] = Form(None),
     photos: List[UploadFile] = File(default=[]),
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db),
@@ -86,6 +89,22 @@ async def create_story(
         story.elevation_profile_json = gpx_utils.profile_to_json(parsed["elevation_profile"])
         story.start_lat = parsed["start_lat"]
         story.start_lon = parsed["start_lon"]
+    # אלטרנטיבה ל-GPX - מסלול שהמשתמש שרטט ידנית על המפה (לא כולל גובה אמיתי)
+    elif drawn_route_json:
+        try:
+            points = json.loads(drawn_route_json)
+        except Exception:
+            raise HTTPException(400, "מסלול משורטט לא תקין")
+        if not isinstance(points, list) or len(points) < 2:
+            raise HTTPException(400, "מסלול משורטט צריך לפחות 2 נקודות")
+        if len(points) > 500:
+            raise HTTPException(400, "יותר מדי נקודות במסלול המשורטט")
+
+        story.distance_km = round(route_distance_km(points), 2)
+        story.elevation_profile_json = json.dumps([[p[0], p[1], 0] for p in points])
+        story.start_lat = points[0][0]
+        story.start_lon = points[0][1]
+        # elevation_gain_m נשאר None בכוונה - אין דרך לדעת גובה אמיתי משרטוט ביד
 
     db.add(story)
     db.flush()  # כדי לקבל story.id לפני העלאת התמונות
@@ -117,8 +136,6 @@ def nearby_stories(
     limit: int = 20,
     db: Session = Depends(get_db),
 ):
-    import math
-
     radius_km = min(max(radius_km, 1), 300)
     limit = min(max(limit, 1), 50)
 
@@ -131,16 +148,6 @@ def nearby_stories(
         )
         .all()
     )
-
-    def haversine_km(lat1, lon1, lat2, lon2):
-        r = 6371
-        dlat = math.radians(lat2 - lat1)
-        dlon = math.radians(lon2 - lon1)
-        a = (
-            math.sin(dlat / 2) ** 2
-            + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
-        )
-        return r * 2 * math.asin(math.sqrt(a))
 
     results = []
     for story in candidates:
