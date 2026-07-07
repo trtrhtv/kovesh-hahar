@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import BackNav from "@/components/BackNav";
 import EventCard from "@/components/EventCard";
 import NotificationBell from "@/components/NotificationBell";
 import AccountMenu from "@/components/AccountMenu";
@@ -18,6 +19,7 @@ export default async function EventsPage() {
           <div className="flex items-center gap-3">
             <NotificationBell />
             <AccountMenu />
+            <BackNav />
             <Link
               href="/events/new"
               className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"

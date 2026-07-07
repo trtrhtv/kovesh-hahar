@@ -189,10 +189,12 @@ export type EventItem = {
   meeting_point_label?: string;
   meeting_point_lat?: number;
   meeting_point_lon?: number;
+  contact_phone: string;
   created_at: string;
   organizer: Author;
   attendee_count: number;
   is_attending: boolean;
+  my_guest_count: number;
 };
 
 export async function fetchEvents(params?: {
@@ -225,9 +227,10 @@ export async function createEvent(
     difficulty?: string;
     country: string;
     region: string;
-    meeting_point_label?: string;
+    meeting_point_label: string;
     meeting_point_lat?: number | null;
     meeting_point_lon?: number | null;
+    contact_phone: string;
   },
   token: string
 ): Promise<EventItem> {
@@ -251,12 +254,20 @@ export async function deleteEvent(eventId: string, token: string): Promise<void>
   if (!res.ok) throw new Error("מחיקת האירוע נכשלה");
 }
 
-export async function toggleEventRSVP(eventId: string, token: string): Promise<{ attending: boolean }> {
+export async function toggleEventRSVP(
+  eventId: string,
+  token: string,
+  guestCount = 1
+): Promise<{ attending: boolean; guest_count: number }> {
   const res = await fetch(`${API_BASE}/events/${eventId}/rsvp`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ guest_count: guestCount }),
   });
-  if (!res.ok) throw new Error("הפעולה נכשלה");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "הפעולה נכשלה"));
+  }
   return res.json();
 }
 

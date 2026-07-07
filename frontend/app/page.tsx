@@ -102,8 +102,8 @@ export default async function HomePage() {
 
             <div className="border-t border-dashed border-edge mt-4 pt-6 px-1 sm:px-4">
               <p className="text-lg text-ink/70 max-w-2xl mx-auto leading-relaxed">
-                מקום חינמי לרוכבים לתעד ולשתף מסלולים אמיתיים - עם קובץ GPX, תמונות,
-                ועדכוני שטח בזמן אמת.
+                הפלטפורמה החברתית לרוכבי שטח בישראל - שתפו סיפורי דרך, ארגנו רכיבות,
+                ותהיו חלק מהקהילה, עם עדכוני שטח בזמן אמת.
               </p>
 
               <form action="/stories" method="get" className="mt-6 flex gap-2 max-w-md">

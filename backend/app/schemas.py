@@ -90,9 +90,10 @@ class EventCreate(BaseModel):
     difficulty: Optional[Difficulty] = None
     country: str
     region: str
-    meeting_point_label: Optional[str] = None
+    meeting_point_label: str
     meeting_point_lat: Optional[float] = None
     meeting_point_lon: Optional[float] = None
+    contact_phone: str
 
 
 class EventUpdate(BaseModel):
@@ -106,6 +107,7 @@ class EventUpdate(BaseModel):
     meeting_point_label: Optional[str] = None
     meeting_point_lat: Optional[float] = None
     meeting_point_lon: Optional[float] = None
+    contact_phone: Optional[str] = None
 
 
 class EventOut(BaseModel):
@@ -120,13 +122,19 @@ class EventOut(BaseModel):
     meeting_point_label: Optional[str] = None
     meeting_point_lat: Optional[float] = None
     meeting_point_lon: Optional[float] = None
+    contact_phone: str
     created_at: datetime
     organizer: UserOut
     attendee_count: int = 0
     is_attending: bool = False
+    my_guest_count: int = 0
 
     class Config:
         from_attributes = True
+
+
+class RSVPRequest(BaseModel):
+    guest_count: int = 1
 
 
 class ContactMessageCreate(BaseModel):

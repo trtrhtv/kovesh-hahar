@@ -124,6 +124,7 @@ function QuickAuthGate({
 
 function EventForm({ token }: { token: string }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -132,6 +133,7 @@ function EventForm({ token }: { token: string }) {
   const [country, setCountry] = useState(ISRAEL);
   const [region, setRegion] = useState("");
   const [meetingLabel, setMeetingLabel] = useState("");
+  const [contactPhone, setContactPhone] = useState(user?.phone_number || "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -151,6 +153,14 @@ function EventForm({ token }: { token: string }) {
       setError("התיאור קצר מדי");
       return;
     }
+    if (!meetingLabel.trim()) {
+      setError("יש לציין נקודת כינוס - זה מה שמאפשר לאנשים בכלל להגיע");
+      return;
+    }
+    if (!contactPhone.trim()) {
+      setError("יש לציין טלפון ליצירת קשר - כדי שמי שבא יוכל לתאם איתך");
+      return;
+    }
 
     setBusy(true);
     try {
@@ -163,7 +173,8 @@ function EventForm({ token }: { token: string }) {
           difficulty: difficulty || undefined,
           country,
           region,
-          meeting_point_label: meetingLabel || undefined,
+          meeting_point_label: meetingLabel,
+          contact_phone: contactPhone,
         },
         token
       );
@@ -295,14 +306,29 @@ function EventForm({ token }: { token: string }) {
           </Field>
         </div>
 
-        <Field label="נקודת כינוס (לא חובה)">
+        <Field label="נקודת כינוס">
           <input
             type="text"
             value={meetingLabel}
             onChange={(e) => setMeetingLabel(e.target.value)}
+            required
             placeholder="לדוגמה: חניון מכתש רמון, 08:00"
             className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
           />
+        </Field>
+
+        <Field label="טלפון ליצירת קשר">
+          <input
+            type="tel"
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
+            required
+            placeholder="050-1234567"
+            className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
+          />
+          <p className="text-[11px] text-textDim mt-1">
+            כדי שמי שבא לאירוע יוכל לתאם איתך ישירות ב-WhatsApp
+          </p>
         </Field>
 
         {error && <p className="text-moto text-sm">{error}</p>}

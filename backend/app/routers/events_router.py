@@ -20,10 +20,16 @@ def create_event(
 ):
     title = payload.title.strip()
     description = payload.description.strip()
+    meeting_point_label = payload.meeting_point_label.strip()
+    contact_phone = payload.contact_phone.strip()
     if not title:
         raise HTTPException(400, "יש למלא כותרת")
     if len(description.split()) < 3:
         raise HTTPException(400, "יש למלא תיאור קצר (לפחות כמה מילים)")
+    if not meeting_point_label:
+        raise HTTPException(400, "יש לציין נקודת כינוס")
+    if not contact_phone:
+        raise HTTPException(400, "יש לציין טלפון ליצירת קשר")
 
     # הפרונט שולח תאריך עם timezone (UTC), אבל datetime.utcnow() לא מודע ל-timezone -
     # השוואה ישירה ביניהם זורקת TypeError. מנרמלים לפני ההשוואה ולפני השמירה ב-DB.
@@ -49,9 +55,10 @@ def create_event(
         difficulty=payload.difficulty,
         country=payload.country,
         region=payload.region.strip(),
-        meeting_point_label=(payload.meeting_point_label or "").strip() or None,
+        meeting_point_label=meeting_point_label,
         meeting_point_lat=payload.meeting_point_lat,
         meeting_point_lon=payload.meeting_point_lon,
+        contact_phone=contact_phone,
     )
     db.add(event)
     db.commit()
@@ -145,12 +152,15 @@ def delete_event(
 @router.post("/{event_id}/rsvp")
 def toggle_rsvp(
     event_id: str,
+    payload: schemas.RSVPRequest = schemas.RSVPRequest(),
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db),
 ):
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
         raise HTTPException(404, "האירוע לא נמצא")
+
+    guest_count = min(max(payload.guest_count, 1), 20)
 
     existing = (
         db.query(models.EventRSVP)
@@ -160,30 +170,34 @@ def toggle_rsvp(
     if existing:
         db.delete(existing)
         db.commit()
-        return {"attending": False}
+        return {"attending": False, "guest_count": 0}
 
-    db.add(models.EventRSVP(event_id=event_id, user_id=current_user.id))
+    db.add(models.EventRSVP(event_id=event_id, user_id=current_user.id, guest_count=guest_count))
+    extra_note = f' (עם עוד {guest_count - 1} אנשים)' if guest_count > 1 else ""
     create_notification(
         db,
         user_id=event.organizer_id,
         actor_id=current_user.id,
         notif_type=models.NotificationType.EVENT_RSVP,
         story_id=None,
-        message=f'{current_user.display_name} מגיע/ה לאירוע "{event.title}"',
+        message=f'{current_user.display_name} מגיע/ה לאירוע "{event.title}"{extra_note}',
     )
     db.commit()
-    return {"attending": True}
+    return {"attending": True, "guest_count": guest_count}
 
 
 def _with_extras(event: models.Event, db: Session, current_user_id: Optional[str]):
-    count = db.query(func.count(models.EventRSVP.id)).filter(models.EventRSVP.event_id == event.id).scalar()
-    event.attendee_count = count or 0
+    total = db.query(func.sum(models.EventRSVP.guest_count)).filter(models.EventRSVP.event_id == event.id).scalar()
+    event.attendee_count = total or 0
     event.is_attending = False
+    event.my_guest_count = 0
     if current_user_id:
-        event.is_attending = (
+        my_rsvp = (
             db.query(models.EventRSVP)
             .filter(models.EventRSVP.event_id == event.id, models.EventRSVP.user_id == current_user_id)
             .first()
-            is not None
         )
+        if my_rsvp:
+            event.is_attending = True
+            event.my_guest_count = my_rsvp.guest_count
     return event

@@ -21,6 +21,7 @@ import NavigateButton from "@/components/NavigateButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ParkingSecurityTag from "@/components/ParkingSecurityTag";
 import TrailUpdatesSection from "@/components/TrailUpdatesSection";
+import WeatherWidget from "@/components/WeatherWidget";
 import DeleteStoryButton from "@/components/DeleteStoryButton";
 import ReadingProgressRider from "@/components/ReadingProgressRider";
 
@@ -147,6 +148,10 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
             lon={story.pin_lon}
             label={story.meeting_point_label}
           />
+        </div>
+
+        <div className="mb-8">
+          <WeatherWidget lat={story.pin_lat} lon={story.pin_lon} />
         </div>
 
         {story.parking_security && (

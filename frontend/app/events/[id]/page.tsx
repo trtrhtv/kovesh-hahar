@@ -4,6 +4,7 @@ import BackNav from "@/components/BackNav";
 import NavigateButton from "@/components/NavigateButton";
 import RSVPButton from "@/components/RSVPButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import WeatherWidget from "@/components/WeatherWidget";
 import DeleteEventButton from "@/components/DeleteEventButton";
 import { fetchEvent } from "@/lib/api";
 import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS } from "@/lib/labels";
@@ -61,19 +62,22 @@ export default async function EventDetailPage({ params }: { params: { id: string
       </div>
 
       <div className="flex items-center gap-3 mb-6">
-        <RSVPButton eventId={event.id} initialAttending={event.is_attending} initialCount={event.attendee_count} />
+        <RSVPButton
+          eventId={event.id}
+          initialAttending={event.is_attending}
+          initialCount={event.attendee_count}
+          initialGuestCount={event.my_guest_count}
+        />
         <Link href={`/users/${event.organizer.id}`} className="text-sm text-textDim hover:text-moto hover:underline">
           מארגן: {event.organizer.display_name}
         </Link>
       </div>
 
-      {event.organizer.phone_number && (
-        <div className="mb-6">
-          <WhatsAppButton phoneNumber={event.organizer.phone_number} routeName={`האירוע "${event.title}"`} />
-        </div>
-      )}
+      <div className="mb-6">
+        <WhatsAppButton phoneNumber={event.contact_phone} routeName={`האירוע "${event.title}"`} />
+      </div>
 
-      {event.meeting_point_lat != null && (
+      {event.meeting_point_lat != null ? (
         <div className="mb-6">
           <NavigateButton
             lat={event.meeting_point_lat}
@@ -81,11 +85,16 @@ export default async function EventDetailPage({ params }: { params: { id: string
             label={event.meeting_point_label}
           />
         </div>
-      )}
-      {event.meeting_point_label && event.meeting_point_lat == null && (
+      ) : (
         <div className="moto-card p-4 mb-6">
           <div className="text-xs font-bold text-cyan tracking-widest mb-1">🧭 נקודת כינוס</div>
           <div className="text-ink font-bold">{event.meeting_point_label}</div>
+        </div>
+      )}
+
+      {event.meeting_point_lat != null && (
+        <div className="mb-6">
+          <WeatherWidget lat={event.meeting_point_lat} lon={event.meeting_point_lon} />
         </div>
       )}
 

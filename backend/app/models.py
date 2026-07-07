@@ -180,6 +180,7 @@ class Event(Base):
     meeting_point_label = Column(String, nullable=True)
     meeting_point_lat = Column(Float, nullable=True)
     meeting_point_lon = Column(Float, nullable=True)
+    contact_phone = Column(String, nullable=False)  # חובה - כדי שתמיד אפשר יהיה ליצור קשר עם המארגן
 
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
@@ -193,6 +194,7 @@ class EventRSVP(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     event_id = Column(String, ForeignKey("events.id"), nullable=False, index=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    guest_count = Column(Integer, nullable=False, default=1)  # כמה אנשים מגיעים בסה"כ, כולל הנרשם עצמו
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
