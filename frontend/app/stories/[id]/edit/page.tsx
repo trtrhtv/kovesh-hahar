@@ -93,25 +93,34 @@ function EditForm({
   const [parkingSecurity, setParkingSecurity] = useState(story.parking_security || "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-
+  function validate(): string | null {
     if (!region.trim()) {
-      setError(country === ISRAEL ? "יש לבחור אזור" : "יש לציין שם מקום");
-      return;
+      return country === ISRAEL ? "יש לבחור אזור" : "יש לציין שם מקום";
     }
     if (vehicleType === "other" && !vehicleTypeOther.trim()) {
-      setError("יש לפרט את סוג האופנוע");
-      return;
+      return "יש לפרט את סוג האופנוע";
     }
     const wordCount = countWords(body);
     if (wordCount < MIN_BODY_WORDS) {
-      setError(`הסיפור קצר מדי - נדרשות לפחות ${MIN_BODY_WORDS} מילים (יש כרגע ${wordCount})`);
+      return `הסיפור קצר מדי - נדרשות לפחות ${MIN_BODY_WORDS} מילים (יש כרגע ${wordCount})`;
+    }
+    return null;
+  }
+
+  function requestSave(e: React.FormEvent) {
+    e.preventDefault();
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
+    setError(null);
+    setConfirming(true);
+  }
 
+  async function confirmSave() {
     setBusy(true);
     try {
       await updateStory(
@@ -152,7 +161,7 @@ function EditForm({
         לא ניתן לשנות כאן תמונות או קובץ GPX בשלב הזה - רק את פרטי הסיפור.
       </p>
 
-      <form onSubmit={submit} className="flex flex-col gap-5">
+      <form onSubmit={requestSave} className="flex flex-col gap-5">
         <Field label="כותרת">
           <input
             type="text"
@@ -316,13 +325,38 @@ function EditForm({
 
         {error && <p className="text-moto text-sm">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50"
-        >
-          {busy ? "שומר..." : "שמור שינויים"}
-        </button>
+        {!confirming ? (
+          <button
+            type="submit"
+            className="tactical-btn bg-moto text-carbon hover:bg-motoDark"
+          >
+            שמור שינויים
+          </button>
+        ) : (
+          <div className="moto-card p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+            <span className="text-sm text-ink font-bold">
+              לשמור את השינויים? זה יעדכן את הסיפור המפורסם.
+            </span>
+            <div className="flex gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={confirmSave}
+                disabled={busy}
+                className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50 !py-2.5 !px-5"
+              >
+                {busy ? "שומר..." : "כן, שמור"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                disabled={busy}
+                className="switch-btn text-ink text-sm font-bold px-5 py-2.5"
+              >
+                ביטול
+              </button>
+            </div>
+          </div>
+        )}
       </form>
     </main>
   );
