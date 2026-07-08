@@ -302,13 +302,13 @@ function StoryForm({ token }: { token: string }) {
           />
         </Field>
 
-        <Field label="הסיפור">
+        <Field label="סיפור הדרך - ספר על המסלול שלך">
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             required
             rows={8}
-            placeholder="איך הייתה הרכיבה, מה כדאי לדעת לפני שיוצאים, אתגרים בדרך..."
+            placeholder="מאיפה יצאתם ולאן הגעתם, איך הייתה הדרך בין הנקודות, קטעים שדרשו תשומת לב מיוחדת, נקודות עצירה ששווה לדעת עליהן, ומה היית מספר לרוכב אחר שרוצה לעשות את המסלול הזה. תאר את המסע כמו שהיה - לא רק 'רכיבה טובה', אלא באמת מה קרה בדרך."
             className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none resize-y"
           />
           <p
