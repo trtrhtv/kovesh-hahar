@@ -202,15 +202,17 @@ alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ## גיבוי אוטומטי יומי (Railway לא נותן את זה מובנה!)
 
-גילינו שRailway לא מגבה את ה-Postgres באופן אוטומטי בשום תוכנית - זה באחריותכם. בנינו שירות גיבוי עצמאי (`backend/backup_service/backup.py`) שרץ פעם ביום ומעלה גיבוי דחוס ל-Cloudflare R2 (חינמי עד 10GB).
+גילינו שRailway לא מגבה את ה-Postgres באופן אוטומטי בשום תוכנית - זה באחריותכם. בנינו שירות גיבוי עצמאי (`backend/backup_service/backup.py`) שרץ פעם ביום ומעלה גיבוי דחוס לאחסון S3-compatible. **משתמשים ב-Backblaze B2** (לא Cloudflare R2) - כי B2 לא דורש כרטיס אשראי לבאקט פרטי (R2 כן דורש, גם בחינם).
 
 ### הקמה (פעם אחת)
 
-**1. יצירת Bucket ב-Cloudflare R2**
-1. חשבון Cloudflare (חינמי) → **R2** בתפריט הצד
-2. **Create bucket** - שם למשל `roadstory-backups`
-3. **Manage R2 API Tokens** → **Create API Token** → הרשאה **Object Read & Write**, מוגבל ל-bucket הזה
-4. שמור את: Account ID, Access Key ID, Secret Access Key
+**1. יצירת Bucket ב-Backblaze B2**
+1. הרשמה חינמית ב-[backblaze.com/sign-up/cloud-storage](https://www.backblaze.com/sign-up/cloud-storage) - **בלי כרטיס אשראי**
+2. בלוח הבקרה → **Buckets** → **Create a Bucket**
+3. שם (למשל `roadstory-backups`), **Private** (לא Public - חשוב, זה מכיל נתונים רגישים)
+4. אחרי היצירה, שים לב לאזור (Region) שמוצג ליד ה-bucket (למשל `us-west-004`) - תצטרך אותו בהמשך
+5. **Application Keys** (בתפריט הצד) → **Add a New Application Key** → הרשאה ל-bucket הספציפי, Read and Write
+6. שמור: **keyID** ו-**applicationKey** (מוצג פעם אחת בלבד!)
 
 **2. שירות חדש ב-Railway (לא שירות ה-API הקיים - נוסף, חדש)**
 1. בפרויקט הקיים ב-Railway → **+ New** → **GitHub Repo** → אותו repo (kovesh-hahar)
@@ -220,17 +222,17 @@ alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
    - **Settings → Cron Schedule**: `0 3 * * *` (כל יום ב-3 בבוקר UTC - תוכל לשנות)
 3. **Variables** של השירות החדש:
    - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (אותו auto-complete כמו בשירות הראשי)
-   - `R2_BACKUP_ACCOUNT_ID` = ה-Account ID מ-Cloudflare
-   - `R2_BACKUP_ACCESS_KEY_ID` = ה-Access Key
-   - `R2_BACKUP_SECRET_ACCESS_KEY` = ה-Secret Key
-   - `R2_BACKUP_BUCKET_NAME` = `roadstory-backups` (או השם שבחרת)
-   - `BACKUP_RETENTION_DAYS` = `30` (לא חובה, זו ברירת המחדל - כמה ימים לשמור לפני מחיקה אוטומטית)
+   - `BACKUP_S3_ENDPOINT_URL` = `https://s3.<האזור-שלך>.backblazeb2.com` (למשל `https://s3.us-west-004.backblazeb2.com` - תואם לאזור מהשלב הקודם)
+   - `BACKUP_S3_ACCESS_KEY_ID` = ה-keyID מ-B2
+   - `BACKUP_S3_SECRET_ACCESS_KEY` = ה-applicationKey מ-B2
+   - `BACKUP_S3_BUCKET_NAME` = `roadstory-backups` (או השם שבחרת)
+   - `BACKUP_RETENTION_DAYS` = `30` (לא חובה, זו ברירת המחדל)
 
 ### בדיקה שזה עובד
-מכיוון שCron רץ לפי לוח זמנים, לא תוכל "לראות" תוצאה מיידית. כדי לבדוק עכשיו: באותו שירות ב-Railway → **Deployments** → תלחץ על שלוש הנקודות → **Redeploy** (זה מריץ את הסקריפט מיידית פעם אחת). אחר כך תבדוק בבאקט ב-R2 שקובץ `backups/backup_....sql.gz` הופיע.
+מכיוון שCron רץ לפי לוח זמנים, לא תוכל "לראות" תוצאה מיידית. כדי לבדוק עכשיו: באותו שירות ב-Railway → **Deployments** → תלחץ על שלוש הנקודות → **Redeploy** (זה מריץ את הסקריפט מיידית פעם אחת). אחר כך תבדוק ב-B2 שקובץ `backups/backup_....sql.gz` הופיע בבאקט.
 
 ### שחזור מגיבוי (אם אי פעם תצטרך)
-1. תוריד את קובץ ה-`.sql.gz` הרלוונטי מ-R2
+1. תוריד את קובץ ה-`.sql.gz` הרלוונטי מ-B2
 2. `gunzip backup_....sql.gz`
 3. `psql "$DATABASE_URL" -f backup_....sql`
 

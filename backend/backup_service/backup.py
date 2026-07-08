@@ -1,5 +1,5 @@
 """
-גיבוי יומי של מסד הנתונים ל-Cloudflare R2.
+גיבוי יומי של מסד הנתונים לאחסון S3-compatible (Backblaze B2, Cloudflare R2, וכו').
 רץ כשירות Railway נפרד עם Cron Schedule (לא שירות שרץ כל הזמן) -
 ראה README.md לגבי הגדרת ה-Cron ומשתני הסביבה הנדרשים.
 """
@@ -12,10 +12,10 @@ import boto3
 from botocore.client import Config
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
-R2_ACCOUNT_ID = os.getenv("R2_BACKUP_ACCOUNT_ID", "")
-R2_ACCESS_KEY_ID = os.getenv("R2_BACKUP_ACCESS_KEY_ID", "")
-R2_SECRET_ACCESS_KEY = os.getenv("R2_BACKUP_SECRET_ACCESS_KEY", "")
-R2_BUCKET_NAME = os.getenv("R2_BACKUP_BUCKET_NAME", "")
+S3_ENDPOINT_URL = os.getenv("BACKUP_S3_ENDPOINT_URL", "")  # למשל https://s3.us-west-004.backblazeb2.com
+S3_ACCESS_KEY_ID = os.getenv("BACKUP_S3_ACCESS_KEY_ID", "")
+S3_SECRET_ACCESS_KEY = os.getenv("BACKUP_S3_SECRET_ACCESS_KEY", "")
+S3_BUCKET_NAME = os.getenv("BACKUP_S3_BUCKET_NAME", "")
 RETENTION_DAYS = int(os.getenv("BACKUP_RETENTION_DAYS", "30"))
 
 
@@ -24,22 +24,21 @@ def fail(message: str):
     sys.exit(1)
 
 
-def get_r2_client():
+def get_s3_client():
     return boto3.client(
         "s3",
-        endpoint_url=f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
-        aws_access_key_id=R2_ACCESS_KEY_ID,
-        aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+        endpoint_url=S3_ENDPOINT_URL,
+        aws_access_key_id=S3_ACCESS_KEY_ID,
+        aws_secret_access_key=S3_SECRET_ACCESS_KEY,
         config=Config(signature_version="s3v4"),
-        region_name="auto",
     )
 
 
 def run_backup():
     if not DATABASE_URL:
         fail("DATABASE_URL לא מוגדר")
-    if not all([R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME]):
-        fail("חסרים משתני R2_BACKUP_* - ראה README")
+    if not all([S3_ENDPOINT_URL, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_BUCKET_NAME]):
+        fail("חסרים משתני BACKUP_S3_* - ראה README")
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"backup_{timestamp}.sql.gz"
@@ -59,9 +58,9 @@ def run_backup():
     size_mb = os.path.getsize(local_path) / (1024 * 1024)
     print(f"[BACKUP] קובץ נוצר: {filename} ({size_mb:.2f}MB)")
 
-    print(f"[BACKUP] מעלה ל-R2...")
-    client = get_r2_client()
-    client.upload_file(local_path, R2_BUCKET_NAME, f"backups/{filename}")
+    print(f"[BACKUP] מעלה לאחסון...")
+    client = get_s3_client()
+    client.upload_file(local_path, S3_BUCKET_NAME, f"backups/{filename}")
     os.remove(local_path)
     print(f"[BACKUP] הועלה בהצלחה")
 
@@ -70,11 +69,11 @@ def run_backup():
 
 def cleanup_old_backups(client):
     cutoff = datetime.now(timezone.utc) - timedelta(days=RETENTION_DAYS)
-    response = client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix="backups/")
+    response = client.list_objects_v2(Bucket=S3_BUCKET_NAME, Prefix="backups/")
     deleted = 0
     for obj in response.get("Contents", []):
         if obj["LastModified"] < cutoff:
-            client.delete_object(Bucket=R2_BUCKET_NAME, Key=obj["Key"])
+            client.delete_object(Bucket=S3_BUCKET_NAME, Key=obj["Key"])
             deleted += 1
     print(f"[BACKUP] נוקו {deleted} גיבויים ישנים מ-{RETENTION_DAYS} יום")
 
