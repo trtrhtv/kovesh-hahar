@@ -1,4 +1,5 @@
 import os
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +10,16 @@ from . import storage
 # מבנה מסד הנתונים מנוהל עכשיו על ידי Alembic (ראה alembic/), לא כאן.
 # כל שינוי מבנה: `alembic revision --autogenerate -m "..."` ואז `alembic upgrade head`
 # רץ אוטומטית לפני עליית השרת (ראה Start Command ב-Railway).
+
+# מעקב שגיאות - רק אם מוגדר SENTRY_DSN ב-Variables, אחרת פשוט לא עושה כלום
+# (בלי DSN, sentry_sdk.init לא נקרא בכלל - אין שום השפעה על האפליקציה)
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=0.1,  # רק 10% מהבקשות התקינות נשלחות למעקב ביצועים - חוסך מכסה
+        send_default_pii=False,  # לא שולחים מידע מזהה של משתמשים (אימייל, IP) לשירות חיצוני
+    )
 
 app = FastAPI(title="כובש ההר - API")
 

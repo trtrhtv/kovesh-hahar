@@ -236,6 +236,26 @@ alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 2. `gunzip backup_....sql.gz`
 3. `psql "$DATABASE_URL" -f backup_....sql`
 
+## מעקב שגיאות (Sentry) - חינמי, 5,000 שגיאות/חודש
+
+**דורש הגדרה חד-פעמית**, בלעדיה שום דבר לא נשלח (לא שובר כלום, פשוט לא פעיל):
+
+1. חשבון חינמי ב-[sentry.io](https://sentry.io) (בלי כרטיס אשראי)
+2. תיצור **שני** פרויקטים נפרדים (Platform): אחד **Python/FastAPI**, אחד **Next.js**
+3. מכל פרויקט תעתיק את ה-**DSN** (כתובת שמופיעה בהגדרות הפרויקט, נראית כמו `https://xxx@xxx.ingest.sentry.io/xxx`)
+
+**ב-Railway** (שירות ה-API הראשי, kovesh-hahar) → Variables:
+```
+SENTRY_DSN = ה-DSN של פרויקט ה-Python
+```
+
+**ב-Vercel** (הפרונט) → Settings → Environment Variables:
+```
+NEXT_PUBLIC_SENTRY_DSN = ה-DSN של פרויקט ה-Next.js
+```
+
+זהו - כל שגיאה לא-מטופלת בשרת או בדפדפן (אצל משתמשים אמיתיים, לא רק כשאתה בודק) תישלח אוטומטית ל-Sentry, ותוכל להגדיר שם התראות במייל.
+
 ## מה בנוי ומה נשאר
 
 **בנוי ועובד מקצה לקצה:**

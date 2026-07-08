@@ -15,4 +15,18 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+const { withSentryConfig } = require("@sentry/nextjs");
+
+// בלי SENTRY_AUTH_TOKEN/SENTRY_ORG/SENTRY_PROJECT מוגדרים, זה רק מדלג על
+// העלאת source maps (לא נכשל) - מעקב השגיאות עצמו עדיין פעיל בלעדיהם.
+module.exports = withSentryConfig(nextConfig, {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  webpack: {
+    removeDebugLogging: true,
+    automaticVercelMonitors: false,
+  },
+  widenClientFileUpload: false,
+});
