@@ -285,6 +285,7 @@ class StoryOut(BaseModel):
     elevation_profile_json: Optional[str] = None
     start_lat: Optional[float] = None
     start_lon: Optional[float] = None
+    gpx_url: Optional[str] = None
     cover_photo_url: Optional[str] = None
     created_at: datetime
     author: UserOut

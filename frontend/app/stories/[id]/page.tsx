@@ -23,6 +23,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import ParkingSecurityTag from "@/components/ParkingSecurityTag";
 import TrailUpdatesSection from "@/components/TrailUpdatesSection";
 import WeatherWidget from "@/components/WeatherWidget";
+import GpxDownload from "@/components/GpxDownload";
 import DeleteStoryButton from "@/components/DeleteStoryButton";
 import ReadingProgressRider from "@/components/ReadingProgressRider";
 
@@ -154,6 +155,12 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
         <div className="mb-8">
           <WeatherWidget lat={story.pin_lat} lon={story.pin_lon} />
         </div>
+
+        {story.gpx_url && (
+          <div className="mb-8">
+            <GpxDownload gpxUrl={story.gpx_url} />
+          </div>
+        )}
 
         {story.parking_security && (
           <div className="mb-3">

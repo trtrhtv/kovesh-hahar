@@ -53,6 +53,7 @@ export type StoryDetail = StoryListItem & {
   parking_security?: string;
   start_lat?: number;
   start_lon?: number;
+  gpx_url?: string;
   photos: Photo[];
 };
 
