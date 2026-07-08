@@ -200,6 +200,40 @@ alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 בלי `RESEND_API_KEY` - בקשות איפוס סיסמה עדיין "יעבדו" (יחזירו הודעת הצלחה, כדי לא לחשוף מידע), אבל שום מייל לא באמת יישלח.
 
+## גיבוי אוטומטי יומי (Railway לא נותן את זה מובנה!)
+
+גילינו שRailway לא מגבה את ה-Postgres באופן אוטומטי בשום תוכנית - זה באחריותכם. בנינו שירות גיבוי עצמאי (`backend/backup_service/backup.py`) שרץ פעם ביום ומעלה גיבוי דחוס ל-Cloudflare R2 (חינמי עד 10GB).
+
+### הקמה (פעם אחת)
+
+**1. יצירת Bucket ב-Cloudflare R2**
+1. חשבון Cloudflare (חינמי) → **R2** בתפריט הצד
+2. **Create bucket** - שם למשל `roadstory-backups`
+3. **Manage R2 API Tokens** → **Create API Token** → הרשאה **Object Read & Write**, מוגבל ל-bucket הזה
+4. שמור את: Account ID, Access Key ID, Secret Access Key
+
+**2. שירות חדש ב-Railway (לא שירות ה-API הקיים - נוסף, חדש)**
+1. בפרויקט הקיים ב-Railway → **+ New** → **GitHub Repo** → אותו repo (kovesh-hahar)
+2. בהגדרות השירות החדש:
+   - **Root Directory**: `backend`
+   - **Settings → Deploy → Start Command**: `python backup_service/backup.py`
+   - **Settings → Cron Schedule**: `0 3 * * *` (כל יום ב-3 בבוקר UTC - תוכל לשנות)
+3. **Variables** של השירות החדש:
+   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (אותו auto-complete כמו בשירות הראשי)
+   - `R2_BACKUP_ACCOUNT_ID` = ה-Account ID מ-Cloudflare
+   - `R2_BACKUP_ACCESS_KEY_ID` = ה-Access Key
+   - `R2_BACKUP_SECRET_ACCESS_KEY` = ה-Secret Key
+   - `R2_BACKUP_BUCKET_NAME` = `roadstory-backups` (או השם שבחרת)
+   - `BACKUP_RETENTION_DAYS` = `30` (לא חובה, זו ברירת המחדל - כמה ימים לשמור לפני מחיקה אוטומטית)
+
+### בדיקה שזה עובד
+מכיוון שCron רץ לפי לוח זמנים, לא תוכל "לראות" תוצאה מיידית. כדי לבדוק עכשיו: באותו שירות ב-Railway → **Deployments** → תלחץ על שלוש הנקודות → **Redeploy** (זה מריץ את הסקריפט מיידית פעם אחת). אחר כך תבדוק בבאקט ב-R2 שקובץ `backups/backup_....sql.gz` הופיע.
+
+### שחזור מגיבוי (אם אי פעם תצטרך)
+1. תוריד את קובץ ה-`.sql.gz` הרלוונטי מ-R2
+2. `gunzip backup_....sql.gz`
+3. `psql "$DATABASE_URL" -f backup_....sql`
+
 ## מה בנוי ומה נשאר
 
 **בנוי ועובד מקצה לקצה:**
