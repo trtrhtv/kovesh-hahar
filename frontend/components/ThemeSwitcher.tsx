@@ -10,20 +10,20 @@ export default function ThemeSwitcher() {
   return (
     <div className="fixed bottom-4 left-4 z-50">
       {open && (
-        <div className="moto-card p-4 mb-3 w-64">
+        <div className="moto-card p-4 mb-3 w-64 max-w-[85vw]">
           <div className="text-[10px] font-bold text-textDim tracking-widest mb-2">
             מצב תצוגה
           </div>
           <div className="grid grid-cols-2 gap-2 mb-4">
             <button
               onClick={() => setMode("oled")}
-              className={`switch-btn text-xs font-bold py-2.5 min-h-[40px] ${mode === "oled" ? "active" : ""}`}
+              className={`switch-btn text-xs font-bold py-2.5 min-h-[44px] ${mode === "oled" ? "active" : ""}`}
             >
               OLED לילה
             </button>
             <button
               onClick={() => setMode("vintage")}
-              className={`switch-btn text-xs font-bold py-2.5 min-h-[40px] ${mode === "vintage" ? "active" : ""}`}
+              className={`switch-btn text-xs font-bold py-2.5 min-h-[44px] ${mode === "vintage" ? "active" : ""}`}
             >
               ראלי וינטג׳
             </button>
@@ -37,7 +37,7 @@ export default function ThemeSwitcher() {
               <button
                 key={key}
                 onClick={() => setAccent(key)}
-                className={`switch-btn text-xs font-bold py-2.5 min-h-[40px] flex items-center justify-center gap-1.5 ${
+                className={`switch-btn text-xs font-bold py-2.5 min-h-[44px] flex items-center justify-center gap-1.5 ${
                   accent === key ? "active" : ""
                 }`}
               >

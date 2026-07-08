@@ -119,7 +119,7 @@ export default function OverviewMap({
       </div>
       <button
         onClick={() => setSatelliteOn(toggleRef.current ? toggleRef.current() : false)}
-        className="absolute bottom-3 right-3 z-10 bg-surface border border-edge px-4 py-2.5 min-h-[40px] text-xs font-bold hover:border-moto transition-colors shadow-sm"
+        className="absolute bottom-3 right-3 z-10 bg-surface border border-edge px-4 py-2.5 min-h-[44px] text-xs font-bold hover:border-moto transition-colors shadow-sm"
       >
         {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
       </button>

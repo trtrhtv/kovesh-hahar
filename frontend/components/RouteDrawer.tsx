@@ -151,7 +151,7 @@ export default function RouteDrawer({
         <button
           type="button"
           onClick={() => setSatelliteOn(toggleSatelliteRef.current ? toggleSatelliteRef.current() : false)}
-          className="bg-surface border border-edge px-3 py-2 text-xs font-bold text-ink hover:border-moto transition-colors shadow-sm"
+          className="bg-surface border border-edge px-3 py-2 min-h-[44px] text-xs font-bold text-ink hover:border-moto transition-colors shadow-sm"
         >
           {satelliteOn ? "מפה רגילה" : "מפת לוויין"}
         </button>

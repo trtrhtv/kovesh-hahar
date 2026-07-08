@@ -10,13 +10,13 @@ export default function BackNav() {
     <div className="flex items-center gap-2">
       <button
         onClick={() => router.back()}
-        className="switch-btn text-xs font-bold text-ink px-3 py-2 min-h-[36px] flex items-center gap-1.5"
+        className="switch-btn text-xs font-bold text-ink px-3 py-2 gap-1.5"
       >
         <span>→</span> חזרה
       </button>
       <Link
         href="/"
-        className="switch-btn text-xs font-bold text-ink px-3 py-2 min-h-[36px] flex items-center gap-1.5"
+        className="switch-btn text-xs font-bold text-ink px-3 py-2 gap-1.5"
       >
         <span>⌂</span> מסך ראשי
       </Link>

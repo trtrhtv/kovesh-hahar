@@ -160,7 +160,7 @@ export default async function HomePage() {
               <Link
                 key={key}
                 href={`/stories?ride_style=${key}`}
-                className="switch-btn pointer-events-auto text-xs font-bold text-ink px-3.5 py-2.5 min-h-[40px] flex items-center border border-edge border-b-[3px] border-b-edge hover:border-b-moto focus:border-b-moto"
+                className="switch-btn pointer-events-auto text-xs font-bold text-ink px-3.5 py-2.5 min-h-[44px] flex items-center border border-edge border-b-[3px] border-b-edge hover:border-b-moto focus:border-b-moto"
               >
                 {label}
               </Link>
@@ -177,7 +177,7 @@ export default async function HomePage() {
             <Link
               key={region}
               href={`/stories?country=${encodeURIComponent("ישראל")}&region=${encodeURIComponent(region)}`}
-              className="switch-btn text-xs font-bold text-ink px-3.5 py-2.5 min-h-[40px] flex items-center"
+              className="switch-btn text-xs font-bold text-ink px-3.5 py-2.5 min-h-[44px] flex items-center"
             >
               {region}
             </Link>

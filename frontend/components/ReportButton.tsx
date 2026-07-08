@@ -59,7 +59,7 @@ export default function ReportButton({
       </button>
 
       {open && (
-        <div className="absolute top-full mt-2 right-0 z-30 moto-card p-3 w-64">
+        <div className="absolute top-full mt-2 right-0 z-30 moto-card p-3 w-64 max-w-[85vw]">
           <form onSubmit={submit} className="flex flex-col gap-2">
             <select
               value={reason}
