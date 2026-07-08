@@ -22,6 +22,26 @@ export const metadata: Metadata = {
   title: "כובש ההר | קהילת הרכיבה לרוכבי שטח",
   description:
     "הפלטפורמה החברתית לרוכבי שטח בישראל - סיפורי דרך, אירועי רכיבה, ועדכוני שטח בזמן אמת. מהרוכבים, בשבילכם.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "כובש ההר",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport = {
+  themeColor: "#0D0F12",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
