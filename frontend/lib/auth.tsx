@@ -30,6 +30,7 @@ type AuthContextType = {
   ) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -129,8 +130,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchMe();
   }
 
+  async function loginWithGoogle(idToken: string) {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_token: idToken }),
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "התחברות עם גוגל נכשלה");
+    }
+    const data = await res.json();
+    setToken(data.access_token);
+    await fetchMe();
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, login, register, logout, refreshUser, loginWithGoogle }}
+    >
       {children}
     </AuthContext.Provider>
   );

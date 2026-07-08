@@ -362,6 +362,19 @@ export async function updateReportStatus(reportId: string, status: string): Prom
   if (!res.ok) throw new Error("עדכון הדיווח נכשל");
 }
 
+export async function googleLogin(idToken: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ id_token: idToken }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(err, "התחברות עם גוגל נכשלה"));
+  }
+}
+
 export async function requestPasswordReset(email: string): Promise<void> {
   const res = await fetch(`${API_BASE}/auth/forgot-password`, {
     method: "POST",

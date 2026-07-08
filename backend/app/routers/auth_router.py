@@ -6,6 +6,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
 
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
+
 from .. import models, schemas, auth, admin
 from ..phone import is_valid_phone
 from ..rate_limit import check_rate_limit
@@ -173,6 +176,65 @@ def logout(response: Response):
     כבר לא תקין (פג תוקף וכו') עדיין אפשר "להתנתק" בלי שגיאה."""
     response.delete_cookie(key=auth.COOKIE_NAME, path="/")
     return {"message": "התנתקת בהצלחה"}
+
+
+@router.post("/google", response_model=schemas.Token)
+def google_login(
+    payload: schemas.GoogleLoginRequest,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    check_rate_limit(request, "google-login", max_attempts=15, window_seconds=900)
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    if not client_id:
+        raise HTTPException(500, "התחברות עם גוגל לא מוגדרת בשרת")
+
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            payload.id_token, google_requests.Request(), client_id
+        )
+    except Exception:
+        raise HTTPException(401, "אימות גוגל נכשל")
+
+    google_id = idinfo["sub"]
+    email = idinfo.get("email")
+    name = idinfo.get("name") or (email.split("@")[0] if email else "רוכב")
+    email_verified_by_google = idinfo.get("email_verified", False)
+
+    user = db.query(models.User).filter(models.User.google_id == google_id).first()
+
+    if not user and email:
+        # אולי כבר יש חשבון עם האימייל הזה (נרשם עם סיסמה) - נקשר אותו לגוגל
+        user = db.query(models.User).filter(func.lower(models.User.email) == email.lower()).first()
+        if user:
+            user.google_id = google_id
+
+    if not user:
+        if not email:
+            raise HTTPException(400, "לא התקבל אימייל מגוגל")
+        username = _generate_unique_username(db, name)
+        user = models.User(
+            email=email,
+            username=username,
+            google_id=google_id,
+            display_name=name,
+            hashed_password=None,  # אין סיסמה - רק גוגל
+            accepted_disclaimer_at=datetime.utcnow(),
+            email_verified=bool(email_verified_by_google),
+        )
+        db.add(user)
+
+    if email_verified_by_google:
+        user.email_verified = True
+
+    db.commit()
+    db.refresh(user)
+
+    token = auth.create_access_token(user.id)
+    _set_auth_cookie(response, token)
+    return schemas.Token(access_token=token)
 
 
 @router.post("/forgot-password")

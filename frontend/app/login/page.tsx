@@ -7,6 +7,7 @@ import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
 import PasswordInput from "@/components/PasswordInput";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { useAuth } from "@/lib/auth";
 
 export default function LoginPage() {
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [accepted, setAccepted] = useState(false);
+  const [googleDisclaimerAccepted, setGoogleDisclaimerAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -139,6 +141,26 @@ export default function LoginPage() {
         >
           {mode === "login" ? "אין לך חשבון? הרשם" : "כבר יש לך חשבון? התחבר"}
         </button>
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-edge" />
+          <span className="text-xs text-textDim">או</span>
+          <div className="flex-1 h-px bg-edge" />
+        </div>
+
+        <label className="flex items-start gap-2.5 text-xs text-textDim leading-relaxed cursor-pointer mb-3">
+          <input
+            type="checkbox"
+            checked={googleDisclaimerAccepted}
+            onChange={(e) => setGoogleDisclaimerAccepted(e.target.checked)}
+            className="mt-0.5 w-5 h-5 shrink-0 accent-moto"
+          />
+          <span>
+            האתר אינו אחראי על תוכן המסלולים, תנאי השטח, או חוקיות המעבר בהם. הרכיבה היא על
+            אחריות הרוכב בלבד.
+          </span>
+        </label>
+        <GoogleSignInButton disabled={!googleDisclaimerAccepted} onError={setError} />
       </main>
     </PageBackdrop>
   );

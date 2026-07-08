@@ -62,7 +62,8 @@ class User(Base):
     reset_token_expires = Column(DateTime, nullable=True)
     email_verified = Column(Boolean, default=False)
     email_verify_token = Column(String, nullable=True, index=True)
-    email_verify_token_expires = Column(DateTime, nullable=True)  # ריק אם נכנס עם גוגל
+    email_verify_token_expires = Column(DateTime, nullable=True)
+    google_id = Column(String, nullable=True, unique=True, index=True)  # ריק אם נכנס עם גוגל
     display_name = Column(String, nullable=False)
     avatar_url = Column(String, nullable=True)
     bike_model = Column(String, nullable=True)  # legacy - נשמר לתאימות, לא בשימוש בממשק החדש

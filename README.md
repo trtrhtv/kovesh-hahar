@@ -256,6 +256,30 @@ NEXT_PUBLIC_SENTRY_DSN = ה-DSN של פרויקט ה-Next.js
 
 זהו - כל שגיאה לא-מטופלת בשרת או בדפדפן (אצל משתמשים אמיתיים, לא רק כשאתה בודק) תישלח אוטומטית ל-Sentry, ותוכל להגדיר שם התראות במייל.
 
+## התחברות עם גוגל - חינמי, דורש הגדרה חד-פעמית
+
+**בלי הגדרה - הכפתור פשוט לא מוצג בכלל** (לא שובר כלום).
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → פרויקט חדש (או קיים)
+2. **APIs & Services → OAuth consent screen** - תגדיר (External, שם האפליקציה, אימייל תמיכה)
+3. **APIs & Services → Credentials → Create Credentials → OAuth client ID**
+   - Application type: **Web application**
+   - **Authorized JavaScript origins**: כתובת ה-Vercel שלכם (למשל `https://kovesh-hahar.vercel.app`)
+   - **Authorized redirect URIs**: לא חובה למלא לשיטה הזו (Google Identity Services, לא redirect classic)
+4. תעתיק את ה-**Client ID** שנוצר (נראה כמו `123456-abc.apps.googleusercontent.com`)
+
+**ב-Vercel** → Environment Variables:
+```
+NEXT_PUBLIC_GOOGLE_CLIENT_ID = ה-Client ID
+```
+
+**ב-Railway** (kovesh-hahar) → Variables:
+```
+GOOGLE_CLIENT_ID = אותו Client ID בדיוק
+```
+
+זהו - כפתור "Sign in with Google" יופיע אוטומטית בעמוד `/login`. משתמש שמתחבר עם גוגל בפעם הראשונה - נוצר לו חשבון אוטומטית (אימייל מאומת אוטומטית, כי גוגל כבר אימת אותו). אם יש כבר חשבון עם אותו אימייל (נרשם עם סיסמה) - הוא מקושר אוטומטית, לא נוצר כפול.
+
 ## מה בנוי ומה נשאר
 
 **בנוי ועובד מקצה לקצה:**

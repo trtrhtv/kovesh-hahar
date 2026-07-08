@@ -151,6 +151,10 @@ class RSVPRequest(BaseModel):
     guest_count: int = 1
 
 
+class GoogleLoginRequest(BaseModel):
+    id_token: str
+
+
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
