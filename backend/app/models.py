@@ -285,5 +285,6 @@ class Like(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False, index=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    value = Column(Integer, nullable=False, default=1)  # 1 = בעד, -1 = נגד
 
     story = relationship("Story", back_populates="likes")

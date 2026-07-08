@@ -41,6 +41,7 @@ export type StoryListItem = {
   created_at: string;
   author: Author;
   like_count: number;
+  my_vote: number;
   comment_count: number;
 };
 
@@ -633,10 +634,12 @@ export async function checkIsAdmin(token: string): Promise<boolean> {
   return !!data.is_admin;
 }
 
-export async function toggleLike(storyId: string, token: string): Promise<{ liked: boolean }> {
-  const res = await fetch(`${API_BASE}/stories/${storyId}/like`, {
+export async function voteStory(storyId: string, value: 1 | -1): Promise<{ my_vote: number }> {
+  const res = await fetch(`${API_BASE}/stories/${storyId}/vote`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     credentials: "include",
+    body: JSON.stringify({ value }),
   });
   if (!res.ok) throw new Error("הפעולה נכשלה");
   return res.json();

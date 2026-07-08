@@ -2,44 +2,60 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { toggleLike } from "@/lib/api";
+import { voteStory } from "@/lib/api";
 
 export default function LikeButton({
   storyId,
   initialCount,
+  initialMyVote = 0,
 }: {
   storyId: string;
   initialCount: number;
+  initialMyVote?: number;
 }) {
-  const { token, user } = useAuth();
-  const [count, setCount] = useState(initialCount);
-  const [liked, setLiked] = useState(false);
+  const { user } = useAuth();
+  const [score, setScore] = useState(initialCount);
+  const [myVote, setMyVote] = useState(initialMyVote);
   const [busy, setBusy] = useState(false);
 
-  async function handleClick() {
-    if (!token) {
-      window.location.href = "/stories/new"; // שער ההתחברות המשותף
+  async function handleVote(value: 1 | -1) {
+    if (!user) {
+      window.location.href = "/login";
       return;
     }
     setBusy(true);
     try {
-      const res = await toggleLike(storyId, token);
-      setLiked(res.liked);
-      setCount((c) => c + (res.liked ? 1 : -1));
+      const res = await voteStory(storyId, value);
+      setScore((s) => s - myVote + res.my_vote);
+      setMyVote(res.my_vote);
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={busy}
-      className={`border-2 px-5 py-2.5 min-h-[44px] text-base font-bold transition-colors ${
-        liked ? "bg-moto text-carbon border-moto" : "border-edge hover:border-moto"
-      }`}
-    >
-      {liked ? "אהבתי ✓" : "אהבתי"} · {count}
-    </button>
+    <div className="flex items-center border-2 border-edge">
+      <button
+        onClick={() => handleVote(1)}
+        disabled={busy}
+        className={`px-3 py-2.5 min-h-[44px] font-bold transition-colors ${
+          myVote === 1 ? "bg-moto text-carbon" : "hover:bg-surfaceHi"
+        }`}
+        aria-label="בעד"
+      >
+        ▲
+      </button>
+      <span className="px-3 font-black text-lg min-w-[2.5ch] text-center">{score}</span>
+      <button
+        onClick={() => handleVote(-1)}
+        disabled={busy}
+        className={`px-3 py-2.5 min-h-[44px] font-bold transition-colors ${
+          myVote === -1 ? "bg-textDim text-carbon" : "hover:bg-surfaceHi"
+        }`}
+        aria-label="נגד"
+      >
+        ▼
+      </button>
+    </div>
   );
 }

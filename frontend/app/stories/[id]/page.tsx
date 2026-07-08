@@ -188,7 +188,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
         )}
 
         <div className="flex items-center gap-3 mb-8">
-          <LikeButton storyId={story.id} initialCount={story.like_count} />
+          <LikeButton storyId={story.id} initialCount={story.like_count} initialMyVote={story.my_vote} />
           <ShareButton title={story.title} path={`/stories/${story.id}`} />
           <ReportButton contentType="story" contentId={story.id} />
         </div>

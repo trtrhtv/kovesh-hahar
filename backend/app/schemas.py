@@ -185,6 +185,10 @@ class ReportStatusUpdate(BaseModel):
     status: ReportStatus
 
 
+class VoteRequest(BaseModel):
+    value: int  # 1 (בעד) או -1 (נגד)
+
+
 class ContactMessageCreate(BaseModel):
     name: str
     email: EmailStr
@@ -282,6 +286,7 @@ class StoryOut(BaseModel):
     author: UserOut
     photos: List[PhotoOut] = []
     like_count: int = 0
+    my_vote: int = 0
     comment_count: int = 0
 
     class Config:
@@ -308,6 +313,7 @@ class StoryListItem(BaseModel):
     created_at: datetime
     author: UserOut
     like_count: int = 0
+    my_vote: int = 0
     comment_count: int = 0
 
     class Config:

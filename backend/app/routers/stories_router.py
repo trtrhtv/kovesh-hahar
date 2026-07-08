@@ -209,6 +209,7 @@ def list_stories(
     author_id: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
     db: Session = Depends(get_db),
 ):
     limit = min(max(limit, 1), 50)  # תקרה כדי שאף אחד לא יבקש 10,000 שורות בבת אחת
@@ -240,11 +241,15 @@ def list_stories(
         .limit(limit)
         .all()
     )
-    return [_with_extras(s, db) for s in stories]
+    return [_with_extras(s, db, current_user.id if current_user else None) for s in stories]
 
 
 @router.get("/{story_id}", response_model=schemas.StoryOut)
-def get_story(story_id: str, db: Session = Depends(get_db)):
+def get_story(
+    story_id: str,
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
+    db: Session = Depends(get_db),
+):
     story = (
         db.query(models.Story)
         .options(joinedload(models.Story.author), joinedload(models.Story.photos))
@@ -253,30 +258,45 @@ def get_story(story_id: str, db: Session = Depends(get_db)):
     )
     if not story:
         raise HTTPException(404, "הסיפור לא נמצא")
-    return _with_extras(story, db)
+    return _with_extras(story, db, current_user.id if current_user else None)
 
 
-@router.post("/{story_id}/like")
-def toggle_like(
+@router.post("/{story_id}/vote")
+def vote_story(
     story_id: str,
+    payload: schemas.VoteRequest,
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db),
 ):
+    if payload.value not in (1, -1):
+        raise HTTPException(400, "ערך הצבעה לא תקין")
+
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if not story:
+        raise HTTPException(404, "הסיפור לא נמצא")
+
     existing = (
         db.query(models.Like)
         .filter(models.Like.story_id == story_id, models.Like.user_id == current_user.id)
         .first()
     )
-    if existing:
+
+    if existing and existing.value == payload.value:
+        # אותה הצבעה שוב - מבטלים אותה
         db.delete(existing)
         db.commit()
-        return {"liked": False}
+        return {"my_vote": 0}
 
-    like = models.Like(story_id=story_id, user_id=current_user.id)
+    if existing:
+        # הצבעה קיימת בכיוון ההפוך - מחליפים
+        existing.value = payload.value
+        db.commit()
+        return {"my_vote": payload.value}
+
+    like = models.Like(story_id=story_id, user_id=current_user.id, value=payload.value)
     db.add(like)
 
-    story = db.query(models.Story).filter(models.Story.id == story_id).first()
-    if story:
+    if payload.value > 0:
         create_notification(
             db,
             user_id=story.author_id,
@@ -287,7 +307,7 @@ def toggle_like(
         )
 
     db.commit()
-    return {"liked": True}
+    return {"my_vote": payload.value}
 
 
 @router.delete("/{story_id}")
@@ -489,13 +509,24 @@ async def replace_story_route(
     return _with_extras(story, db)
 
 
-def _with_extras(story: models.Story, db: Session):
-    like_count = db.query(func.count(models.Like.id)).filter(models.Like.story_id == story.id).scalar()
+def _with_extras(story: models.Story, db: Session, current_user_id: Optional[str] = None):
+    score = db.query(func.coalesce(func.sum(models.Like.value), 0)).filter(
+        models.Like.story_id == story.id
+    ).scalar()
     comment_count = (
         db.query(func.count(models.Comment.id)).filter(models.Comment.story_id == story.id).scalar()
     )
-    story.like_count = like_count or 0
+    story.like_count = score or 0
     story.comment_count = comment_count or 0
+    story.my_vote = 0
+    if current_user_id:
+        my_like = (
+            db.query(models.Like)
+            .filter(models.Like.story_id == story.id, models.Like.user_id == current_user_id)
+            .first()
+        )
+        if my_like:
+            story.my_vote = my_like.value
     # "נעץ" למפה - עדיפות לנקודת הכינוס הידנית, אחרת נקודת ההתחלה מה-GPX
     story.pin_lat = story.meeting_point_lat if story.meeting_point_lat is not None else story.start_lat
     story.pin_lon = story.meeting_point_lon if story.meeting_point_lon is not None else story.start_lon
