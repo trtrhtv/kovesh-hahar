@@ -25,7 +25,7 @@ export default function SiteHeader() {
   ).sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
-    <header className="border-b border-edge">
+    <header className="border-b border-edge sticky top-0 z-40 bg-carbon/90 backdrop-blur-md">
       <div className="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
         <Link href="/" aria-label="דף הבית">
           <Logo />
