@@ -66,7 +66,7 @@ export default async function HomePage() {
 
         {/* שכבה 3 - ליבת הממשק, זכוכית קפואה מעל התנועה */}
         <div className="relative z-20 max-w-5xl mx-auto px-5 py-20">
-          <div className="corner-frame relative overflow-hidden backdrop-blur-xl bg-surfaceHi/20 border border-edge p-6 sm:p-10">
+          <div className="corner-frame relative overflow-hidden backdrop-blur-md bg-surfaceHi/10 border border-edge p-6 sm:p-10">
             {/* טלמטריית פינות - מדמה מחשב ניווט פיזי */}
             <span className="hidden sm:block absolute top-2 left-2 font-mono text-[10px] text-cyan/70 tracking-wider">
               [SYS.LOC // 31.7683°N 35.2137°E]
