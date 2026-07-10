@@ -4,6 +4,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 
 from .. import models, schemas, auth, admin, locations
 from ..notifications import create_notification
@@ -196,7 +197,20 @@ def set_rsvp(
         story_id=None,
         message=f'{current_user.display_name} מגיע/ה לאירוע "{event.title}"{extra_note}',
     )
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # מרוץ: בקשה מקבילה כבר יצרה הרשמה. אילוץ הייחודיות מנע כפילות - מעדכנים
+        # את ההרשמה הקיימת במקום להחזיר 500.
+        db.rollback()
+        existing = (
+            db.query(models.EventRSVP)
+            .filter(models.EventRSVP.event_id == event_id, models.EventRSVP.user_id == current_user.id)
+            .first()
+        )
+        if existing:
+            existing.guest_count = guest_count
+            db.commit()
     return {"attending": True, "guest_count": guest_count}
 
 

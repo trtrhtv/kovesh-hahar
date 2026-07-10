@@ -3,7 +3,8 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    Column, String, Integer, Float, Text, DateTime, ForeignKey, Enum, Boolean
+    Column, String, Integer, Float, Text, DateTime, ForeignKey, Enum, Boolean,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
@@ -204,6 +205,9 @@ class Event(Base):
 class EventRSVP(Base):
     """מי הביע כוונה להגיע לאירוע"""
     __tablename__ = "event_rsvps"
+    # רוכב אחד = הרשמה אחת לאירוע. בלי זה, לחיצות במקביל יצרו שורות כפולות שמנפחות
+    # את מספר המשתתפים ומבלבלות את לוגיקת ההרשמה/ביטול.
+    __table_args__ = (UniqueConstraint("event_id", "user_id", name="uq_event_rsvps_event_user"),)
 
     id = Column(String, primary_key=True, default=gen_uuid)
     event_id = Column(String, ForeignKey("events.id"), nullable=False, index=True)
@@ -287,6 +291,9 @@ class TrailUpdate(Base):
 
 class Like(Base):
     __tablename__ = "likes"
+    # הצבעה אחת לכל רוכב על כל סיפור. בלי זה, לחיצות במקביל יצרו שורות כפולות
+    # שסופרות פעמיים ומשאירות שכפול שהטוגל לא מנקה.
+    __table_args__ = (UniqueConstraint("story_id", "user_id", name="uq_likes_story_user"),)
 
     id = Column(String, primary_key=True, default=gen_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False, index=True)
