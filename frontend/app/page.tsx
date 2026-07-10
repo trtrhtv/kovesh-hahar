@@ -28,20 +28,9 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <CinematicVideoBackground />
 
-        {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן */}
+        {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן.
+            האופנוע עצמו מגיע מהרקע הרציף (fixed) של כל העמוד - מקור אחד, בלי כפילות. */}
         <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
-
-        {/* שכבה 2 - קרוסלת האקשן (4 תמונות, מתחלפות כל 8 שניות), עם פאן איטי על כל תמונה */}
-        <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-          <HeroCarousel />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to bottom, rgb(var(--bg-main-rgb) / 0.15), rgb(var(--bg-main-rgb) / 0.4), rgb(var(--bg-main-rgb) / 0.75))",
-            }}
-          />
-        </div>
 
         <div
           className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none z-0"
