@@ -30,10 +30,17 @@ app = FastAPI(title="כובש ההר - API")
 _cors_origins_env = os.getenv("CORS_ORIGINS", "")
 _extra_origins = [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
 
+# אין להתיר את כל *.vercel.app: כל אתר חינמי ב-vercel.app הוא origin שאפשר להשיג,
+# ועם allow_credentials=True זה מאפשר לכל אתר כזה לשלוח בקשות מאומתות ולקרוא את
+# התשובות בשם משתמש מחובר (השתלטות חשבון). לתמיכה ב-preview deployments של הפרויקט
+# עצמו, הגדירו CORS_ORIGIN_REGEX לביטוי ממוקד-פרויקט, למשל:
+#   CORS_ORIGIN_REGEX=https://kovesh-hahar-.*\.vercel\.app
+_cors_origin_regex = os.getenv("CORS_ORIGIN_REGEX") or None
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"] + _extra_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=_cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
