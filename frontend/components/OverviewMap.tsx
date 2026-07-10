@@ -70,8 +70,15 @@ export default function OverviewMap({
           el.style.border = "2px solid #E8E1D3";
           el.style.cursor = "pointer";
 
-          const popup = new maplibregl.default.Popup({ offset: 12, closeButton: false }).setHTML(
-            `<div style="font-family: sans-serif; font-size: 13px; direction: rtl;">${story.title}</div>`
+          // setDOMContent עם textContent, לא setHTML: כותרת הסיפור היא קלט משתמש,
+          // ו-setHTML היה מריץ תגיות/סקריפט שהוזרקו לתוך הכותרת (XSS).
+          const popupEl = document.createElement("div");
+          popupEl.style.fontFamily = "sans-serif";
+          popupEl.style.fontSize = "13px";
+          popupEl.style.direction = "rtl";
+          popupEl.textContent = story.title;
+          const popup = new maplibregl.default.Popup({ offset: 12, closeButton: false }).setDOMContent(
+            popupEl
           );
 
           const marker = new maplibregl.default.Marker({ element: el })

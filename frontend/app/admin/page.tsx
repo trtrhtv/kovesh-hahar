@@ -50,7 +50,9 @@ export default function AdminPage() {
     setReports((prev) => prev.filter((r) => r.id !== reportId));
   }
 
-  if (loading || isAdmin === null) {
+  // מציגים ספינר רק בזמן שהזהות עדיין נטענת, או כשיש token והבדיקה מול השרת בעיצומה.
+  // בלי התנאי `token &&`, משתמש מנותק (token=null) היה נתקע ב-isAdmin===null לנצח.
+  if (loading || (token && isAdmin === null)) {
     return <div className="max-w-2xl mx-auto px-5 py-24 text-center text-textDim">טוען...</div>;
   }
 

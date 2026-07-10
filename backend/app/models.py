@@ -134,6 +134,11 @@ class Story(Base):
     comments = relationship("Comment", back_populates="story", cascade="all, delete-orphan")
     likes = relationship("Like", back_populates="story", cascade="all, delete-orphan")
     trail_updates = relationship("TrailUpdate", back_populates="story", cascade="all, delete-orphan")
+    # להתראות אין back_populates (הן מפנות לשלוש טבלאות), אבל בלי ה-cascade הזה
+    # מחיקת סיפור שיש לו התראות (לייק/תגובה) זורקת IntegrityError ב-Postgres.
+    notifications = relationship(
+        "Notification", cascade="all, delete-orphan", foreign_keys="Notification.story_id"
+    )
 
 
 class StoryPhoto(Base):
