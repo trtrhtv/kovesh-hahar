@@ -4,6 +4,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 
 from .. import models, schemas, auth, storage, gpx_utils, locations, admin
 from ..geo import haversine_km, route_distance_km
@@ -306,7 +307,20 @@ def vote_story(
             message=f'{current_user.display_name} אהב/ה את הסיפור "{story.title}"',
         )
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # מרוץ: בקשה מקבילה (לחיצה כפולה) כבר יצרה הצבעה. אילוץ הייחודיות מנע כפילות -
+        # מתאוששים בעדכון ההצבעה הקיימת לערך המבוקש במקום להחזיר 500.
+        db.rollback()
+        existing = (
+            db.query(models.Like)
+            .filter(models.Like.story_id == story_id, models.Like.user_id == current_user.id)
+            .first()
+        )
+        if existing:
+            existing.value = payload.value
+            db.commit()
     return {"my_vote": payload.value}
 
 
@@ -323,8 +337,18 @@ def delete_story(
     if story.author_id != current_user.id and not admin.is_admin(current_user):
         raise HTTPException(403, "אין לך הרשאה למחוק את הסיפור הזה")
 
+    # אוספים את כתובות הקבצים לפני המחיקה - אחרי db.delete הקשר לתמונות אבד.
+    # (cover_photo_url הוא כפילות של אחת מכתובות התמונות, אז אין צורך להוסיפו בנפרד.)
+    file_urls = [p.url for p in story.photos]
+    if story.gpx_url:
+        file_urls.append(story.gpx_url)
+
     db.delete(story)
     db.commit()
+
+    # מוחקים את הקבצים רק אחרי שמחיקת ה-DB הצליחה, כדי לא להשאיר רשומה בלי קובץ
+    for url in file_urls:
+        storage.delete_file(url)
     return {"deleted": True}
 
 
@@ -437,6 +461,7 @@ def delete_story_photo(
         raise HTTPException(404, "התמונה לא נמצאה")
 
     was_cover = story.cover_photo_url == photo.url
+    deleted_url = photo.url
     db.delete(photo)
     db.flush()
 
@@ -451,6 +476,7 @@ def delete_story_photo(
         story.cover_photo_url = next_photo.url if next_photo else None
 
     db.commit()
+    storage.delete_file(deleted_url)
     db.refresh(story)
     return _with_extras(story, db)
 
@@ -471,6 +497,9 @@ async def replace_story_route(
 
     if not gpx_file and not drawn_route_json:
         raise HTTPException(400, "יש לצרף קובץ GPX או מסלול משורטט")
+
+    # הקובץ ה-GPX הישן - נמחק בסוף אם החלפנו אותו (בין אם ב-GPX חדש ובין אם במסלול משורטט)
+    old_gpx_url = story.gpx_url
 
     if gpx_file is not None:
         raw = await gpx_file.read()
@@ -505,6 +534,9 @@ async def replace_story_route(
         story.start_lon = points[0][1]
 
     db.commit()
+    # מוחקים את ה-GPX הישן רק אם הוחלף בקובץ אחר (או הוסר לטובת מסלול משורטט)
+    if old_gpx_url and old_gpx_url != story.gpx_url:
+        storage.delete_file(old_gpx_url)
     db.refresh(story)
     return _with_extras(story, db)
 

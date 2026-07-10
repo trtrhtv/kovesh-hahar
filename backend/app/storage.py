@@ -64,6 +64,31 @@ def _upload_to_r2(file_bytes: bytes, content_type: str, folder: str, extension: 
     return f"{R2_PUBLIC_URL_BASE}/{key}"
 
 
+def delete_file(url: str) -> None:
+    """מוחק קובץ שהועלה, לפי ה-URL שהוחזר מ-upload_file. best-effort: כישלון (קובץ
+    שכבר לא קיים, בעיית רשת ל-R2) לא זורק - מחיקת רשומת ה-DB היא העיקר, קובץ יתום
+    בודד הוא לכל היותר בזבוז אחסון קטן ולא סיבה להפיל את הבקשה."""
+    if not url:
+        return
+    try:
+        if STORAGE_BACKEND == "r2":
+            if R2_PUBLIC_URL_BASE and url.startswith(R2_PUBLIC_URL_BASE):
+                key = url[len(R2_PUBLIC_URL_BASE):].lstrip("/")
+                if key:
+                    get_client().delete_object(Bucket=R2_BUCKET_NAME, Key=key)
+        else:
+            marker = "/media/"
+            idx = url.find(marker)
+            if idx != -1:
+                rel_path = url[idx + len(marker):]
+                # מונע path-traversal אם ה-URL מעוות
+                full_path = os.path.normpath(os.path.join(LOCAL_UPLOAD_DIR, rel_path))
+                if full_path.startswith(os.path.abspath(LOCAL_UPLOAD_DIR)) and os.path.isfile(full_path):
+                    os.remove(full_path)
+    except Exception:
+        pass
+
+
 # מגבלות שנקבעו בכוונה כדי לשמור על עלות אחסון נמוכה - ראה שיחה על בר-קיימות
 MAX_PHOTOS_PER_STORY = 10
 MAX_PHOTO_SIZE_MB = 8
