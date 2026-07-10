@@ -63,6 +63,10 @@ def register(payload: schemas.UserCreate, request: Request, response: Response, 
     if not payload.accepted_disclaimer:
         raise HTTPException(400, "יש לאשר את הצהרת האחריות כדי להירשם")
 
+    # מדיניות סיסמאות זהה לזו של איפוס הסיסמה - בלי זה אפשר היה להירשם עם סיסמה בת תו אחד
+    if len(payload.password) < 8:
+        raise HTTPException(400, "הסיסמה חייבת להיות באורך 8 תווים לפחות")
+
     existing = db.query(models.User).filter(models.User.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="כבר קיים משתמש עם האימייל הזה")
@@ -175,7 +179,12 @@ def resend_verification(
 def logout(response: Response):
     """מנקה את ה-cookie. קריאה זולה - לא דורשת להיות מחובר, כדי שגם אם ה-token
     כבר לא תקין (פג תוקף וכו') עדיין אפשר "להתנתק" בלי שגיאה."""
-    response.delete_cookie(key=auth.COOKIE_NAME, path="/")
+    # חובה לשקף את אותם מאפיינים שבהם נקבעה העוגייה (Secure + SameSite=None), אחרת
+    # בטופולוגיית cross-site הדפדפן דוחה את ה-Set-Cookie המנקה והעוגייה שורדת - כלומר
+    # ה-logout לא באמת מנתק. Starlette ברירת-המחדל היא SameSite=Lax בלי Secure, לכן מפורש.
+    response.delete_cookie(
+        key=auth.COOKIE_NAME, path="/", secure=True, httponly=True, samesite="none"
+    )
     return {"message": "התנתקת בהצלחה"}
 
 
@@ -207,10 +216,19 @@ def google_login(
     user = db.query(models.User).filter(models.User.google_id == google_id).first()
 
     if not user and email:
-        # אולי כבר יש חשבון עם האימייל הזה (נרשם עם סיסמה) - נקשר אותו לגוגל
-        user = db.query(models.User).filter(func.lower(models.User.email) == email.lower()).first()
-        if user:
-            user.google_id = google_id
+        # אולי כבר יש חשבון עם האימייל הזה (נרשם עם סיסמה) - נקשר אותו לגוגל.
+        # אבל רק אם גוגל אימת את בעלות האימייל: אחרת תוקף עם זהות גוגל שנושאת אימייל
+        # לא-מאומת ששווה לאימייל של הקורבן היה משתלט על החשבון הקיים (OAuth pre-takeover).
+        existing = db.query(models.User).filter(func.lower(models.User.email) == email.lower()).first()
+        if existing:
+            if not email_verified_by_google:
+                raise HTTPException(
+                    403,
+                    "כבר קיים חשבון עם האימייל הזה, וגוגל לא אימת את בעלותך עליו. "
+                    "התחבר עם הסיסמה שלך, ותוכל לקשר את גוגל מההגדרות.",
+                )
+            existing.google_id = google_id
+            user = existing
 
     if not user:
         if not email:
