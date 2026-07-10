@@ -1,12 +1,9 @@
 import CinematicVideoBackground from "@/components/CinematicVideoBackground";
 import HeroCarousel from "@/components/HeroCarousel";
 import BreakoutRiderImage from "@/components/BreakoutRiderImage";
-import Logo from "@/components/Logo";
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
-import NotificationBell from "@/components/NotificationBell";
-import AccountMenu from "@/components/AccountMenu";
 import { fetchStories } from "@/lib/api";
 import { RIDE_STYLE_LABELS } from "@/lib/labels";
 import { ISRAEL_REGIONS } from "@/lib/locations";
@@ -16,29 +13,6 @@ export default async function HomePage() {
 
   return (
     <main>
-      {/* ניווט עליון */}
-      <header className="border-b border-edge">
-        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center flex-wrap gap-y-2 justify-between">
-          <Logo />
-          <nav className="flex items-center flex-wrap gap-3 sm:gap-5 text-sm">
-            <NotificationBell />
-            <Link href="/stories" className="hover:text-moto transition-colors">
-              כל הסיפורים
-            </Link>
-            <Link href="/events" className="hover:text-moto transition-colors">
-              אירועים
-            </Link>
-            <AccountMenu />
-            <Link
-              href="/stories/new"
-              className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
-            >
-              העלה סיפור
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       {/* Hero - 3 שכבות עומק: רשת סורק → אופנוע מרחף → ליבת הממשק */}
       <section className="relative overflow-hidden">
         <CinematicVideoBackground />

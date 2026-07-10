@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
 import Footer from "@/components/Footer";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -55,6 +56,7 @@ export default function RootLayout({
         <div className="livery-stripe h-[3px] w-full shrink-0" />
         <ThemeProvider>
           <AuthProvider>
+            <SiteHeader />
             <div className="flex-1">{children}</div>
             <Footer />
             <ThemeSwitcher />
