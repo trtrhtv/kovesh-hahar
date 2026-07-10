@@ -11,7 +11,20 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from . import models
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
+_DEFAULT_SECRET = "change-me-in-production"
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", _DEFAULT_SECRET)
+
+# בפרודקשן (DB אמיתי, לא SQLite מקומי) אסור לרוץ עם הסוד ברירת-המחדל: מי שקורא
+# את הריפו הציבורי יכול לזייף טוקן לכל משתמש. נכשלים מיד בעליית השרת במקום להיחשף.
+# פיתוח מקומי (בלי DATABASE_URL - נופל ל-SQLite) ממשיך לעבוד עם ברירת המחדל.
+if SECRET_KEY == _DEFAULT_SECRET:
+    _db_url = os.getenv("DATABASE_URL", "")
+    if _db_url and not _db_url.startswith("sqlite"):
+        raise RuntimeError(
+            "JWT_SECRET_KEY לא מוגדר. חובה להגדיר סוד אקראי ארוך במשתני הסביבה "
+            "לפני הרצה בפרודקשן."
+        )
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 30
 COOKIE_NAME = "access_token"
