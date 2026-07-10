@@ -13,6 +13,17 @@ export default async function HomePage() {
 
   return (
     <main>
+      {/* רקע אופנוע רציף לכל אורך העמוד - fixed, כך שגם המקטעים שמתחת ל-hero
+          (מפה, פיד) ממשיכים את תחושת התנועה במקום רקע שטוח לבן/שחור. שכבת כיסוי
+          מבוססת bg-main (theme-aware) שומרת על קריאוּת הטקסט מעל התנועה. */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
+        <HeroCarousel />
+        <div
+          className="absolute inset-0"
+          style={{ background: "rgb(var(--bg-main-rgb))", opacity: 0.8 }}
+        />
+      </div>
+
       {/* Hero - 3 שכבות עומק: רשת סורק → אופנוע מרחף → ליבת הממשק */}
       <section className="relative overflow-hidden">
         <CinematicVideoBackground />
