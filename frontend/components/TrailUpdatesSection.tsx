@@ -8,6 +8,8 @@ import { TRAIL_STATUS_LABELS, TRAIL_STATUS_COLORS } from "@/lib/labels";
 import { spawnDustBurst } from "@/lib/effects";
 
 const STATUS_OPTIONS = ["open", "blocked", "muddy", "unknown"];
+const MAX_PHOTOS = 3;
+const FRESH_DAYS = 7; // מעבר לזה עדכון נחשב "לא עדכני" (מוצג, לא נמחק)
 
 function formatTerminalTimestamp(iso: string): string {
   const d = new Date(iso);
@@ -16,11 +18,25 @@ function formatTerminalTimestamp(iso: string): string {
   return `[${time}] [${date}]`;
 }
 
+function daysAgo(iso: string): number {
+  const then = new Date(iso).setHours(0, 0, 0, 0);
+  const now = new Date().setHours(0, 0, 0, 0);
+  return Math.round((now - then) / 86400000);
+}
+
+function relativeDays(iso: string): string {
+  const d = daysAgo(iso);
+  if (d <= 0) return "היום";
+  if (d === 1) return "אתמול";
+  return `לפני ${d} ימים`;
+}
+
 export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
   const { token } = useAuth();
   const [updates, setUpdates] = useState<TrailUpdate[]>([]);
   const [status, setStatus] = useState("open");
   const [note, setNote] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -37,9 +53,10 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
     setBusy(true);
     setError(null);
     try {
-      const update = await postTrailUpdate(storyId, status, note.trim(), token);
+      const update = await postTrailUpdate(storyId, status, note.trim(), token, photos);
       setUpdates((prev) => [update, ...prev]);
       setNote("");
+      setPhotos([]);
       setShowForm(false);
     } catch (err: any) {
       setError(err.message);
@@ -92,6 +109,21 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
             maxLength={500}
             className="border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
           />
+
+          <label className="text-xs text-textDim flex flex-col gap-1.5">
+            <span>תמונות מהשטח (לא חובה, עד {MAX_PHOTOS})</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onChange={(e) => setPhotos(Array.from(e.target.files || []).slice(0, MAX_PHOTOS))}
+              className="text-xs text-textDim file:bg-surface file:border file:border-edge file:text-ink file:text-xs file:font-bold file:px-3 file:py-2 file:me-2 file:cursor-pointer"
+            />
+            {photos.length > 0 && (
+              <span className="text-[11px] text-moto">{photos.length} תמונות נבחרו</span>
+            )}
+          </label>
+
           {error && <p className="text-danger text-sm">{error}</p>}
           <button
             ref={submitRef}
@@ -109,16 +141,53 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
         {updates.length === 0 ? (
           <p className="text-textDim text-sm font-mono">// אין עדיין עדכוני שטח על המסלול הזה</p>
         ) : (
-          <div className="flex flex-col gap-1.5">
-            {updates.map((u) => (
-              <div key={u.id} className="text-xs sm:text-sm font-mono flex flex-wrap gap-x-2">
-                <span className="text-textDim shrink-0">{formatTerminalTimestamp(u.created_at)}</span>
-                <span style={{ color: TRAIL_STATUS_COLORS[u.status] }} className="font-bold shrink-0">
-                  {TRAIL_STATUS_LABELS[u.status]}
-                </span>
-                {u.note && <span className="text-ink/80">- {u.note}</span>}
-              </div>
-            ))}
+          <div className="flex flex-col gap-3">
+            {updates.map((u) => {
+              const stale = daysAgo(u.created_at) > FRESH_DAYS;
+              return (
+                <div key={u.id} className={stale ? "opacity-60" : ""}>
+                  <div className="text-xs sm:text-sm font-mono flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-textDim shrink-0">{formatTerminalTimestamp(u.created_at)}</span>
+                    <span
+                      style={{ color: TRAIL_STATUS_COLORS[u.status] }}
+                      className="font-bold shrink-0"
+                    >
+                      {TRAIL_STATUS_LABELS[u.status]}
+                    </span>
+                    {u.note && <span className="text-ink/80">- {u.note}</span>}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1 text-[11px] font-mono">
+                    <span className="text-textDim">עודכן {relativeDays(u.created_at)}</span>
+                    {stale && (
+                      <span className="border border-textDim/60 text-textDim px-1.5 py-0.5 tracking-wide">
+                        לא עדכני
+                      </span>
+                    )}
+                  </div>
+                  {u.photos && u.photos.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {u.photos.map((p) => (
+                        <a
+                          key={p.id}
+                          href={p.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={p.url}
+                            alt="עדכון שטח"
+                            loading="lazy"
+                            className="w-16 h-16 object-cover border border-edge hover:border-moto transition-colors"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -70,6 +70,7 @@ export type TrailUpdate = {
   note?: string;
   created_at: string;
   author: Author;
+  photos: { id: string; url: string }[];
 };
 
 export type Bike = { id: string; model_name: string; vehicle_type?: string };
@@ -479,15 +480,20 @@ export async function postTrailUpdate(
   storyId: string,
   status: string,
   note: string,
-  token: string
+  token: string,
+  photos: File[] = []
 ): Promise<TrailUpdate> {
+  // multipart - כדי לתמוך בתמונות אופציונליות. בלי Content-Type ידני: הדפדפן
+  // קובע את ה-boundary של ה-multipart בעצמו.
+  const form = new FormData();
+  form.append("status", status);
+  form.append("note", note);
+  for (const p of photos) form.append("photos", p);
+
   const res = await fetch(`${API_BASE}/stories/${storyId}/trail-updates`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     credentials: "include",
-    body: JSON.stringify({ status, note }),
+    body: form,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

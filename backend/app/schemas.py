@@ -231,12 +231,21 @@ class TrailUpdateCreate(BaseModel):
     note: Optional[str] = None
 
 
+class TrailUpdatePhotoOut(BaseModel):
+    id: str
+    url: str
+
+    class Config:
+        from_attributes = True
+
+
 class TrailUpdateOut(BaseModel):
     id: str
     status: TrailStatus
     note: Optional[str] = None
     created_at: datetime
     author: UserOut
+    photos: List[TrailUpdatePhotoOut] = []
 
     class Config:
         from_attributes = True

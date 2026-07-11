@@ -287,6 +287,21 @@ class TrailUpdate(Base):
 
     story = relationship("Story", back_populates="trail_updates")
     author = relationship("User")
+    photos = relationship(
+        "TrailUpdatePhoto", back_populates="trail_update", cascade="all, delete-orphan"
+    )
+
+
+class TrailUpdatePhoto(Base):
+    """תמונות אופציונליות שרוכב מצרף לעדכון שטח (למשל צילום של הבוץ/החסימה)"""
+    __tablename__ = "trail_update_photos"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    trail_update_id = Column(String, ForeignKey("trail_updates.id"), nullable=False, index=True)
+    url = Column(String, nullable=False)
+    order_index = Column(Integer, default=0)
+
+    trail_update = relationship("TrailUpdate", back_populates="photos")
 
 
 class Like(Base):
