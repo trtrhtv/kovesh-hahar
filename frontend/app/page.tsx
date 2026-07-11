@@ -20,7 +20,7 @@ export default async function HomePage() {
         <HeroCarousel />
         <div
           className="absolute inset-0"
-          style={{ background: "rgb(var(--bg-main-rgb))", opacity: 0.8 }}
+          style={{ background: "rgb(var(--bg-main-rgb))", opacity: 0.5 }}
         />
       </div>
 
@@ -30,7 +30,7 @@ export default async function HomePage() {
 
         {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן.
             האופנוע עצמו מגיע מהרקע הרציף (fixed) של כל העמוד - מקור אחד, בלי כפילות. */}
-        <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 z-0 scanline-grid opacity-20 pointer-events-none" aria-hidden="true" />
 
         <div
           className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none z-0"
