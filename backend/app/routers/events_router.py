@@ -138,8 +138,50 @@ def update_event(
         raise HTTPException(403, "אין לך הרשאה לערוך את האירוע הזה")
 
     data = payload.dict(exclude_unset=True)
-    if "event_date" in data and data["event_date"] is not None and data["event_date"].tzinfo is not None:
-        data["event_date"] = data["event_date"].astimezone(timezone.utc).replace(tzinfo=None)
+
+    # ולידציה זהה לזו של יצירה, אבל רק על השדות שנשלחו בפועל (PATCH חלקי).
+    # בלי זה אפשר היה לעדכן כותרת ריקה, טלפון לא-תקין, תאריך בעבר, סיום לפני התחלה וכו'.
+    if "title" in data:
+        data["title"] = (data["title"] or "").strip()
+        if not data["title"]:
+            raise HTTPException(400, "יש למלא כותרת")
+    if "description" in data:
+        data["description"] = (data["description"] or "").strip()
+        if len(data["description"].split()) < 3:
+            raise HTTPException(400, "יש למלא תיאור קצר (לפחות כמה מילים)")
+    if "meeting_point_label" in data:
+        data["meeting_point_label"] = (data["meeting_point_label"] or "").strip()
+        if not data["meeting_point_label"]:
+            raise HTTPException(400, "יש לציין נקודת כינוס")
+    if "contact_phone" in data:
+        data["contact_phone"] = (data["contact_phone"] or "").strip()
+        if not data["contact_phone"] or not is_valid_phone(data["contact_phone"]):
+            raise HTTPException(400, "מספר הטלפון לא נראה תקין")
+
+    # נרמול tz לשני התאריכים (כמו ביצירה) - השוואה מול utcnow הלא-מודע זורקת אחרת
+    for date_field in ("event_date", "end_date"):
+        if date_field in data and data[date_field] is not None and data[date_field].tzinfo is not None:
+            data[date_field] = data[date_field].astimezone(timezone.utc).replace(tzinfo=None)
+
+    effective_event_date = data.get("event_date", event.event_date)
+    if "event_date" in data and effective_event_date < datetime.utcnow() - timedelta(hours=1):
+        raise HTTPException(400, "תאריך האירוע לא יכול להיות בעבר")
+    effective_end_date = data.get("end_date", event.end_date)
+    if effective_end_date is not None and effective_event_date is not None and effective_end_date < effective_event_date:
+        raise HTTPException(400, "תאריך הסיום לא יכול להיות לפני תאריך ההתחלה")
+
+    if "region" in data and data["region"] is not None:
+        data["region"] = data["region"].strip()
+    if "country" in data or "region" in data:
+        effective_country = data.get("country", event.country)
+        effective_region = data.get("region", event.region)
+        if not locations.is_valid_country(effective_country):
+            raise HTTPException(400, "מדינה לא תקינה")
+        if effective_country == locations.ISRAEL and not locations.is_valid_israel_region(effective_region):
+            raise HTTPException(400, "אזור לא תקין - יש לבחור מהרשימה")
+        if effective_country != locations.ISRAEL and not (effective_region or "").strip():
+            raise HTTPException(400, "יש לציין שם מקום")
+
     for field, value in data.items():
         setattr(event, field, value)
 

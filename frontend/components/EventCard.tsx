@@ -30,7 +30,7 @@ export default function EventCard({ event }: { event: EventItem }) {
           {endDate && (
             <>
               <span>·</span>
-              <span>טיול {Math.round((endDate.getTime() - date.getTime()) / 86400000) + 1} ימים</span>
+              <span>טיול {Math.round((new Date(endDate).setHours(0, 0, 0, 0) - new Date(date).setHours(0, 0, 0, 0)) / 86400000) + 1} ימים</span>
             </>
           )}
           {event.vehicle_type && (

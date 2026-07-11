@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from typing import List
 
-from .. import models, schemas, auth
+from .. import models, schemas, auth, admin
 from ..notifications import create_notification
 from ..database import get_db
 
@@ -68,7 +68,7 @@ def delete_comment(
     )
     if not comment:
         raise HTTPException(404, "התגובה לא נמצאה")
-    if comment.author_id != current_user.id:
+    if comment.author_id != current_user.id and not admin.is_admin(current_user):
         raise HTTPException(403, "אפשר למחוק רק תגובות שכתבת בעצמך")
 
     db.delete(comment)
