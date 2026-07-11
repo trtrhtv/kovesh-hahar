@@ -1,9 +1,5 @@
 import Link from "next/link";
-import Logo from "@/components/Logo";
-import BackNav from "@/components/BackNav";
 import EventCard from "@/components/EventCard";
-import NotificationBell from "@/components/NotificationBell";
-import AccountMenu from "@/components/AccountMenu";
 import { fetchEvents } from "@/lib/api";
 
 export default async function EventsPage() {
@@ -11,27 +7,16 @@ export default async function EventsPage() {
 
   return (
     <main>
-      <header className="border-b border-edge">
-        <div className="max-w-3xl mx-auto px-5 py-4 flex items-center flex-wrap gap-y-2 justify-between">
-          <Link href="/">
-            <Logo />
-          </Link>
-          <div className="flex items-center gap-3">
-            <NotificationBell />
-            <AccountMenu />
-            <BackNav />
-            <Link
-              href="/events/new"
-              className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
-            >
-              אירוע חדש
-            </Link>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-3xl mx-auto px-5 py-10">
-        <h1 className="text-3xl font-black mb-1">אירועי רכיבה קרובים</h1>
+        <div className="flex items-start justify-between gap-4 mb-1">
+          <h1 className="text-3xl font-black">אירועי רכיבה קרובים</h1>
+          <Link
+            href="/events/new"
+            className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4 shrink-0"
+          >
+            אירוע חדש
+          </Link>
+        </div>
         <p className="text-textDim mb-8 text-sm">
           מארגנים רכיבה קבוצתית? תפרסמו כאן ותראו מי מגיע.
         </p>

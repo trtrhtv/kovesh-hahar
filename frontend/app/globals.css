@@ -29,14 +29,15 @@ html {
 }
 
 html {
-  overflow-x: hidden;
+  /* clip (ולא hidden) חוסם גלישה אופקית בלי להפוך את ה-html למיכל גלילה -
+     hidden היה שובר את position:sticky של ה-header (overflow-y נחשב auto) */
+  overflow-x: clip;
 }
 
 body {
   background-color: rgb(var(--bg-main-rgb));
   color: rgb(var(--ink-rgb));
   position: relative;
-  overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

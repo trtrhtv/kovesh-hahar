@@ -1,12 +1,9 @@
 import CinematicVideoBackground from "@/components/CinematicVideoBackground";
 import HeroCarousel from "@/components/HeroCarousel";
 import BreakoutRiderImage from "@/components/BreakoutRiderImage";
-import Logo from "@/components/Logo";
 import Link from "next/link";
 import StoryCard from "@/components/StoryCard";
 import OverviewMap from "@/components/OverviewMap";
-import NotificationBell from "@/components/NotificationBell";
-import AccountMenu from "@/components/AccountMenu";
 import { fetchStories } from "@/lib/api";
 import { RIDE_STYLE_LABELS } from "@/lib/labels";
 import { ISRAEL_REGIONS } from "@/lib/locations";
@@ -16,47 +13,24 @@ export default async function HomePage() {
 
   return (
     <main>
-      {/* ניווט עליון */}
-      <header className="border-b border-edge">
-        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center flex-wrap gap-y-2 justify-between">
-          <Logo />
-          <nav className="flex items-center flex-wrap gap-3 sm:gap-5 text-sm">
-            <NotificationBell />
-            <Link href="/stories" className="hover:text-moto transition-colors">
-              כל הסיפורים
-            </Link>
-            <Link href="/events" className="hover:text-moto transition-colors">
-              אירועים
-            </Link>
-            <AccountMenu />
-            <Link
-              href="/stories/new"
-              className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
-            >
-              העלה סיפור
-            </Link>
-          </nav>
-        </div>
-      </header>
+      {/* רקע אופנוע רציף לכל אורך העמוד - fixed, כך שגם המקטעים שמתחת ל-hero
+          (מפה, פיד) ממשיכים את תחושת התנועה במקום רקע שטוח לבן/שחור. שכבת כיסוי
+          מבוססת bg-main (theme-aware) שומרת על קריאוּת הטקסט מעל התנועה. */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
+        <HeroCarousel />
+        <div
+          className="absolute inset-0"
+          style={{ background: "rgb(var(--bg-main-rgb))", opacity: 0.35 }}
+        />
+      </div>
 
       {/* Hero - 3 שכבות עומק: רשת סורק → אופנוע מרחף → ליבת הממשק */}
       <section className="relative overflow-hidden">
         <CinematicVideoBackground />
 
-        {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן */}
-        <div className="absolute inset-0 z-0 scanline-grid opacity-40 pointer-events-none" aria-hidden="true" />
-
-        {/* שכבה 2 - קרוסלת האקשן (4 תמונות, מתחלפות כל 8 שניות), עם פאן איטי על כל תמונה */}
-        <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-          <HeroCarousel />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to bottom, rgb(var(--bg-main-rgb) / 0.15), rgb(var(--bg-main-rgb) / 0.4), rgb(var(--bg-main-rgb) / 0.75))",
-            }}
-          />
-        </div>
+        {/* שכבה 1 - הכי עמוקה: רשת טכנית + וינייטה - קבועה, לא מותנית בתוכן.
+            האופנוע עצמו מגיע מהרקע הרציף (fixed) של כל העמוד - מקור אחד, בלי כפילות. */}
+        <div className="absolute inset-0 z-0 scanline-grid opacity-20 pointer-events-none" aria-hidden="true" />
 
         <div
           className="absolute top-0 bottom-0 right-0 w-[55%] sm:w-[42%] bg-surface/60 livery-stripe opacity-[0.06] pointer-events-none z-0"
