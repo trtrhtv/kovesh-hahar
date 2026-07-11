@@ -24,7 +24,7 @@ export default function SettingsPage() {
           <Logo />
         </Link>
         <p className="text-textDim mb-4">צריך להתחבר כדי לערוך פרופיל.</p>
-        <Link href="/stories/new" className="text-moto font-bold hover:underline">
+        <Link href="/login" className="text-moto font-bold hover:underline">
           להתחברות ←
         </Link>
       </main>

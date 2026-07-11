@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 function buildHref(basePath: string, params: Record<string, string | undefined>, page: number) {
+  // מסננים גם את page הקיים - buildHref קובע אותו מפורשות. בלי זה, הקישור לעמוד 1
+  // היה משמר את page הנוכחי (למשל page=3) והכפתור "1" לא היה עובד.
   const qs = new URLSearchParams(
-    Object.entries(params).filter(([k, v]) => k !== "offset" && v) as [string, string][]
+    Object.entries(params).filter(([k, v]) => k !== "offset" && k !== "page" && v) as [string, string][]
   );
   if (page > 1) qs.set("page", String(page));
   const query = qs.toString();
@@ -38,7 +40,7 @@ export default function Pagination({
         href={buildHref(basePath, params, Math.max(1, currentPage - 1))}
         className={`switch-btn text-xs font-bold px-3 py-2 ${currentPage === 1 ? "pointer-events-none opacity-30" : "text-ink"}`}
       >
-        ← הקודם
+        → הקודם
       </Link>
 
       {pages.map((p, i) =>
@@ -65,7 +67,7 @@ export default function Pagination({
           currentPage === totalPages ? "pointer-events-none opacity-30" : "text-ink"
         }`}
       >
-        הבא →
+        הבא ←
       </Link>
     </nav>
   );

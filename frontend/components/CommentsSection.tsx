@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { fetchComments, postComment, type Comment } from "@/lib/api";
 import ReportButton from "@/components/ReportButton";
@@ -77,9 +78,9 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
           </button>
         </form>
       ) : (
-        <a href="/stories/new" className="text-moto text-sm hover:underline">
+        <Link href="/login" className="text-moto text-sm hover:underline">
           התחבר כדי להגיב
-        </a>
+        </Link>
       )}
       {error && <p className="text-moto text-sm mt-2">{error}</p>}
     </div>

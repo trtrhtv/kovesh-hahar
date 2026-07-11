@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { fetchTrailUpdates, postTrailUpdate, type TrailUpdate } from "@/lib/api";
 import { TRAIL_STATUS_LABELS, TRAIL_STATUS_COLORS } from "@/lib/labels";
@@ -123,9 +124,9 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
       </div>
 
       {!token && (
-        <a href="/stories/new" className="text-moto text-sm hover:underline block mt-3">
+        <Link href="/login" className="text-moto text-sm hover:underline block mt-3">
           התחבר כדי לעדכן על מצב המסלול
-        </a>
+        </Link>
       )}
     </div>
   );
