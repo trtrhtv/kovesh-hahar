@@ -357,6 +357,9 @@ def delete_story(
     file_urls = [p.url for p in story.photos]
     if story.gpx_url:
         file_urls.append(story.gpx_url)
+    # גם תמונות שצורפו לעדכוני שטח נמחקות עם הסיפור
+    for tu in story.trail_updates:
+        file_urls.extend(p.url for p in tu.photos)
 
     db.delete(story)
     db.commit()
