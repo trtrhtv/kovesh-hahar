@@ -6,21 +6,21 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
-import PasswordInput from "@/components/PasswordInput";
+import AuthForm from "@/components/AuthForm";
 import { useAuth } from "@/lib/auth";
 import { createEvent } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
 import { VEHICLE_TYPE_LABELS, DIFFICULTY_LABELS, TIME_PERIOD_LABELS, TIME_PERIOD_HOURS } from "@/lib/labels";
 
 export default function NewEventPage() {
-  const { user, token, loading, login, register } = useAuth();
+  const { user, token, loading } = useAuth();
 
   return (
     <PageBackdrop>
       {loading ? (
         <div className="max-w-2xl mx-auto px-5 py-24 text-center text-textDim">טוען...</div>
       ) : !user || !token ? (
-        <QuickAuthGate onLogin={login} onRegister={register} />
+        <QuickAuthGate />
       ) : (
         <EventForm token={token} />
       )}
@@ -28,101 +28,14 @@ export default function NewEventPage() {
   );
 }
 
-function QuickAuthGate({
-  onLogin,
-  onRegister,
-}: {
-  onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (
-    email: string,
-    password: string,
-    displayName: string,
-    acceptedDisclaimer: boolean
-  ) => Promise<void>;
-}) {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [accepted, setAccepted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setBusy(true);
-    try {
-      if (mode === "login") await onLogin(email, password);
-      else await onRegister(email, password, displayName, accepted);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
+function QuickAuthGate() {
   return (
     <main className="max-w-md mx-auto px-5 py-24">
-      <div className="mb-4">
-        <BackNav />
-      </div>
+      <div className="mb-4"><BackNav /></div>
       <Link href="/" className="block mb-8">
         <Logo />
       </Link>
-      <h1 className="text-2xl font-black mb-6">כדי לארגן אירוע, צריך קודם חשבון</h1>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        {mode === "register" && (
-          <input
-            type="text"
-            placeholder="שם תצוגה"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            required
-            className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-          />
-        )}
-        <input
-          type="text"
-          placeholder={mode === "login" ? "אימייל או שם משתמש" : "אימייל"}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-        />
-        <PasswordInput value={password} onChange={setPassword} required />
-        {mode === "login" && (
-          <Link href="/forgot-password" className="text-xs text-textDim hover:text-moto self-start">
-            שכחת סיסמה?
-          </Link>
-        )}
-        {mode === "register" && (
-          <label className="flex items-start gap-2.5 text-xs text-textDim leading-relaxed cursor-pointer">
-            <input
-              type="checkbox"
-              checked={accepted}
-              onChange={(e) => setAccepted(e.target.checked)}
-              required
-              className="mt-0.5 w-5 h-5 shrink-0 accent-moto"
-            />
-            <span>מאשר/ת את הצהרת האחריות של האתר.</span>
-          </label>
-        )}
-        {error && <p className="text-danger text-sm">{error}</p>}
-        <button
-          type="submit"
-          disabled={busy}
-          className="tactical-btn bg-moto text-onAccent hover:bg-motoDark disabled:opacity-50"
-        >
-          {busy ? "רגע..." : mode === "login" ? "התחבר" : "הרשם"}
-        </button>
-      </form>
-      <button
-        onClick={() => setMode(mode === "login" ? "register" : "login")}
-        className="text-sm text-moto hover:underline mt-4"
-      >
-        {mode === "login" ? "אין לך חשבון? הרשם" : "כבר יש לך חשבון? התחבר"}
-      </button>
+      <AuthForm subtitle="כדי לארגן אירוע רכיבה, צריך קודם חשבון." />
     </main>
   );
 }

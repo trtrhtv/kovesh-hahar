@@ -6,8 +6,8 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import BackNav from "@/components/BackNav";
 import PageBackdrop from "@/components/PageBackdrop";
-import PasswordInput from "@/components/PasswordInput";
 import RouteDrawer from "@/components/RouteDrawer";
+import AuthForm from "@/components/AuthForm";
 import { useAuth } from "@/lib/auth";
 import { createStory } from "@/lib/api";
 import { ISRAEL, ISRAEL_REGIONS, COUNTRIES } from "@/lib/locations";
@@ -16,14 +16,14 @@ import { VEHICLE_TYPE_LABELS, RIDE_STYLE_LABELS, DIFFICULTY_LABELS, SEASON_LABEL
 const MAX_PHOTOS = 10;
 
 export default function NewStoryPage() {
-  const { user, token, loading, login, register } = useAuth();
+  const { user, token, loading } = useAuth();
 
   return (
     <PageBackdrop>
       {loading ? (
         <div className="max-w-2xl mx-auto px-5 py-24 text-center text-textDim">טוען...</div>
       ) : !user || !token ? (
-        <AuthGate onLogin={login} onRegister={register} />
+        <AuthGate />
       ) : (
         <StoryForm token={token} />
       )}
@@ -31,147 +31,14 @@ export default function NewStoryPage() {
   );
 }
 
-function AuthGate({
-  onLogin,
-  onRegister,
-}: {
-  onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (
-    email: string,
-    password: string,
-    displayName: string,
-    acceptedDisclaimer: boolean,
-    phoneNumber?: string,
-    username?: string
-  ) => Promise<void>;
-}) {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setBusy(true);
-    try {
-      if (mode === "login") {
-        await onLogin(email, password);
-      } else {
-        await onRegister(email, password, displayName, acceptedDisclaimer, phoneNumber, username);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
+function AuthGate() {
   return (
     <main className="max-w-md mx-auto px-5 py-24">
       <div className="mb-4"><BackNav /></div>
       <Link href="/" className="block mb-8">
         <Logo />
       </Link>
-      <h1 className="text-2xl font-black mb-1">
-        {mode === "login" ? "התחברות" : "הרשמה"}
-      </h1>
-      <p className="text-textDim mb-6 text-sm">כדי לשתף סיפור נסיעה, צריך קודם חשבון.</p>
-
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        {mode === "register" && (
-          <input
-            type="text"
-            placeholder="שם תצוגה"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            required
-            className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-          />
-        )}
-        {mode === "register" && (
-          <div>
-            <input
-              type="text"
-              placeholder="שם משתמש (לא חובה - ליצור לבד אם ריק)"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_ ]/g, ""))}
-              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-            />
-            <p className="text-[11px] text-textDim mt-1">
-              באנגלית בלבד - זה מה שתשתמש בו כדי להתחבר בפעם הבאה, בלי להקליד אימייל מלא
-            </p>
-          </div>
-        )}
-        <input
-          type="text"
-          placeholder={mode === "login" ? "אימייל או שם משתמש" : "אימייל"}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-        />
-        <PasswordInput value={password} onChange={setPassword} required minLength={mode === "register" ? 8 : undefined} />
-        {mode === "login" && (
-          <Link href="/forgot-password" className="text-xs text-textDim hover:text-moto self-start">
-            שכחת סיסמה?
-          </Link>
-        )}
-
-        {mode === "register" && (
-          <div>
-            <input
-              type="tel"
-              placeholder="טלפון (לא חובה)"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full border border-edge bg-surface px-3 py-2.5 focus:border-moto outline-none"
-            />
-            <p className="text-[11px] text-textDim mt-1">
-              רק אם תרצה שרוכבים אחרים יוכלו לפנות אליך ב-WhatsApp מתוך הסיפורים שלך
-            </p>
-          </div>
-        )}
-
-        {mode === "register" && (
-          <label className="flex items-start gap-2.5 text-xs text-textDim leading-relaxed cursor-pointer">
-            <input
-              type="checkbox"
-              checked={acceptedDisclaimer}
-              onChange={(e) => setAcceptedDisclaimer(e.target.checked)}
-              required
-              className="mt-0.5 w-5 h-5 shrink-0 accent-moto"
-            />
-            <span>
-              האתר אינו אחראי על תוכן המסלולים, תנאי השטח, או חוקיות המעבר בהם. הרכיבה
-              היא על אחריות הרוכב בלבד. יש לבדוק שטחי אש ואישורי מעבר מול הגורמים
-              הרלוונטיים לפני היציאה לשטח.
-            </span>
-          </label>
-        )}
-
-        {error && <p className="text-danger text-sm">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={busy || (mode === "register" && !acceptedDisclaimer)}
-          className="tactical-btn bg-moto text-onAccent hover:bg-motoDark disabled:opacity-50"
-        >
-          {busy ? "רגע..." : mode === "login" ? "התחבר" : "הרשם"}
-        </button>
-      </form>
-
-      <button
-        onClick={() => setMode(mode === "login" ? "register" : "login")}
-        className="text-sm text-moto hover:underline mt-4"
-      >
-        {mode === "login" ? "אין לך חשבון? הרשם" : "כבר יש לך חשבון? התחבר"}
-      </button>
+      <AuthForm subtitle="כדי לשתף סיפור נסיעה, צריך קודם חשבון." />
     </main>
   );
 }
