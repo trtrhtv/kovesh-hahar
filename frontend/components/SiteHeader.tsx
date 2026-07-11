@@ -51,7 +51,7 @@ export default function SiteHeader() {
           <AccountMenu />
           <Link
             href="/stories/new"
-            className="hidden md:inline-flex tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
+            className="hidden md:inline-flex tactical-btn bg-moto text-onAccent hover:bg-motoDark !text-[11px] !py-2.5 !px-4"
           >
             העלה סיפור
           </Link>
@@ -88,7 +88,7 @@ export default function SiteHeader() {
           <Link
             href="/stories/new"
             onClick={() => setMenuOpen(false)}
-            className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-xs mt-3 justify-center"
+            className="tactical-btn bg-moto text-onAccent hover:bg-motoDark !text-xs mt-3 justify-center"
           >
             העלה סיפור
           </Link>

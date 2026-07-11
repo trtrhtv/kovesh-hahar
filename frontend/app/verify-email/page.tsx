@@ -59,7 +59,7 @@ function VerifyEmailInner() {
         )}
         {status === "error" && (
           <div>
-            <p className="text-moto mb-4">{error}</p>
+            <p className="text-danger mb-4">{error}</p>
             <Link href="/settings" className="text-moto hover:underline">
               אפשר לבקש קישור חדש מההגדרות ←
             </Link>

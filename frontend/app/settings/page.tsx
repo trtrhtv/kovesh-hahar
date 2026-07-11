@@ -155,13 +155,13 @@ function ProfileForm({ token, user, onSaved }: { token: string; user: any; onSav
         <span className="text-sm text-ink">קבל התראות (תגובות, לייקים, עדכוני שטח)</span>
       </label>
 
-      {error && <p className="text-moto text-sm">{error}</p>}
+      {error && <p className="text-danger text-sm">{error}</p>}
       {saved && <p className="text-emerald-400 text-sm">נשמר בהצלחה</p>}
 
       <button
         type="submit"
         disabled={busy}
-        className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50 self-start"
+        className="tactical-btn bg-moto text-onAccent hover:bg-motoDark disabled:opacity-50 self-start"
       >
         {busy ? "שומר..." : "שמור שינויים"}
       </button>
@@ -270,7 +270,7 @@ function BikesSection({
           + הוסף
         </button>
       </form>
-      {error && <p className="text-moto text-sm mt-2">{error}</p>}
+      {error && <p className="text-danger text-sm mt-2">{error}</p>}
     </div>
   );
 }
@@ -307,7 +307,7 @@ function VerifyEmailBanner() {
           {busy ? "שולח..." : "שלח שוב"}
         </button>
       )}
-      {error && <p className="text-moto text-xs">{error}</p>}
+      {error && <p className="text-danger text-xs">{error}</p>}
     </div>
   );
 }

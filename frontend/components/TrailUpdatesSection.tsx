@@ -92,12 +92,12 @@ export default function TrailUpdatesSection({ storyId }: { storyId: string }) {
             maxLength={500}
             className="border border-edge bg-surface px-3 py-2 text-sm focus:border-moto outline-none"
           />
-          {error && <p className="text-moto text-sm">{error}</p>}
+          {error && <p className="text-danger text-sm">{error}</p>}
           <button
             ref={submitRef}
             type="submit"
             disabled={busy}
-            className="btn-press moto-btn relative bg-moto text-carbon py-3.5 min-h-[48px] text-base font-black hover:bg-motoDark transition-colors disabled:opacity-50 w-full sm:w-auto sm:self-start px-6"
+            className="btn-press moto-btn relative bg-moto text-onAccent py-3.5 min-h-[48px] text-base font-black hover:bg-motoDark transition-colors disabled:opacity-50 w-full sm:w-auto sm:self-start px-6"
           >
             {busy ? "שולח..." : "שלח דיווח סטטוס"}
           </button>

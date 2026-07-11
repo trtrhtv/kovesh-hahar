@@ -345,12 +345,12 @@ function EditForm({
           </select>
         </Field>
 
-        {error && <p className="text-moto text-sm">{error}</p>}
+        {error && <p className="text-danger text-sm">{error}</p>}
 
         {!confirming ? (
           <button
             type="submit"
-            className="tactical-btn bg-moto text-carbon hover:bg-motoDark"
+            className="tactical-btn bg-moto text-onAccent hover:bg-motoDark"
           >
             שמור שינויים
           </button>
@@ -364,7 +364,7 @@ function EditForm({
                 type="button"
                 onClick={confirmSave}
                 disabled={busy}
-                className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50 !py-2.5 !px-5"
+                className="tactical-btn bg-moto text-onAccent hover:bg-motoDark disabled:opacity-50 !py-2.5 !px-5"
               >
                 {busy ? "שומר..." : "כן, שמור"}
               </button>
@@ -479,7 +479,7 @@ function PhotosSection({
           </button>
         </div>
       )}
-      {error && <p className="text-moto text-xs mt-2">{error}</p>}
+      {error && <p className="text-danger text-xs mt-2">{error}</p>}
     </div>
   );
 }
@@ -570,12 +570,12 @@ function RouteSection({
           type="button"
           onClick={handleSave}
           disabled={busy}
-          className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50 !py-2.5 !px-5"
+          className="tactical-btn bg-moto text-onAccent hover:bg-motoDark disabled:opacity-50 !py-2.5 !px-5"
         >
           {busy ? "שומר..." : "שמור מסלול"}
         </button>
       )}
-      {error && <p className="text-moto text-xs mt-2">{error}</p>}
+      {error && <p className="text-danger text-xs mt-2">{error}</p>}
     </div>
   );
 }

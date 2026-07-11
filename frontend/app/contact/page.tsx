@@ -75,12 +75,12 @@ export default function ContactPage() {
               className="border border-edge bg-surface px-3 py-3 focus:border-moto outline-none resize-y"
             />
 
-            {error && <p className="text-moto text-sm">{error}</p>}
+            {error && <p className="text-danger text-sm">{error}</p>}
 
             <button
               type="submit"
               disabled={busy}
-              className="tactical-btn bg-moto text-carbon hover:bg-motoDark min-h-[48px] disabled:opacity-50"
+              className="tactical-btn bg-moto text-onAccent hover:bg-motoDark min-h-[48px] disabled:opacity-50"
             >
               {busy ? "שולח..." : "שלח הודעה"}
             </button>

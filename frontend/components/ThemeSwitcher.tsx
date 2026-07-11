@@ -55,7 +55,7 @@ export default function ThemeSwitcher() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="הגדרות תצוגה"
-        className="moto-btn bg-moto text-carbon w-12 h-12 min-h-[48px] flex items-center justify-center font-black hover:bg-motoDark transition-colors shadow-glow-moto"
+        className="moto-btn bg-moto text-onAccent w-12 h-12 min-h-[48px] flex items-center justify-center font-black hover:bg-motoDark transition-colors shadow-glow-moto"
       >
         ⚙
       </button>
