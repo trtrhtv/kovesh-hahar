@@ -20,7 +20,7 @@ export default async function HomePage() {
         <HeroCarousel />
         <div
           className="absolute inset-0"
-          style={{ background: "rgb(var(--bg-main-rgb))", opacity: 0.5 }}
+          style={{ background: "rgb(var(--bg-main-rgb))", opacity: 0.35 }}
         />
       </div>
 
