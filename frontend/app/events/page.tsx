@@ -12,7 +12,7 @@ export default async function EventsPage() {
           <h1 className="text-3xl font-black">אירועי רכיבה קרובים</h1>
           <Link
             href="/events/new"
-            className="tactical-btn bg-moto text-carbon hover:bg-motoDark !text-[11px] !py-2.5 !px-4 shrink-0"
+            className="tactical-btn bg-moto text-onAccent hover:bg-motoDark !text-[11px] !py-2.5 !px-4 shrink-0"
           >
             אירוע חדש
           </Link>

@@ -12,7 +12,9 @@ module.exports = {
         textDim: "rgb(var(--text-dim-rgb) / <alpha-value>)",
         moto: "rgb(var(--accent-rgb) / <alpha-value>)",
         motoDark: "rgb(var(--accent-dark-rgb) / <alpha-value>)",
-        cyan: "#00E5FF",
+        onAccent: "rgb(var(--on-accent-rgb) / <alpha-value>)",
+        danger: "rgb(var(--danger-rgb) / <alpha-value>)",
+        cyan: "rgb(var(--cyan-rgb) / <alpha-value>)",
       },
       fontFamily: {
         heebo: ["var(--font-heebo)", "sans-serif"],

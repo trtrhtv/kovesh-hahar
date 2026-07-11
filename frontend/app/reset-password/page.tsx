@@ -70,11 +70,11 @@ function ResetPasswordForm() {
           <form onSubmit={submit} className="flex flex-col gap-4">
             <PasswordInput value={password} onChange={setPassword} placeholder="סיסמה חדשה" required minLength={8} />
             <PasswordInput value={confirm} onChange={setConfirm} placeholder="אימות סיסמה" required minLength={8} />
-            {error && <p className="text-moto text-sm">{error}</p>}
+            {error && <p className="text-danger text-sm">{error}</p>}
             <button
               type="submit"
               disabled={busy}
-              className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50"
+              className="tactical-btn bg-moto text-onAccent hover:bg-motoDark disabled:opacity-50"
             >
               {busy ? "מעדכן..." : "עדכן סיסמה"}
             </button>

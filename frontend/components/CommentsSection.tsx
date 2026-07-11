@@ -72,7 +72,7 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
           <button
             type="submit"
             disabled={busy || !text.trim()}
-            className="bg-surfaceHi text-ink px-4 py-2 text-sm font-bold hover:bg-moto hover:text-carbon transition-colors disabled:opacity-50"
+            className="bg-surfaceHi text-ink px-4 py-2 text-sm font-bold hover:bg-moto hover:text-onAccent transition-colors disabled:opacity-50"
           >
             שלח
           </button>
@@ -82,7 +82,7 @@ export default function CommentsSection({ storyId }: { storyId: string }) {
           התחבר כדי להגיב
         </Link>
       )}
-      {error && <p className="text-moto text-sm mt-2">{error}</p>}
+      {error && <p className="text-danger text-sm mt-2">{error}</p>}
     </div>
   );
 }

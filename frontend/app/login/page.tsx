@@ -125,11 +125,11 @@ export default function LoginPage() {
               </span>
             </label>
           )}
-          {error && <p className="text-moto text-sm">{error}</p>}
+          {error && <p className="text-danger text-sm">{error}</p>}
           <button
             type="submit"
             disabled={busy}
-            className="tactical-btn bg-moto text-carbon hover:bg-motoDark disabled:opacity-50"
+            className="tactical-btn bg-moto text-onAccent hover:bg-motoDark disabled:opacity-50"
           >
             {busy ? "רגע..." : mode === "login" ? "התחבר" : "הרשם"}
           </button>

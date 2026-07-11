@@ -39,7 +39,7 @@ export default function LikeButton({
         onClick={() => handleVote(1)}
         disabled={busy}
         className={`px-3 py-2.5 min-h-[44px] font-bold transition-colors ${
-          myVote === 1 ? "bg-moto text-carbon" : "hover:bg-surfaceHi"
+          myVote === 1 ? "bg-moto text-onAccent" : "hover:bg-surfaceHi"
         }`}
         aria-label="בעד"
       >

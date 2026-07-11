@@ -11,7 +11,7 @@ export default function NotFound() {
       <div className="flex items-center gap-3 flex-wrap justify-center">
         <Link
           href="/"
-          className="tactical-btn bg-moto text-carbon hover:bg-motoDark !px-5"
+          className="tactical-btn bg-moto text-onAccent hover:bg-motoDark !px-5"
         >
           ⌂ חזרה לדף הבית
         </Link>

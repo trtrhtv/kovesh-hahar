@@ -89,7 +89,7 @@ export default async function HomePage() {
                 />
                 <button
                   type="submit"
-                  className="tactical-btn bg-moto text-carbon hover:bg-motoDark !px-5"
+                  className="tactical-btn bg-moto text-onAccent hover:bg-motoDark !px-5"
                   aria-label="חפש"
                 >
                   🔍
@@ -106,7 +106,7 @@ export default async function HomePage() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/stories/new"
-                  className="tactical-btn bg-moto text-carbon hover:bg-motoDark"
+                  className="tactical-btn bg-moto text-onAccent hover:bg-motoDark"
                 >
                   שתף סיפור נסיעה
                 </Link>

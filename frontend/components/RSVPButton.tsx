@@ -82,7 +82,7 @@ export default function RSVPButton({
           onClick={handleSetRSVP}
           disabled={busy || (attending && !changed)}
           className={`tactical-btn disabled:opacity-50 ${
-            attending ? "bg-emerald-600 text-carbon hover:bg-emerald-500" : "bg-moto text-carbon hover:bg-motoDark"
+            attending ? "bg-emerald-600 text-onAccent hover:bg-emerald-500" : "bg-moto text-onAccent hover:bg-motoDark"
           }`}
         >
           {attending
@@ -103,7 +103,7 @@ export default function RSVPButton({
           </button>
         )}
       </div>
-      {error && <p className="text-moto text-xs">{error}</p>}
+      {error && <p className="text-danger text-xs">{error}</p>}
     </div>
   );
 }

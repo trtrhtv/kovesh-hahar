@@ -69,7 +69,7 @@ export default function NotificationBell() {
       >
         🔔
         {count > 0 && (
-          <span className="absolute top-0.5 left-0.5 bg-moto text-carbon text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+          <span className="absolute top-0.5 left-0.5 bg-moto text-onAccent text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
             {count > 9 ? "9+" : count}
           </span>
         )}

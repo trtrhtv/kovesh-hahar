@@ -36,7 +36,7 @@ export default function NavigateButton({
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => spawnDustBurst(wazeRef.current)}
-          className="btn-press moto-btn relative bg-moto text-carbon w-full sm:w-auto px-6 py-4 min-h-[52px] text-base font-black hover:bg-motoDark hover:shadow-glow-moto transition-colors flex items-center justify-center text-center"
+          className="btn-press moto-btn relative bg-moto text-onAccent w-full sm:w-auto px-6 py-4 min-h-[52px] text-base font-black hover:bg-motoDark hover:shadow-glow-moto transition-colors flex items-center justify-center text-center"
         >
           נווט ב-Waze
         </a>

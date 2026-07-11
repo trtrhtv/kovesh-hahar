@@ -80,7 +80,7 @@ export default function ReportButton({
               maxLength={500}
               className="border border-edge bg-surface px-2 py-1.5 text-xs focus:border-moto outline-none resize-none"
             />
-            {error && <p className="text-moto text-[11px]">{error}</p>}
+            {error && <p className="text-danger text-[11px]">{error}</p>}
             <div className="flex gap-2">
               <button
                 type="submit"

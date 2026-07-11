@@ -25,7 +25,7 @@ export default function Error({
       <div className="flex items-center gap-3 flex-wrap justify-center">
         <button
           onClick={() => reset()}
-          className="tactical-btn bg-moto text-carbon hover:bg-motoDark !px-5"
+          className="tactical-btn bg-moto text-onAccent hover:bg-motoDark !px-5"
         >
           נסה שוב
         </button>

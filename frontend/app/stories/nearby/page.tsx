@@ -66,7 +66,7 @@ export default function NearbyStoriesPage() {
           </label>
           <button
             onClick={() => search(radiusKm)}
-            className="tactical-btn bg-moto text-carbon hover:bg-motoDark"
+            className="tactical-btn bg-moto text-onAccent hover:bg-motoDark"
           >
             📍 אתר את המיקום שלי וחפש
           </button>
@@ -82,7 +82,7 @@ export default function NearbyStoriesPage() {
 
       {status === "error" && (
         <div className="moto-card p-6 text-center">
-          <p className="text-moto mb-4">{error}</p>
+          <p className="text-danger mb-4">{error}</p>
           <button onClick={() => setStatus("idle")} className="switch-btn text-ink text-sm font-bold px-4 py-2.5">
             נסה שוב
           </button>
