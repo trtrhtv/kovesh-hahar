@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { voteStory } from "@/lib/api";
+import { voteStory, fetchMyStoryVote } from "@/lib/api";
 
 export default function LikeButton({
   storyId,
@@ -17,6 +17,18 @@ export default function LikeButton({
   const [score, setScore] = useState(initialCount);
   const [myVote, setMyVote] = useState(initialMyVote);
   const [busy, setBusy] = useState(false);
+
+  // המצב האישי (initialMyVote) מגיע אנונימי מה-SSR; מהדרים אותו מהדפדפן כשמחוברים
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchMyStoryVote(storyId).then((v) => {
+      if (!cancelled) setMyVote(v);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, storyId]);
 
   async function handleVote(value: 1 | -1) {
     if (!user) {

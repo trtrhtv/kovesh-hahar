@@ -225,6 +225,33 @@ export async function fetchEvent(id: string): Promise<EventItem | null> {
   return res.json();
 }
 
+// --- הידרציה בצד-לקוח של מצב אישי (my_vote / RSVP) ---
+// Server Components לא יכולים לקרוא את עוגיית ההתחברות (היא על דומיין ה-backend, לא
+// על דומיין הפרונט), ולכן my_vote/is_attending מגיעים תמיד אנונימיים מה-SSR. הפונקציות
+// האלה רצות בדפדפן עם credentials:"include" - שם העוגייה כן נשלחת ל-backend, וחוזר
+// המצב הנכון של המשתמש המחובר.
+export async function fetchMyStoryVote(storyId: string): Promise<number> {
+  const res = await fetch(`${API_BASE}/stories/${storyId}`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!res.ok) return 0;
+  const data = await res.json();
+  return data.my_vote ?? 0;
+}
+
+export async function fetchMyRsvp(
+  eventId: string
+): Promise<{ is_attending: boolean; my_guest_count: number }> {
+  const res = await fetch(`${API_BASE}/events/${eventId}`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!res.ok) return { is_attending: false, my_guest_count: 0 };
+  const data = await res.json();
+  return { is_attending: !!data.is_attending, my_guest_count: data.my_guest_count ?? 0 };
+}
+
 export async function createEvent(
   data: {
     title: string;
@@ -414,7 +441,8 @@ export async function fetchNearbyStories(
 }
 
 export async function fetchStory(id: string): Promise<StoryDetail | null> {
-  const res = await fetch(`${API_BASE}/stories/${id}`, { next: { revalidate: 30 } });
+  // no-store: מונע הצגת עריכה ישנה מהמטמון (באג "העריכה נראית לא-נשמרה", חלון 30ש')
+  const res = await fetch(`${API_BASE}/stories/${id}`, { cache: "no-store" });
   if (!res.ok) return null;
   return res.json();
 }
