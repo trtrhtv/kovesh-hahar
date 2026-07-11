@@ -1,8 +1,9 @@
 import json
+import math
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
@@ -140,13 +141,25 @@ def nearby_stories(
     radius_km = min(max(radius_km, 1), 300)
     limit = min(max(limit, 1), 50)
 
+    # קופסת-תוחם (bounding box) ב-SQL כדי לא לטעון את כל טבלת הסיפורים ל-Python.
+    # ~111 ק"מ למעלת קו-רוחב; מעלת קו-אורך מתכווצת עם הרוחב (cos). ההסינה המדויקת
+    # (haversine מעגלי) נעשית אחרי כן רק על המועמדים שבתוך הקופסה, לא על הכל.
+    lat_delta = radius_km / 111.0
+    lon_delta = radius_km / (111.0 * max(math.cos(math.radians(lat)), 0.01))
+    eff_lat = func.coalesce(models.Story.meeting_point_lat, models.Story.start_lat)
+    eff_lon = func.coalesce(models.Story.meeting_point_lon, models.Story.start_lon)
+
     candidates = (
         db.query(models.Story)
-        .options(joinedload(models.Story.author))
+        .options(joinedload(models.Story.author).selectinload(models.User.bikes))
         .filter(
             models.Story.is_published == True,  # noqa: E712
-            (models.Story.meeting_point_lat.isnot(None)) | (models.Story.start_lat.isnot(None)),
+            eff_lat.isnot(None),
+            eff_lon.isnot(None),
+            eff_lat.between(lat - lat_delta, lat + lat_delta),
+            eff_lon.between(lon - lon_delta, lon + lon_delta),
         )
+        .limit(500)  # תקרה קשיחה - הקופסה כבר מצמצמת, וזה מונע חריגה קיצונית
         .all()
     )
 
@@ -161,7 +174,7 @@ def nearby_stories(
             results.append((distance, story))
 
     results.sort(key=lambda pair: pair[0])
-    return [_with_extras(story, db) for _, story in results[:limit]]
+    return _attach_extras([story for _, story in results[:limit]], db)
 
 
 @router.get("/count")
@@ -214,7 +227,9 @@ def list_stories(
     db: Session = Depends(get_db),
 ):
     limit = min(max(limit, 1), 50)  # תקרה כדי שאף אחד לא יבקש 10,000 שורות בבת אחת
-    query = db.query(models.Story).options(joinedload(models.Story.author)).filter(
+    query = db.query(models.Story).options(
+        joinedload(models.Story.author).selectinload(models.User.bikes)
+    ).filter(
         models.Story.is_published == True  # noqa: E712
     )
 
@@ -242,7 +257,7 @@ def list_stories(
         .limit(limit)
         .all()
     )
-    return [_with_extras(s, db, current_user.id if current_user else None) for s in stories]
+    return _attach_extras(stories, db, current_user.id if current_user else None)
 
 
 @router.get("/{story_id}", response_model=schemas.StoryOut)
@@ -541,25 +556,44 @@ async def replace_story_route(
     return _with_extras(story, db)
 
 
-def _with_extras(story: models.Story, db: Session, current_user_id: Optional[str] = None):
-    score = db.query(func.coalesce(func.sum(models.Like.value), 0)).filter(
-        models.Like.story_id == story.id
-    ).scalar()
-    comment_count = (
-        db.query(func.count(models.Comment.id)).filter(models.Comment.story_id == story.id).scalar()
+def _attach_extras(
+    stories: List[models.Story], db: Session, current_user_id: Optional[str] = None
+) -> List[models.Story]:
+    """מחשב לייקים/תגובות/הצבעה-שלי לרשימת סיפורים ב-2-3 שאילתות סה"כ (במקום 2-3
+    לכל סיפור - N+1). קריטי לפידים גדולים."""
+    if not stories:
+        return stories
+    ids = [s.id for s in stories]
+
+    like_sums = dict(
+        db.query(models.Like.story_id, func.coalesce(func.sum(models.Like.value), 0))
+        .filter(models.Like.story_id.in_(ids))
+        .group_by(models.Like.story_id)
+        .all()
     )
-    story.like_count = score or 0
-    story.comment_count = comment_count or 0
-    story.my_vote = 0
+    comment_counts = dict(
+        db.query(models.Comment.story_id, func.count(models.Comment.id))
+        .filter(models.Comment.story_id.in_(ids))
+        .group_by(models.Comment.story_id)
+        .all()
+    )
+    my_votes = {}
     if current_user_id:
-        my_like = (
-            db.query(models.Like)
-            .filter(models.Like.story_id == story.id, models.Like.user_id == current_user_id)
-            .first()
+        my_votes = dict(
+            db.query(models.Like.story_id, models.Like.value)
+            .filter(models.Like.story_id.in_(ids), models.Like.user_id == current_user_id)
+            .all()
         )
-        if my_like:
-            story.my_vote = my_like.value
-    # "נעץ" למפה - עדיפות לנקודת הכינוס הידנית, אחרת נקודת ההתחלה מה-GPX
-    story.pin_lat = story.meeting_point_lat if story.meeting_point_lat is not None else story.start_lat
-    story.pin_lon = story.meeting_point_lon if story.meeting_point_lon is not None else story.start_lon
-    return story
+
+    for s in stories:
+        s.like_count = int(like_sums.get(s.id, 0) or 0)
+        s.comment_count = int(comment_counts.get(s.id, 0) or 0)
+        s.my_vote = int(my_votes.get(s.id, 0) or 0)
+        # "נעץ" למפה - עדיפות לנקודת הכינוס הידנית, אחרת נקודת ההתחלה מה-GPX
+        s.pin_lat = s.meeting_point_lat if s.meeting_point_lat is not None else s.start_lat
+        s.pin_lon = s.meeting_point_lon if s.meeting_point_lon is not None else s.start_lon
+    return stories
+
+
+def _with_extras(story: models.Story, db: Session, current_user_id: Optional[str] = None):
+    return _attach_extras([story], db, current_user_id)[0]

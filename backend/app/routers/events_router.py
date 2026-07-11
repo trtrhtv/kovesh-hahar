@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
@@ -91,7 +91,9 @@ def list_events(
     db: Session = Depends(get_db),
 ):
     limit = min(max(limit, 1), 50)
-    query = db.query(models.Event).options(joinedload(models.Event.organizer))
+    query = db.query(models.Event).options(
+        joinedload(models.Event.organizer).selectinload(models.User.bikes)
+    )
 
     if not include_past:
         query = query.filter(models.Event.event_date >= datetime.utcnow())
@@ -102,7 +104,7 @@ def list_events(
 
     events = query.order_by(models.Event.event_date.asc()).offset(offset).limit(limit).all()
     uid = current_user.id if current_user else None
-    return [_with_extras(e, db, uid) for e in events]
+    return _attach_event_extras(events, db, uid)
 
 
 @router.get("/{event_id}", response_model=schemas.EventOut)
@@ -231,18 +233,36 @@ def cancel_rsvp(
     return {"attending": False, "guest_count": 0}
 
 
-def _with_extras(event: models.Event, db: Session, current_user_id: Optional[str]):
-    total = db.query(func.sum(models.EventRSVP.guest_count)).filter(models.EventRSVP.event_id == event.id).scalar()
-    event.attendee_count = total or 0
-    event.is_attending = False
-    event.my_guest_count = 0
+def _attach_event_extras(
+    events: List[models.Event], db: Session, current_user_id: Optional[str]
+) -> List[models.Event]:
+    """מחשב מספר משתתפים + ה-RSVP-שלי לרשימת אירועים ב-1-2 שאילתות סה"כ (במקום
+    2 לכל אירוע - N+1)."""
+    if not events:
+        return events
+    ids = [e.id for e in events]
+
+    totals = dict(
+        db.query(models.EventRSVP.event_id, func.sum(models.EventRSVP.guest_count))
+        .filter(models.EventRSVP.event_id.in_(ids))
+        .group_by(models.EventRSVP.event_id)
+        .all()
+    )
+    my_rsvps = {}
     if current_user_id:
-        my_rsvp = (
-            db.query(models.EventRSVP)
-            .filter(models.EventRSVP.event_id == event.id, models.EventRSVP.user_id == current_user_id)
-            .first()
+        my_rsvps = dict(
+            db.query(models.EventRSVP.event_id, models.EventRSVP.guest_count)
+            .filter(models.EventRSVP.event_id.in_(ids), models.EventRSVP.user_id == current_user_id)
+            .all()
         )
-        if my_rsvp:
-            event.is_attending = True
-            event.my_guest_count = my_rsvp.guest_count
-    return event
+
+    for e in events:
+        e.attendee_count = int(totals.get(e.id, 0) or 0)
+        my_count = my_rsvps.get(e.id)
+        e.is_attending = my_count is not None
+        e.my_guest_count = int(my_count or 0)
+    return events
+
+
+def _with_extras(event: models.Event, db: Session, current_user_id: Optional[str]):
+    return _attach_event_extras([event], db, current_user_id)[0]
