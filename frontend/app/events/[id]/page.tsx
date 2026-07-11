@@ -68,7 +68,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
             {event.time_is_approximate
               ? TIME_PERIOD_LABELS[event.approximate_period || ""] || "זמן משוער"
               : date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
-            {endDate && ` · טיול ${Math.round((endDate.getTime() - date.getTime()) / 86400000) + 1} ימים`}
+            {endDate && ` · טיול ${Math.round((new Date(endDate).setHours(0, 0, 0, 0) - new Date(date).setHours(0, 0, 0, 0)) / 86400000) + 1} ימים`}
           </div>
         </div>
       </div>

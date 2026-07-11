@@ -14,7 +14,7 @@ export default function CinematicVideoBackground() {
 
   return (
     <div
-      className="hidden md:block motion-safe:block motion-reduce:hidden absolute inset-0 -z-10 overflow-hidden"
+      className="hidden motion-safe:md:block absolute inset-0 -z-10 overflow-hidden"
       aria-hidden="true"
     >
       <video
