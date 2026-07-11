@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { setEventRSVP, cancelEventRSVP } from "@/lib/api";
+import { setEventRSVP, cancelEventRSVP, fetchMyRsvp } from "@/lib/api";
 
 export default function RSVPButton({
   eventId,
@@ -22,6 +22,23 @@ export default function RSVPButton({
   const [savedGuests, setSavedGuests] = useState(initialGuestCount || 0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // המצב האישי (initialAttending/initialGuestCount) מגיע אנונימי מה-SSR; מהדרים מהדפדפן
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchMyRsvp(eventId).then(({ is_attending, my_guest_count }) => {
+      if (cancelled) return;
+      setAttending(is_attending);
+      if (is_attending) {
+        setSavedGuests(my_guest_count);
+        setMyGuests(my_guest_count || 1);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, eventId]);
 
   async function handleSetRSVP() {
     if (!token) {
